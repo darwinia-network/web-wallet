@@ -19,7 +19,7 @@ import Apps from './Apps';
 
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
-const url = process.env.WS_URL || 'ws://121.199.60.87:9944/';
+const url = process.env.WS_URL || 'ws://121.199.60.87/';
 
 const DARWINIA_TYPES = {
   "TokenBalance": "u128",

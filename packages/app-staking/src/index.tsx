@@ -123,7 +123,8 @@ class App extends React.PureComponent<Props, State> {
             />
           </header>
           <Switch>
-            // @ts-ignore
+            {/* 
+              // @ts-ignore */}
             <Route path={`${basePath}/actions`} render={this.renderComponent(Accounts)} />
             <Route render={this.renderComponent(Overview)} />
           </Switch>

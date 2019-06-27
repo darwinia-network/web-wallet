@@ -17,6 +17,7 @@ import CryptoType from './CryptoType';
 import Label from './Label';
 import Ring from './styles/icon/ring.svg'
 import Kton from './styles/icon/kton.svg'
+import { withRouter } from "react-router";
 
 import { StructAny } from '@polkadot/types';
 import { noop } from 'rxjs';
@@ -56,7 +57,8 @@ type Props = BareProps & I18nProps & {
   value: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
-  transferCb?: (type: string) => void
+  transferCb?: (type: string) => void,
+  history: any
 };
 
 // <AddressInfo
@@ -70,7 +72,7 @@ type Props = BareProps & I18nProps & {
 // <AddressInfo withBalance={{ available: true }} />
 class AddressInfoDarwinia extends React.PureComponent<Props> {
   render() {
-    const { balances_all, ringBalances_freeBalance, ktonBalances_freeBalance, ringBalances_totalLock, ktonBalances_totalLock, staking_info, t, withBalance = true, children, className, transferCb } = this.props;
+    const { balances_all, ringBalances_freeBalance, ktonBalances_freeBalance, ringBalances_totalLock, ktonBalances_totalLock, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
 
     return (
       <div className={className}>
@@ -102,7 +104,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
                 isBasic={true}
                 isSecondary={true}
                 label={t('Setting')}
-                onClick={noop}
+                onClick={() => {
+                  history.push('ringstaking');
+                }}
               /></p>
             </div>
           </div>
@@ -136,7 +140,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
                 isBasic={true}
                 isSecondary={true}
                 label={t('Setting')}
-                onClick={noop}
+                onClick={() => {
+                  history.push('staking');
+                }}
               /></p>
             </div>
           </div>
@@ -299,7 +305,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 }
 
 export default withMulti(
-  styled(AddressInfoDarwinia)`
+  // @ts-ignore
+  styled(withRouter(AddressInfoDarwinia))`
 
     align-items: flex-start;
     display: flex;

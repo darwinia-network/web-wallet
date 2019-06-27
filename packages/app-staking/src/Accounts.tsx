@@ -51,9 +51,11 @@ class Accounts extends React.PureComponent<Props, State> {
     const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
 
+
     return (
       <StyledWrapper>
-       // @ts-ignore 
+        {/* 
+  // @ts-ignore */}
         <Account
                 accountId={accountMain}
                 balances={balances}

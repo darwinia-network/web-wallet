@@ -8,6 +8,7 @@ import appSettings from '@polkadot/ui-settings';
 
 import template from './123code';
 import accounts from './accounts';
+import RingStaking from './ringstaking'
 import addressbook from './addressbook';
 import contracts from './contracts';
 import dashboard from './dashboard';
@@ -31,6 +32,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     null,
     accounts,
     addressbook,
+    RingStaking,
     // transfer,
     null,
     // settings,
@@ -44,6 +46,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     null,
     accounts,
     addressbook,
+    RingStaking,
     // transfer,
     null,
     contracts,

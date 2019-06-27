@@ -12,9 +12,10 @@ import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { HelpOverlay, Tabs } from '@polkadot/ui-app';
 import { TabItem } from '@polkadot/ui-app/Tabs';
 import { withMulti, withObservable } from '@polkadot/ui-api';
+// import ringStakingBanner from './img/ringStakingBanner.png'
 
 import './index.css';
-import RingStaking from './RingStaking'
+
 import basicMd from './md/basic.md';
 import Overview from './Overview';
 import translate from './translate';
@@ -90,18 +91,7 @@ class AccountsApp extends React.PureComponent<Props, State> {
 
     return (
       <main className='accounts--App'>
-        {/*<HelpOverlay md={basicMd} />*/}
-        {/*<header>*/}
-          {/*<Tabs*/}
-            {/*basePath={basePath}*/}
-            {/*hidden={hidden}*/}
-            {/*items={tabs}*/}
-          {/*/>*/}
-        {/*</header>*/}
-        {/*<Switch>*/}
-          {/*<Route path={`${basePath}/vanity`} render={this.renderComponent(Vanity)} />*/}
-          {/*<Route render={this.renderComponent(Overview)} />*/}
-        {/*</Switch>*/}
+        {/* <img src={ringStakingBanner} alt="stake ring for precious kton"/> */}
         <Overview onStatusChange={onStatusChange}/>
       </main>
     );
@@ -128,5 +118,3 @@ export default withMulti(
   translate,
   withObservable(accountObservable.subject, { propName: 'allAccounts' })
 );
-
-export {RingStaking};
