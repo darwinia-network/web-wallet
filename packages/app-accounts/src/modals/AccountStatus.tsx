@@ -24,7 +24,7 @@ import Backup from './Backup';
 import ChangePass from './ChangePass';
 import AccountsList from './AccountsList';
 
-import ChangeIcon from '../img/ChangeIcon.svg'
+import ChangeIcon from '../img/changeIcon.svg'
 
 
 type Props = ComponentProps & I18nProps & {
