@@ -73,6 +73,14 @@ type Props = BareProps & I18nProps & {
 class AddressInfoDarwinia extends React.PureComponent<Props> {
   render() {
     const { balances_all, ringBalances_freeBalance, ktonBalances_freeBalance, ringBalances_totalLock, ktonBalances_totalLock, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
+    console.log(11111,ringBalances_totalLock)
+
+    const balanceDisplay = withBalance === true
+      ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
+      : withBalance
+        ? withBalance
+        : undefined;
+
 
     return (
       <div className={className}>
@@ -99,7 +107,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div className="ui--value-box">
               <p>bonded:</p>
-              <p>{ringBalances_totalLock && ringBalances_totalLock.toString()}</p>
+              <p>--</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -135,7 +143,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div className="ui--value-box">
               <p>bonded:</p>
-              <p>{ktonBalances_totalLock && ktonBalances_totalLock.toString()}</p>
+              <p>{balanceDisplay.bonded ? this.renderBonded(balanceDisplay.bonded) : '0'}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -151,6 +159,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
     )
   }
+  
 
   private renderBalances() {
     const { balances_all, ringBalances_freeBalance, staking_info, t, withBalance = true } = this.props;
@@ -220,13 +229,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     }
 
     return value
-      ? (
-        <>
-          <Label label={t('bonded')} />
-          <div className='result'>{value}</div>
-        </>
-      )
-      : undefined;
+      ? value
+      : '0';
   }
 
   private renderExtended() {

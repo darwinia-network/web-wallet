@@ -21,7 +21,7 @@ import Account from './Account';
 import AccountDarwinia from './AccountDarwinia';
 import translate from './translate';
 import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
-import noAccountImg from './img/noAccount.svg'
+const ringStakingBanner =  require('./img/ringStakingBanner.png');
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[]
@@ -43,57 +43,29 @@ class Overview extends React.PureComponent<Props, State> {
   };
 
   componentDidMount() {
-    setTimeout(() => {
-      const AccountMain = this.getAccountMain() || '';
-      this.setState({
-        AccountMain
-      })
-    },0)
-  }
-
-  private _wrapperStatusChange = (e) => {
-    const { accounts, onStatusChange, t } = this.props;
-    onStatusChange(e);
     const AccountMain = this.getAccountMain() || '';
     this.setState({
       AccountMain
     })
   }
+
   render() {
     const { accounts, onStatusChange, t } = this.props;
+
     const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
 
     return (
       <Wrapper>
-        {AccountMain && <AccountStatus onStatusChange={this._wrapperStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
-
-        {AccountMain && <div className={'titleRow'}>
+        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
+        <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton"/>
+        <div className={'titleRow'}>
           Darwinia asset
-        </div>}
+        </div>
 
         {AccountMain && <AccountDarwinia
           address={AccountMain}
           key={AccountMain}
         />}
-
-        {!AccountMain && <div className='noAccount'>
-          <img src={noAccountImg} />
-          <p className='h1'>No account</p>
-          <p>Please add an account and open your Darwinia Network Surfing</p>
-
-          <Button
-            isPrimary
-            label={t('Add account')}
-            onClick={this.toggleCreate}
-          />
-
-          <Button
-            isPrimary
-            label={t('Restore JSON')}
-            onClick={this.toggleImport}
-          />
-
-        </div>}
 
         {isCreateOpen && (
           <CreateModal
@@ -124,12 +96,12 @@ class Overview extends React.PureComponent<Props, State> {
   }
 
   private getAccountMain = (): string | undefined => {
-    const AccountMain = store.get('accountMain');
+    const AccountMain = store.get('accountMain')
+    console.log(AccountMain)
     const { accounts } = this.props;
-
     if (AccountMain) {
       return AccountMain
-    } else if (accounts) {
+    } else if (accounts && accounts[AccountMain]) {
       return accounts && Object.keys(accounts)[0]
     } else {
       return ''
@@ -173,29 +145,10 @@ const Wrapper = styled.div`
       height: 22px;
       margin-right: 0.5rem;
     }
-
-    .noAccount{
-      margin: 200px auto 0 auto;
-      width: 630px;
-      text-align: center;
-      border: 1px solid #EDEDED;
-      padding: 80px 100px;
-      color: #302b3c;
-      background: #fff;
-      img{
-        margin-bottom: 30px;
-      }
-      .h1{
-        font-size: 20px;
-        font-weight: bold;
-      }
-      p{
-        font-size: 14px;
-        margin-bottom: 40px;
-      }
-      button+button{
-        margin-left: 30px;
-      }
+    
+    .ringStakingBanner{
+      width: 100%;
+      margin-top: 20px;
     }
 `
 

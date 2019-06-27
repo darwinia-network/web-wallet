@@ -12,12 +12,11 @@ import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { HelpOverlay, Tabs } from '@polkadot/ui-app';
 import { TabItem } from '@polkadot/ui-app/Tabs';
 import { withMulti, withObservable } from '@polkadot/ui-api';
-// import ringStakingBanner from './img/ringStakingBanner.png'
 
 import './index.css';
 
 import basicMd from './md/basic.md';
-import Overview from './Overview';
+import Overview from './RingStakingOverview';
 import translate from './translate';
 import Vanity from './Vanity';
 
@@ -91,7 +90,6 @@ class AccountsApp extends React.PureComponent<Props, State> {
 
     return (
       <main className='accounts--App'>
-        {/* <img src={ringStakingBanner} alt="stake ring for precious kton"/> */}
         <Overview onStatusChange={onStatusChange}/>
       </main>
     );
