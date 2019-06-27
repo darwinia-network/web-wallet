@@ -33,7 +33,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     addressbook,
     // transfer,
     null,
-    settings,
+    // settings,
     template
   )
   : ([] as Routes).concat(
@@ -51,7 +51,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     extrinsics,
     sudo,
     null,
-    settings,
+    // settings,
     toolbox,
     // js,
     template
