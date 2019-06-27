@@ -22,13 +22,15 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   controllerId: string,
   isOpen: boolean,
   onClose: () => void,
-  staking_ledger?: Option<StakingLedger>
+  staking_ledger?: Option<StakingLedger>,
+  ktonBalances_freeBalance: BN, ktonBalances_locks: Array<BN>
 };
 
 type State = {
   maxAdditional?: BN,
   extrinsic: SubmittableExtrinsic | null,
-  maxBalance?: BN
+  maxBalance?: BN,
+  
 };
 
 const ZERO = new BN(0);
@@ -38,7 +40,7 @@ class BondExtra extends TxComponent<Props, State> {
     extrinsic: null
   };
 
-  componentDidUpdate (prevProps: Props, prevState: State) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const { balances_fees } = this.props;
     const { extrinsic } = this.state;
 
@@ -51,7 +53,7 @@ class BondExtra extends TxComponent<Props, State> {
     }
   }
 
-  render () {
+  render() {
     const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, t } = this.props;
     const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance } = this.state;
     const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && maxAdditional.lte(maxBalance);
@@ -70,12 +72,6 @@ class BondExtra extends TxComponent<Props, State> {
         {this.renderContent()}
         <Modal.Actions>
           <Button.Group>
-            <Button
-              isNegative
-              onClick={onClose}
-              label={t('Cancel')}
-            />
-            <Button.Or />
             <TxButton
               accountId={accountId}
               isDisabled={!canSubmit}
@@ -85,21 +81,24 @@ class BondExtra extends TxComponent<Props, State> {
               extrinsic={extrinsic}
               ref={this.button}
             />
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              onClick={onClose}
+              label={t('Cancel')}
+            />
           </Button.Group>
         </Modal.Actions>
       </Modal>
     );
   }
 
-  private renderContent () {
+  private renderContent() {
     const { accountId, t } = this.props;
     const { maxBalance } = this.state;
 
     return (
       <>
-        <Modal.Header>
-          {t('Bond Extra')}
-        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'
@@ -122,7 +121,7 @@ class BondExtra extends TxComponent<Props, State> {
     );
   }
 
-  private nextState (newState: Partial<State>): void {
+  private nextState(newState: Partial<State>): void {
     this.setState((prevState: State): State => {
       const { api } = this.props;
       const { maxAdditional = prevState.maxAdditional, maxBalance = prevState.maxBalance } = newState;
@@ -139,7 +138,7 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
   private setMaxBalance = () => {
-    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, staking_ledger } = this.props;
+    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, staking_ledger, ktonBalances_freeBalance, ktonBalances_locks } = this.props;
     const { maxAdditional } = this.state;
 
     const { transactionBaseFee, transactionByteFee } = balances_fees;
@@ -166,7 +165,16 @@ class BondExtra extends TxComponent<Props, State> {
       const fees = transactionBaseFee
         .add(transactionByteFee.muln(txLength));
 
-      maxBalance = new BN(freeBalance).sub(fees).sub(bonded);
+      let _ktonBalances_locks = new BN(0)
+
+      if (ktonBalances_locks && ktonBalances_locks.length) {
+        // @ts-ignore
+        _ktonBalances_locks = ktonBalances_locks[0].amount
+      }
+      
+      console.log(maxBalance)
+
+      maxBalance = new BN(ktonBalances_freeBalance).sub(_ktonBalances_locks);
     }
 
     this.nextState({
@@ -188,6 +196,8 @@ export default withMulti(
     'derive.balances.fees',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
-    ['query.staking.ledger', { paramName: 'controllerId' }]
+    ['query.staking.ledger', { paramName: 'controllerId' }],
+    ['query.ktonBalances.locks', { paramName: 'accountId' }],
+    ['query.ktonBalances.freeBalance', { paramName: 'accountId' }]
   )
 );

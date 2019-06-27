@@ -10,9 +10,12 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 import React from 'react';
-import { AddressInfo, AddressMini, AddressRow, Button, Card, TxButton } from '@polkadot/ui-app';
+import { AddressInfo, AddressMini, AddressRow, Button, Card, TxButton, AddressInfoStaking } from '@polkadot/ui-app';
 import { withCalls } from '@polkadot/ui-api';
+import { formatBalance, formatNumber } from '@polkadot/util';
+import BN from 'bn.js';
 
+import styled from 'styled-components'
 import Bond from './Bond';
 import BondExtra from './BondExtra';
 import Nominating from './Nominating';
@@ -29,7 +32,8 @@ type Props = ApiProps & I18nProps & {
   recentlyOffline: RecentlyOfflineMap,
   balances_all?: DerivedBalances,
   staking_info?: DerivedStaking,
-  stashOptions: Array<KeyringSectionOption>
+  stashOptions: Array<KeyringSectionOption>,
+  ktonBalances_freeBalance: BN
 };
 
 type State = {
@@ -51,11 +55,77 @@ type State = {
   validatorPrefs?: ValidatorPrefs
 };
 
-function toIdString (id?: AccountId | null): string | null {
+function toIdString(id?: AccountId | null): string | null {
   return id
     ? id.toString()
     : null;
 }
+
+const StyledWrapper = styled.div`
+  width: 100%;
+  position: relative;
+  border-radius:2px;
+ 
+  .ui--address-box{
+    background: #fff;
+    .ui--AddressRow{
+      background: #EDEDED;
+      padding: 10px 20px;
+      .ui--IdentityIcon{
+        background: #fff;
+        border-radius: 50%;
+      }
+    }
+    border:1px solid rgba(237,237,237,1);
+  }
+
+  .ui--address-value{
+    display: flex;
+    padding: 35px;
+    div{
+      flex: 1;
+      text-align: center;
+
+      h1{
+        font-weight:600;
+        color:rgba(48,43,60,1);
+        line-height:33px;
+        font-size: 24px;
+        margin-top: 5px;
+      }
+    }
+  }
+
+  .ui--string-now{
+    background: #fff;
+    padding: 40px 60px;
+    border-radius:2px;
+    border:1px solid rgba(237,237,237,1);
+    margin-top: 20px;
+    
+
+    h1{
+      font-size: 26px;
+      font-weight: bold;
+      color: #302B3C;
+    }
+    p{
+      font-size: 14px;
+      font-weight: bold;
+      color: #302B3C;
+    }
+    button{
+      background: linear-gradient(315deg,#fe3876,#7c30dd 90%,#3a30dd);
+      color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 7px 23px;
+      border: 0;
+      border-radius: 2px;
+      margin-top: 20px;
+    }
+  }
+`
 
 class Account extends React.PureComponent<Props, State> {
   state: State = {
@@ -73,7 +143,7 @@ class Account extends React.PureComponent<Props, State> {
     stashId: null
   };
 
-  static getDerivedStateFromProps ({ staking_info }: Props): State | null {
+  static getDerivedStateFromProps({ staking_info }: Props): State | null {
     if (!staking_info) {
       return null;
     }
@@ -94,8 +164,8 @@ class Account extends React.PureComponent<Props, State> {
     } as State;
   }
 
-  render () {
-    const { accountId, filter } = this.props;
+  render() {
+    const { accountId, filter, ktonBalances_freeBalance } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId } = this.state;
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
@@ -107,14 +177,38 @@ class Account extends React.PureComponent<Props, State> {
     // This is deliberate in order to display the Component modals in a performant matter later on
     // because their state will already be loaded.
     return (
-      <Card>
-        {this.renderBond()}
-        {this.renderBondExtra()}
-        {this.renderNominating()}
-        {this.renderSessionKey()}
-        {this.renderUnbond()}
-        {this.renderValidating()}
-        <AddressRow
+      <StyledWrapper>
+        <div>
+          {this.renderBond()}
+          {this.renderBondExtra()}
+          {this.renderNominating()}
+          {this.renderSessionKey()}
+          {this.renderUnbond()}
+          {this.renderValidating()}
+          <div className="ui--address-box">
+            <AddressRow
+              buttons={this.renderButtons()}
+              value={accountId}
+              className="ui--AddressRow"
+            ></AddressRow>
+
+          <AddressInfoStaking
+            value={accountId}
+            withBalance={true}
+          />
+          </div>
+        </div>
+        {!isActiveStash && <div className="ui--string-now">
+          <h1>Start a KTON staking</h1>
+          <p>note: </p>
+          <p>
+            1. Please make sure you have 2 available accounts. Add account<br />
+            2. Please make sure that there are a few ring in the account as gas fee.<br />
+            3. After the kton is bonded, you can apply to become a verifier or vote for the verifier and get earnings from it.
+            </p>
+          <button>Staking now</button>
+        </div>}
+        {/* <AddressRow
           buttons={this.renderButtons()}
           value={accountId}
         >
@@ -129,12 +223,13 @@ class Account extends React.PureComponent<Props, State> {
               {this.renderNominee()}
             </div>
           </AddressInfo>
-        </AddressRow>
-      </Card>
+        </AddressRow> */}
+
+      </StyledWrapper >
     );
   }
 
-  private renderBond () {
+  private renderBond() {
     const { accountId } = this.props;
     const { controllerId, isBondOpen } = this.state;
 
@@ -148,7 +243,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderBondExtra () {
+  private renderBondExtra() {
     const { accountId } = this.props;
     const { controllerId, isBondExtraOpen } = this.state;
 
@@ -162,7 +257,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderUnbond () {
+  private renderUnbond() {
     const { controllerId, isUnbondOpen } = this.state;
 
     return (
@@ -174,7 +269,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderValidating () {
+  private renderValidating() {
     const { accountId } = this.props;
     const { isValidatingOpen, stashId, validatorPrefs } = this.state;
 
@@ -193,7 +288,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderSessionKey () {
+  private renderSessionKey() {
     const { accountId } = this.props;
     const { isSessionKeyOpen, stashId } = this.state;
 
@@ -211,7 +306,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderNominee () {
+  private renderNominee() {
     const { recentlyOffline, t } = this.props;
     const { nominators } = this.state;
 
@@ -237,7 +332,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderControllerId () {
+  private renderControllerId() {
     const { recentlyOffline, t } = this.props;
     const { controllerId, isActiveController } = this.state;
 
@@ -256,7 +351,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderSessionId () {
+  private renderSessionId() {
     const { t } = this.props;
     const { isActiveSession, sessionId } = this.state;
 
@@ -272,7 +367,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderStashId () {
+  private renderStashId() {
     const { recentlyOffline, t } = this.props;
     const { isActiveStash, stashId } = this.state;
 
@@ -293,7 +388,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderNominating () {
+  private renderNominating() {
     const { accountId, stashOptions } = this.props;
     const { isNominateOpen, stashId } = this.state;
 
@@ -312,7 +407,7 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { accountId, balances_all, t } = this.props;
     const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs } = this.state;
     const buttons = [];
@@ -454,6 +549,8 @@ export default translate(
   withCalls<Props>(
     ['derive.staking.info', { paramName: 'accountId' }],
     'query.staking.recentlyOffline',
-    ['derive.balances.all', { paramName: 'accountId' }]
+    ['derive.balances.all', { paramName: 'accountId' }],
+    ['query.ringBalances.freeBalance', { paramName: 'accountId' }],
+    ['query.ktonBalances.freeBalance', { paramName: 'accountId' }],
   )(Account)
 );

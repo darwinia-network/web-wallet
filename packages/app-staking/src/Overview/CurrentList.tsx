@@ -52,15 +52,7 @@ class CurrentList extends React.PureComponent<Props, State> {
     const { filter, filterOptions } = this.state;
     return (
       <div>
-        <FilterOverlay>
-          <Dropdown
-            help={t('Select which validators/intentions you want to display.')}
-            label={t('filter')}
-            onChange={this.onChangeFilter}
-            options={filterOptions}
-            value={filter}
-          />
-        </FilterOverlay>
+        
         <Columar className='validator--ValidatorsList'>
           <Column header={t('validators')}>
             {this.renderColumn(current, t('validator (stash)'))}

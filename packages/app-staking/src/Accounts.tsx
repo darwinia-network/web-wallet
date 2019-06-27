@@ -10,12 +10,15 @@ import { CardGrid, Dropdown, FilterOverlay } from '@polkadot/ui-app';
 import { getAddrName } from '@polkadot/ui-app/util';
 import keyring from '@polkadot/ui-keyring';
 import createOption from '@polkadot/ui-keyring/options/item';
+import styled from 'styled-components';
 
 import Account from './Account';
 import translate from './translate';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
-type Props = I18nProps & ComponentProps;
+type Props = I18nProps & ComponentProps &{
+  accountMain: 'string'
+};
 
 type State = {
   filter: AccountFilter,
@@ -25,7 +28,7 @@ type State = {
 class Accounts extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const { t } = props;
@@ -41,43 +44,47 @@ class Accounts extends React.PureComponent<Props, State> {
     };
   }
 
-  render () {
-    const { balances, recentlyOffline, t, validators } = this.props;
+  render() {
+    const { balances, recentlyOffline, t, validators , accountMain} = this.props;
+    console.log('accountMain',accountMain)
     const { filter, filterOptions } = this.state;
     const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
 
     return (
-      <CardGrid>
-        <FilterOverlay>
-          <Dropdown
-            help={t('Select which types of accounts to display, either all, only the stash accounts or the controller accounts.')}
-            label={t('filter')}
-            onChange={this.onChangeFilter}
-            options={filterOptions}
-            value={filter}
-          />
-        </FilterOverlay>
-        {accounts.map((account) => {
-          const address = account.address();
+      <StyledWrapper>
+       // @ts-ignore 
+        <Account
+                accountId={accountMain}
+                balances={balances}
+                filter={filter}
+                isValidator={validators.includes(accountMain)}
+                key={accountMain}
+                recentlyOffline={recentlyOffline}
+                stashOptions={stashOptions}
+              />
 
-          return (
-            <Account
-              accountId={address}
-              balances={balances}
-              filter={filter}
-              isValidator={validators.includes(address)}
-              key={address}
-              recentlyOffline={recentlyOffline}
-              stashOptions={stashOptions}
-            />
-          );
-        })}
-      </CardGrid>
+          {/* {accounts.map((account) => {
+            const address = account.address();
+
+            return (
+              <Account
+                accountId={address}
+                balances={balances}
+                filter={filter}
+                isValidator={validators.includes(address)}
+                key={address}
+                recentlyOffline={recentlyOffline}
+                stashOptions={stashOptions}
+              />
+            );
+          })} */}
+     
+      </StyledWrapper>
     );
   }
 
-  private getStashOptions (): Array<KeyringSectionOption> {
+  private getStashOptions(): Array<KeyringSectionOption> {
     const { stashes } = this.props;
 
     return stashes.map((stashId) =>
@@ -89,5 +96,9 @@ class Accounts extends React.PureComponent<Props, State> {
     this.setState({ filter });
   }
 }
+
+const StyledWrapper = styled.div`
+
+`
 
 export default translate(Accounts);

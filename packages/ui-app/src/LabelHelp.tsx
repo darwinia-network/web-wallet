@@ -23,7 +23,7 @@ const Wrapper = styled.div`
   cursor: help;
   display: inline-block;
   line-height: 1rem;
-  margin: 0 0 0 0.25rem;
+  margin: 0 0 0 1rem;
 `;
 
 export default class LabelHelp extends React.PureComponent<Props, State> {

@@ -22,7 +22,7 @@ type Props = I18nProps & ApiProps & {
 };
 
 const Wrapper = styled.div`
-  background: #fafafa;
+  background: #f8f8f8;
   display: flex;
   flex-direction: column;
   flex-grow: 1;

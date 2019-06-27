@@ -92,12 +92,6 @@ class Bond extends TxComponent<Props, State> {
         {this.renderContent()}
         <Modal.Actions>
           <Button.Group>
-            <Button
-              isNegative
-              onClick={onClose}
-              label={t('Cancel')}
-            />
-            <Button.Or />
             <TxButton
               accountId={accountId}
               isDisabled={!canSubmit}
@@ -106,6 +100,12 @@ class Bond extends TxComponent<Props, State> {
               onClick={onClose}
               extrinsic={extrinsic}
               ref={this.button}
+            />
+            <Button
+              isSecondary={true}
+              isBasic={true}
+              onClick={onClose}
+              label={t('Cancel')}
             />
           </Button.Group>
         </Modal.Actions>
@@ -120,9 +120,6 @@ class Bond extends TxComponent<Props, State> {
 
     return (
       <>
-        <Modal.Header>
-          {t('Bonding Preferences')}
-        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'
@@ -244,6 +241,6 @@ export default withMulti(
   withCalls<Props>(
     'derive.balances.fees',
     ['derive.balances.all', { paramName: 'accountId' }],
-    ['query.system.accountNonce', { paramName: 'accountId' }]
+    ['query.system.accountNonce', { paramName: 'accountId' }],
   )
 );

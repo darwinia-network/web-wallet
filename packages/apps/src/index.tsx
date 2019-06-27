@@ -19,7 +19,42 @@ import Apps from './Apps';
 
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
-const url = process.env.WS_URL || settings.apiUrl || undefined;
+const url = process.env.WS_URL || 'ws://121.199.60.87:9944/';
+
+const DARWINIA_TYPES = {
+  "TokenBalance": "u128",
+  "RewardBalance": "u128",
+  "RewardBalanceOf": "u128",
+  "Auction": {
+    "seller": "AccountId",
+    "startAt": "Moment",
+    "duration": "u64",
+    "startingPrice": "TokenBalance",
+    "endingPrice": "TokenBalance",
+    "lastRecord": "TokenBalance",
+    "lastBidder": "AccountId",
+    "lastBidStartAt": "Moment"
+  },
+  "Currency": "u128",
+  "CurrencyOf": "u128",
+  "DepositInfo": {
+    "month": "Moment",
+    "start_at": "Moment",
+    "value": "CurrencyOf",
+    "unit_interest": "u64",
+    "claimed": "bool"
+  },
+  "Deposit": {
+    "total_deposit": "CurrencyOf",
+    "deposit_list": "Vec<DepositInfo>"
+  },
+  "Revenue": {
+    "team": "TokenBalance",
+    "contribution": "TokenBalance",
+    "ktoner": "TokenBalance",
+    "lottery": "TokenBalance"
+  }
+}
 
 if (!rootElement) {
   throw new Error(`Unable to find element with id '${rootId}'`);
@@ -28,6 +63,8 @@ if (!rootElement) {
 console.log('Web socket url=', url);
 
 try {
+  store.set('types', DARWINIA_TYPES);
+
   const types = store.get('types') || {};
   const names = Object.keys(types);
 

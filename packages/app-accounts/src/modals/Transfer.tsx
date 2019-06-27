@@ -24,7 +24,8 @@ type Props = ApiProps & I18nProps & {
   onClose: () => void,
   recipientId?: string,
   senderId?: string,
-  system_accountNonce?: BN
+  system_accountNonce?: BN,
+  type: 'ring' | 'kton'
 };
 
 type State = {
@@ -68,7 +69,7 @@ const Wrapper = styled.div`
 class Transfer extends React.PureComponent<Props> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
@@ -81,7 +82,7 @@ class Transfer extends React.PureComponent<Props> {
     };
   }
 
-  componentDidUpdate (prevProps: Props, prevState: State) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const { balances_fees } = this.props;
     const { extrinsic, recipientId, senderId } = this.state;
 
@@ -95,7 +96,7 @@ class Transfer extends React.PureComponent<Props> {
     }
   }
 
-  render () {
+  render() {
     const { t } = this.props;
 
     return (
@@ -111,7 +112,7 @@ class Transfer extends React.PureComponent<Props> {
     );
   }
 
-  private nextState (newState: Partial<State>): void {
+  private nextState(newState: Partial<State>): void {
     this.setState((prevState: State): State => {
       const { api } = this.props;
       const { amount = prevState.amount, recipientId = prevState.recipientId, hasAvailable = prevState.hasAvailable, maxBalance = prevState.maxBalance, senderId = prevState.senderId } = newState;
@@ -130,19 +131,13 @@ class Transfer extends React.PureComponent<Props> {
     });
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { onClose, t } = this.props;
     const { extrinsic, hasAvailable, senderId } = this.state;
 
     return (
       <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
           <TxButton
             accountId={senderId}
             extrinsic={extrinsic}
@@ -152,13 +147,19 @@ class Transfer extends React.PureComponent<Props> {
             onStart={onClose}
             withSpinner={false}
           />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            label={t('Cancel')}
+            onClick={onClose}
+          />
         </Button.Group>
       </Modal.Actions>
     );
   }
 
-  private renderContent () {
-    const { recipientId: propRecipientId, senderId: propSenderId, t } = this.props;
+  private renderContent() {
+    const { recipientId: propRecipientId, senderId: propSenderId, type, t } = this.props;
     const { extrinsic, hasAvailable, maxBalance, recipientId, senderId } = this.state;
     const available = <span className='label'>{t('available ')}</span>;
 
@@ -173,7 +174,7 @@ class Transfer extends React.PureComponent<Props> {
             onChange={this.onChangeFrom}
             type='account'
           />
-          <div className='balance'><Available label={available} params={senderId} /></div>
+          <div className='balance'><Available label={available} params={senderId} type={type} /></div>
           <InputAddress
             defaultValue={propRecipientId}
             help={t('Select a contact or paste the address you want to send funds to.')}
@@ -182,7 +183,7 @@ class Transfer extends React.PureComponent<Props> {
             onChange={this.onChangeTo}
             type='all'
           />
-          <div className='balance'><Available label={available} params={recipientId} /></div>
+          <div className='balance'><Available label={available} params={recipientId} type={type} /></div>
           <InputBalance
             help={t('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 mili is equivalent to sending 0.001.')}
             isError={!hasAvailable}

@@ -178,7 +178,7 @@ function createWebpack ({ alias = {}, context, name = 'index' }) {
       new HtmlWebpackPlugin({
         inject: true,
         template: path.join(context, `${hasPublic ? 'public/' : ''}${name}.html`),
-        PAGE_TITLE: 'Polkadot/Substrate Portal'
+        PAGE_TITLE: 'Darwinia Wallet'
       }),
       new webpack.optimize.SplitChunksPlugin(),
       new MiniCssExtractPlugin({

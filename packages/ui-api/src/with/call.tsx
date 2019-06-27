@@ -114,11 +114,12 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
               ? paramValue
               : [paramValue]
           );
-
+        // console.log(1111, values)
         return [true, values];
       }
 
       private getApiMethod (newParams: Array<any>): [Method, Array<any>, boolean] {
+        // console.log('getApiMethod', newParams)
         const { api } = this.props;
 
         if (endpoint === 'subscribe') {
@@ -132,22 +133,23 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         }
 
         const [area, section, method, ...others] = endpoint.split('.');
-
+        // console.log('endpoint', [area, section, method, ...others])
         assert(area.length && section.length && method.length && others.length === 0, `Invalid API format, expected <area>.<section>.<method>, found ${endpoint}`);
         assert(['rpc', 'query', 'derive'].includes(area), `Unknown api.${area}, expected rpc, query or derive`);
         assert(!at || area === 'query', `Only able to do an 'at' query on the api.query interface`);
 
         const apiSection = (api as any)[area][section];
 
+
         assert(apiSection && apiSection[method], `Unable to find api.${area}.${section}.${method}`);
-
+        console.log(`Unable to find api.${area}.${section}.${method}`)
         const meta = apiSection[method].meta;
-
         if (area === 'query' && meta && meta.type.isMap) {
           const arg = newParams[0];
 
           assert((!isUndefined(arg) && !isNull(arg)) || meta.type.asMap.isLinked, `${meta.name} expects one argument`);
         }
+
 
         return [
           apiSection[method],

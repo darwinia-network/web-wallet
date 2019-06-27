@@ -63,7 +63,7 @@ export default styled(Bubble)`
   .ui--Bubble-header {
     background: rgba(0, 0, 0, 0.05);
     box-sizing: border-box;
-    border-radius: .28571429rem 0 0 .28571429rem;
+    border-radius: 0;
     height: 2.75rem;
     margin-right: 0.75rem;
     padding: 0 0.75rem;

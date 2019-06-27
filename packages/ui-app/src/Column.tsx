@@ -12,12 +12,12 @@ type Props = {
 };
 
 class Column extends React.PureComponent<Props> {
-  render () {
+  render() {
     const { children, className, header } = this.props;
 
     return (
       <div className={`ui--Column ${className}`}>
-        <h1>{header}</h1>
+        <h1 className='titleRow'>{header}</h1>
         <article className='container'>
           {children}
         </article>
@@ -32,6 +32,26 @@ export default styled(Column)`
   margin: 0;
   padding: 0.5rem;
 
+  .titleRow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #302B3C;
+  }
+
+  .titleRow::before {
+    content: ' ';
+    display: inline-block;
+    background-color: #000;
+    width: 6px;
+    height: 22px;
+    margin-right: 0.5rem;
+  }
+    
   .container {
     margin: 0;
     padding: 0;

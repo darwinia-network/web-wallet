@@ -6,9 +6,11 @@ import { GroupProps, GroupType } from './types';
 
 import React from 'react';
 import SUIButton from 'semantic-ui-react/dist/commonjs/elements/Button/Button';
+import styled from 'styled-components';
 
 import { classes } from '../util';
 import Divider from './Divider';
+
 
 class ButtonGroup extends React.PureComponent<GroupProps> {
   render () {

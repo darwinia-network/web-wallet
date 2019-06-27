@@ -65,7 +65,8 @@ export default class Apps extends React.Component<Props, State> {
   componentDidMount () {
     this.setState({
       menuOpen: false,
-      isMenu: window.innerWidth >= SIDEBAR_MENU_THRESHOLD ? false : true
+      // isMenu: window.innerWidth >= SIDEBAR_MENU_THRESHOLD ? false : true
+      isMenu: false
     });
   }
 

@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ButtonType } from './types';
+import {ButtonType} from './types';
 
 import './Button.css';
 
@@ -16,5 +16,6 @@ const Button = IButton as any as ButtonType;
 Button.Divider = Divider;
 Button.Group = Group;
 Button.Or = Or;
+
 
 export default Button;

@@ -7,7 +7,7 @@ import { AppProps, I18nProps } from '@polkadot/ui-app/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { ComponentProps, RecentlyOffline, RecentlyOfflineMap } from './types';
-
+import store from 'store'
 import React from 'react';
 import { Route, Switch } from 'react-router';
 import { AccountId, Option } from '@polkadot/types';
@@ -15,6 +15,7 @@ import { HelpOverlay } from '@polkadot/ui-app';
 import Tabs, { TabItem } from '@polkadot/ui-app/Tabs';
 import { withCalls, withMulti, withObservable } from '@polkadot/ui-api';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
+import AccountStatus from '@polkadot/app-accounts/modals/AccountStatus';
 
 import './index.css';
 
@@ -36,13 +37,14 @@ type State = {
   recentlyOffline: RecentlyOfflineMap,
   stashes: Array<string>,
   tabs: Array<TabItem>,
-  validators: Array<string>
+  validators: Array<string>,
+  AccountMain: string
 };
 
 class App extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const { t } = props;
@@ -61,11 +63,12 @@ class App extends React.PureComponent<Props, State> {
           text: t('Account actions')
         }
       ],
-      validators: []
+      validators: [],
+      AccountMain: ''
     };
   }
 
-  static getDerivedStateFromProps ({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
+  static getDerivedStateFromProps({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
     return {
       controllers: staking_controllers[1].filter((optId) => optId.isSome).map((accountId) =>
         accountId.unwrap().toString()
@@ -92,47 +95,82 @@ class App extends React.PureComponent<Props, State> {
     } as State;
   }
 
-  render () {
-    const { allAccounts, basePath } = this.props;
-    const { tabs } = this.state;
+  componentDidMount() {
+    const AccountMain = this.getAccountMain() || '';
+    this.setState({
+      AccountMain
+    })
+  }
+
+  render() {
+    const { allAccounts, basePath, onStatusChange } = this.props;
+    const { tabs, AccountMain } = this.state;
     const hidden = !allAccounts || Object.keys(allAccounts).length === 0
       ? ['actions']
       : [];
 
+      // @ts-ignore
     return (
-      <main className='staking--App'>
-        <HelpOverlay md={basicMd} />
-        <header>
-          <Tabs
-            basePath={basePath}
-            hidden={hidden}
-            items={tabs}
-          />
-        </header>
-        <Switch>
-          <Route path={`${basePath}/actions`} render={this.renderComponent(Accounts)} />
-          <Route render={this.renderComponent(Overview)} />
-        </Switch>
-      </main>
+      <>
+        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
+
+        <main className='staking--App'>
+          <header>
+            <Tabs
+              basePath={basePath}
+              hidden={hidden}
+              items={tabs}
+            />
+          </header>
+          <Switch>
+            // @ts-ignore
+            <Route path={`${basePath}/actions`} render={this.renderComponent(Accounts)} />
+            <Route render={this.renderComponent(Overview)} />
+          </Switch>
+        </main>
+      </>
     );
   }
 
-  private renderComponent (Component: React.ComponentType<ComponentProps>) {
+  private renderComponent(Component: React.ComponentType<ComponentProps>) {
     return (): React.ReactNode => {
-      const { controllers, recentlyOffline, stashes, validators } = this.state;
+      const { controllers, recentlyOffline, stashes, validators, AccountMain } = this.state;
       const { balances = {} } = this.props;
 
       return (
+        // @ts-ignore
         <Component
           balances={balances}
           controllers={controllers}
           recentlyOffline={recentlyOffline}
           stashes={stashes}
           validators={validators}
+          // @ts-ignore
+          accountMain={AccountMain}
         />
       );
     };
   }
+
+  private getAccountMain = (): string | undefined => {
+    const AccountMain = store.get('accountMain')
+    console.log(AccountMain)
+    const { allAccounts } = this.props;
+    if (AccountMain) {
+      return AccountMain
+    } else if (allAccounts && allAccounts[AccountMain]) {
+      return allAccounts && Object.keys(allAccounts)[0]
+    } else {
+      return ''
+    }
+  }
+
+  private changeMainAddress = (): void => {
+    this.setState({
+      AccountMain: this.getAccountMain() || ''
+    })
+  }
+
 }
 
 export default withMulti(

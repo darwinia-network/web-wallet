@@ -85,23 +85,24 @@ class AccountsApp extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { basePath } = this.props;
+    const { basePath ,onStatusChange} = this.props;
     const { hidden, tabs } = this.state;
 
     return (
       <main className='accounts--App'>
-        <HelpOverlay md={basicMd} />
-        <header>
-          <Tabs
-            basePath={basePath}
-            hidden={hidden}
-            items={tabs}
-          />
-        </header>
-        <Switch>
-          <Route path={`${basePath}/vanity`} render={this.renderComponent(Vanity)} />
-          <Route render={this.renderComponent(Overview)} />
-        </Switch>
+        {/*<HelpOverlay md={basicMd} />*/}
+        {/*<header>*/}
+          {/*<Tabs*/}
+            {/*basePath={basePath}*/}
+            {/*hidden={hidden}*/}
+            {/*items={tabs}*/}
+          {/*/>*/}
+        {/*</header>*/}
+        {/*<Switch>*/}
+          {/*<Route path={`${basePath}/vanity`} render={this.renderComponent(Vanity)} />*/}
+          {/*<Route render={this.renderComponent(Overview)} />*/}
+        {/*</Switch>*/}
+        <Overview onStatusChange={onStatusChange}/>
       </main>
     );
   }

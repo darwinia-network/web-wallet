@@ -34,7 +34,7 @@ class Item extends React.PureComponent<Props> {
 
     const body = (
       <>
-        <Icon name={icon} />
+        {/* <Icon name={icon} /> */}
         <span className='text'>{t(`sidebar.${name}`, i18n)}</span>
         <Tooltip
           offset={{ right: -4 }}

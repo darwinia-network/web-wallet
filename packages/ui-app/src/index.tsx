@@ -3,8 +3,15 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 export { default as AddressInfo } from './AddressInfo';
+export { default as AddressInfoAccountList } from './AddressInfoAccountList';
+export { default as AddressInfoStaking } from './AddressInfoStaking';
+export { default as AddressInfoDarwinia } from './AddressInfoDarwinia';
+export { default as AddressInfoDw } from './AddressInfoDw';
 export { default as AddressMini } from './AddressMini';
 export { default as AddressRow } from './AddressRow';
+export { default as AddressRowAccountList } from './AddressRowAccountList';
+export { default as AddressRowCreate } from './AddressRowCreate';
+export { default as AddressRowReverse } from './AddressRowReverse';
 export { default as Available } from './Available';
 export { default as Balance } from './Balance';
 export { default as Bonded } from './Bonded';

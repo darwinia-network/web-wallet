@@ -2,15 +2,15 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { KeyringPair$Json } from '@polkadot/keyring/types';
-import { I18nProps } from '@polkadot/ui-app/types';
-import { ActionStatus } from '@polkadot/ui-app/Status/types';
-import { ModalProps } from '../types';
+import {KeyringPair$Json} from '@polkadot/keyring/types';
+import {I18nProps} from '@polkadot/ui-app/types';
+import {ActionStatus} from '@polkadot/ui-app/Status/types';
+import {ModalProps} from '../types';
 
 import React from 'react';
-import { AddressRow, Button, InputFile, Modal, Password, TxComponent } from '@polkadot/ui-app';
-import { InputAddress } from '@polkadot/ui-app/InputAddress';
-import { isHex, isObject, u8aToString } from '@polkadot/util';
+import {AddressRow, AddressRowCreate, Button, InputFile, Modal, Password, TxComponent} from '@polkadot/ui-app';
+import {InputAddress} from '@polkadot/ui-app/InputAddress';
+import {isHex, isObject, u8aToString} from '@polkadot/util';
 import keyring from '@polkadot/ui-keyring';
 
 import translate from '../translate';
@@ -34,24 +34,18 @@ class Import extends TxComponent<Props, State> {
     password: ''
   };
 
-  render () {
-    const { onClose, t } = this.props;
-    const { isFileValid, isPassValid } = this.state;
+  render() {
+    const {onClose, t} = this.props;
+    const {isFileValid, isPassValid} = this.state;
 
     return (
       <Modal
         dimmer='inverted'
         open
       >
-        <Modal.Header>{t('Add an account via seed')}</Modal.Header>
         {this.renderInput()}
         <Modal.Actions>
           <Button.Group>
-            <Button
-              label={t('Cancel')}
-              onClick={onClose}
-            />
-            <Button.Or />
             <Button
               isDisabled={!isFileValid || !isPassValid}
               isPrimary
@@ -59,23 +53,32 @@ class Import extends TxComponent<Props, State> {
               label={t('Restore')}
               ref={this.button}
             />
+            <Button
+              isBasic
+              isSecondary
+              label={t('Cancel')}
+              onClick={onClose}
+            />
           </Button.Group>
         </Modal.Actions>
       </Modal>
     );
   }
 
-  private renderInput () {
-    const { t } = this.props;
-    const { address, isFileValid, isPassValid, json, password } = this.state;
+  private renderInput() {
+    const {t} = this.props;
+    const {address, isFileValid, isPassValid, json, password} = this.state;
     const acceptedFormats = ['application/json', 'text/plain'].join(', ');
 
     return (
-      <Modal.Content>
-        <AddressRow
-          defaultName={isFileValid && json ? json.meta.name : null}
-          value={isFileValid && address ? address : null}
-        >
+      <>
+        <Modal.Content className={'modal-header'}>
+          <AddressRowCreate
+            defaultName={isFileValid && json ? json.meta.name : 'xxxxxxx'}
+            value={isFileValid && address ? address : null}
+          />
+        </Modal.Content>
+        <Modal.Content>
           <InputFile
             accept={acceptedFormats}
             className='full'
@@ -95,8 +98,8 @@ class Import extends TxComponent<Props, State> {
             onEnter={this.submit}
             value={password}
           />
-        </AddressRow>
-      </Modal.Content>
+        </Modal.Content>
+      </>
     );
   }
 
@@ -134,25 +137,24 @@ class Import extends TxComponent<Props, State> {
   }
 
   private onSave = (): void => {
-    const { onClose, onStatusChange, t } = this.props;
-    const { json, password } = this.state;
+    const {onClose, onStatusChange, t} = this.props;
+    const {json, password} = this.state;
 
     if (!json) {
       return;
     }
 
-    const status = { action: 'restore' } as ActionStatus;
+    const status = {action: 'restore'} as ActionStatus;
 
     try {
       const pair = keyring.restoreAccount(json, password);
-
       status.status = pair ? 'success' : 'error';
       status.account = pair.address();
       status.message = t('account restored');
 
       InputAddress.setLastValue('account', pair.address());
     } catch (error) {
-      this.setState({ isPassValid: false });
+      this.setState({isPassValid: false});
 
       status.status = 'error';
       status.message = error.message;

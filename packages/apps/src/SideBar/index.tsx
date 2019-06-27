@@ -64,7 +64,7 @@ const Toggle = styled.img`
 class SideBar extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     // setup modals for each of the actual modal routes
@@ -79,7 +79,7 @@ class SideBar extends React.PureComponent<Props, State> {
     };
   }
 
-  render () {
+  render() {
     const { handleResize, isCollapsed, toggleMenu, menuOpen } = this.props;
     const logo = getLogo(true);
 
@@ -104,8 +104,8 @@ class SideBar extends React.PureComponent<Props, State> {
               {this.renderLogo()}
               {this.renderRoutes()}
               <Menu.Divider hidden />
-              {this.renderGithub()}
-              {this.renderWiki()}
+              {/* {this.renderGithub()}
+              {this.renderWiki()} */}
               <Menu.Divider hidden />
               {
                 isCollapsed
@@ -113,7 +113,7 @@ class SideBar extends React.PureComponent<Props, State> {
                   : <NodeInfo />
               }
             </div>
-            {this.renderCollapse()}
+            {/* {this.renderCollapse()} */}
           </Menu>
           <Responsive minWidth={SIDEBAR_MENU_THRESHOLD}>
             <div
@@ -126,13 +126,13 @@ class SideBar extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderCollapse () {
+  private renderCollapse() {
     const { isCollapsed } = this.props;
 
     return (
       <Responsive
         minWidth={SIDEBAR_MENU_THRESHOLD}
-        className={`apps--SideBar-collapse ${isCollapsed ? 'collapsed' : 'expanded'}`}
+        className={`apps--SideBar-collapse ${false ? 'collapsed' : 'expanded'}`}
       >
         <Button
           icon={`angle double ${isCollapsed ? 'right' : 'left'}`}
@@ -144,20 +144,22 @@ class SideBar extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderLogo () {
+  private renderLogo() {
     const { isCollapsed } = this.props;
     const logo = getLogo(isCollapsed);
 
     return (
-      <img
-        alt='polkadot'
-        className='apps--SideBar-logo'
-        src={logo}
-      />
+      <div className='apps-SideBar-logo-box'>
+        <img
+          alt='polkadot'
+          className='apps--SideBar-logo'
+          src={logo}
+        />
+      </div>
     );
   }
 
-  private renderModals () {
+  private renderModals() {
     const { modals } = this.state;
     const filtered = routing.routes.filter((route) => route && route.Modal) as Array<Route>;
 
@@ -173,7 +175,7 @@ class SideBar extends React.PureComponent<Props, State> {
     ));
   }
 
-  private renderRoutes () {
+  private renderRoutes() {
     const { handleResize, isCollapsed } = this.props;
 
     return routing.routes.map((route, index) => (
@@ -199,7 +201,7 @@ class SideBar extends React.PureComponent<Props, State> {
     ));
   }
 
-  private renderGithub () {
+  private renderGithub() {
     return (
       <Menu.Item className='apps--SideBar-Item'>
         <a
@@ -213,7 +215,7 @@ class SideBar extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderWiki () {
+  private renderWiki() {
     return (
       <Menu.Item className='apps--SideBar-Item'>
         <a

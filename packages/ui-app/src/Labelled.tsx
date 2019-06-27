@@ -52,9 +52,12 @@ const Wrapper = styled.div`
   }
 
   > .ui--Labelled-content {
+    font-weight: normal;
     box-sizing: border-box;
     flex: 1 1;
     min-width: 0;
+    color: #302B3C;
+    
   }
 
   ${media.DESKTOP`

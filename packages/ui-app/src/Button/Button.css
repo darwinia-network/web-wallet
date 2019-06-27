@@ -9,6 +9,14 @@
     margin-bottom: 0.5rem;
     text-align: center;
   }
+
+   button+button{
+     margin-left: 10px!important;
+   }
+
+   button{
+     border-radius: 2px!important;
+   }
 }
 
 .ui--Button-Group:not(:first-child) {
@@ -17,4 +25,15 @@
 
 br+.ui--Button-Group {
   margin-top: 0;
+}
+
+.ui.primary.button, .ui.primary.buttons .button{
+  background-color: #302B3C;
+}
+
+.overviewTab{
+  margin: 1.5em .25em;
+  .ui.primary.button, .ui.primary.buttons .button {
+    margin: 0 1.25em 0 0;
+  }
 }

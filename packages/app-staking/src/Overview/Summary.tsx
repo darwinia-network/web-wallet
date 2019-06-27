@@ -4,6 +4,7 @@
 
 import { DerivedBalancesMap } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
+import styled from 'styled-components';
 
 import BN from 'bn.js';
 import React from 'react';
@@ -23,44 +24,44 @@ type Props = I18nProps & {
 };
 
 class Summary extends React.PureComponent<Props> {
-  render () {
+  render() {
     const { className, controllers, lastAuthor, lastBlock, style, t, staking_validatorCount, validators } = this.props;
     const waiting = controllers.length > validators.length
       ? (controllers.length - validators.length)
       : 0;
 
     return (
-      <SummaryBox
-        className={className}
-        style={style}
-      >
-        <section>
-          <CardSummary label={t('validators')}>
-            {validators.length}/{staking_validatorCount ? staking_validatorCount.toString() : '-'}
-          </CardSummary>
-          <CardSummary label={t('waiting')}>
-            {waiting}
-          </CardSummary>
-        </section>
-        <section>
-          <CardSummary label={t('last block')}>
-            {lastAuthor && (
-              <IdentityIcon
-                className='validator--Account-block-icon'
-                size={24}
-                value={lastAuthor}
-              />
-            )}
-            {lastBlock}
-          </CardSummary>
-        </section>
-        <section>
-          <SummarySession />
-        </section>
-      </SummaryBox>
+      <StyledWrapper>
+        <SummaryBox
+          className={className}
+          style={style}
+        >
+          <section>
+            <CardSummary label={t('validators')}>
+              {validators.length}/{staking_validatorCount ? staking_validatorCount.toString() : '-'}
+            </CardSummary>
+            <CardSummary label={t('waiting')}>
+              {waiting}
+            </CardSummary>
+          </section>
+          <section>
+            <CardSummary label={t('last block')}>
+              {lastBlock}
+            </CardSummary>
+          </section>
+        </SummaryBox>
+      </StyledWrapper>
     );
   }
 }
+
+const StyledWrapper = styled.div`
+  background: #fff;
+  padding: 55px;
+  border-radius:2px;
+  border:1px solid rgba(237,237,237,1);
+`
+
 
 export default withMulti(
   Summary,

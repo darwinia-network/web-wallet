@@ -52,20 +52,26 @@ class Account extends React.PureComponent<Props> {
     return (
       <Card>
         {this.renderModals()}
-        <AddressRow
+        {/* <AddressRow
           buttons={this.renderButtons()}
           isEditable={isEditable}
           value={address}
           withExplorer
-          withIndex
-          withTags
+          // withIndex
+          // withTags
         >
           <AddressInfo
             withBalance
             withExtended
             value={address}
           />
-        </AddressRow>
+        </AddressRow> */}
+
+        <AddressInfo
+            withBalance
+            withExtended
+            value={address}
+          />
       </Card>
     );
   }
@@ -210,12 +216,12 @@ class Account extends React.PureComponent<Props> {
           </>
         )}
         <Button
-          isPrimary
-          label={<><Icon name='paper plane' /> {t('send')}</>}
-          onClick={this.toggleTransfer}
-          size='small'
-          tooltip={t('Send funds from this account')}
-        />
+        isPrimary
+        label={<><Icon name='paper plane' /> {t('send')}</>}
+        onClick={this.toggleTransfer}
+        size='small'
+        tooltip={t('Send funds from this account')}
+      />
       </div>
     );
   }

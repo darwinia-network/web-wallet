@@ -120,13 +120,6 @@ class Signer extends React.PureComponent<Props, State> {
       <Modal.Actions>
         <Button.Group>
           <Button
-            isNegative
-            onClick={this.onCancel}
-            tabIndex={3}
-            label={t('Cancel')}
-          />
-          <Button.Or />
-          <Button
             className='ui--signer-Signer-Submit'
             isDisabled={!isSendable}
             isPrimary
@@ -137,6 +130,13 @@ class Signer extends React.PureComponent<Props, State> {
                 ? t('Submit (no signature)')
                 : t('Sign and Submit')
             }
+          />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            onClick={this.onCancel}
+            tabIndex={3}
+            label={t('Cancel')}
           />
         </Button.Group>
       </Modal.Actions>

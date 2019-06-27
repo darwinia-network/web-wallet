@@ -206,12 +206,12 @@ class General extends React.PureComponent<Props, State> {
   }
   private saveAndReload = (): void => {
     const { settings } = this.state;
-
+    console.log('settings', settings)
     uiSettings.set(settings);
 
     // HACK This is terribe, but since the API needs to re-connect, but since
     // the API does not yet handle re-connections properly, it is what it is
-    window.location.reload();
+    // window.location.reload();
   }
 }
 

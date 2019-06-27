@@ -17,7 +17,7 @@ const StyledSummary = styled.div`
   display: flex;
   flex-wrap: no-wrap;
   justify-content: space-between;
-  margin-bottom: 1.4rem;
+  margin-bottom: 0rem;
 
   > section {
 		display: flex;
@@ -50,7 +50,7 @@ const StyledSummary = styled.div`
   }
 
   @media(min-width: 768px) {
-    margin-bottom: 2.8rem;
+    margin-bottom: 0rem;
   }
 
   .ui.label {

@@ -16,6 +16,7 @@ import styled from 'styled-components';
 type Props = BareProps & {
   children?: React.ReactNode,
   icon?: string,
+  hasIcon?: boolean,
   isAddress?: boolean,
   value?: any
 };
@@ -26,7 +27,7 @@ type InnerProps = Props & I18nProps & {
 
 class CopyButtonInner extends React.PureComponent<InnerProps> {
   render () {
-    const { children, className, icon = 'copy', value } = this.props;
+    const { children, className, icon = 'copy', value, hasIcon = true } = this.props;
 
     return (
       <div className={className}>
@@ -36,12 +37,12 @@ class CopyButtonInner extends React.PureComponent<InnerProps> {
         >
           <div>
             {children}
-            <Button
+            {hasIcon || <Button
               className='iconButton'
               icon={icon}
               size='mini'
               isPrimary
-            />
+            />}
           </div>
         </CopyToClipboard>
       </div>

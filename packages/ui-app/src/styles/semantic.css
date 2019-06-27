@@ -96,13 +96,14 @@
 }
 
 .ui.modal {
-  background: #fafafa /* #fff */;
+  background: #fff /* #fff */;
   color: #4e4e4e;
   font-family: sans-serif;
 
   > .actions,
   > .content {
     background: transparent;
+    padding: 1.5rem 3.5rem;
   }
 
   > .actions {
@@ -125,6 +126,10 @@
   > :first-child:not(.icon) {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+  }
+
+  > .modal-header{
+    background: #FBFBFB;
   }
 
   .description {
@@ -201,4 +206,12 @@
 /* remove the default white background, settigns app has it as part of Tab */
 .ui.segment {
   background: transparent;
+}
+
+.ui.button{
+  border-radius: 2px;
+}
+
+.ui.basic.button{
+  border-radius: 2px;
 }

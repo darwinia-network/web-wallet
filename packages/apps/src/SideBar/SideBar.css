@@ -90,10 +90,19 @@
       }
     }
 
+    .apps-SideBar-logo-box {
+      background: linear-gradient(315deg,#fe3876,#7c30dd 90%,#3a30dd);
+      width: 100%;
+      display: flex;
+    justify-content: center;
+    align-items: center;
+
+    }
+
     .apps--SideBar-logo {
       margin: 0.5rem 1.5rem 1.5rem 0.75rem;
       padding-top: 0.75em;
-      width: 9rem;
+      width: 50px;
     }
 
     .apps--SideBar-collapse {
@@ -134,7 +143,7 @@
     text-align: left;
 
     .apps-SideBar-Scroll {
-      padding-left: 0.75rem;
+      padding-left: 0;
     }
   }
 
@@ -191,13 +200,13 @@ a.apps--SideBar-Item-NavLink {
 
   &:hover {
     background: rgba(0,0,0,0.15);
-    border-radius: 0.28571429rem 0 0 0.28571429rem;
+    border-radius: 0;
   }
 }
 
 a.apps--SideBar-Item-NavLink-active {
   background: #fafafa !important;
-  border-radius: 0.28571429rem 0 0 0.28571429rem;
+  border-radius: 0;
   color: inherit;
 
   &:hover {

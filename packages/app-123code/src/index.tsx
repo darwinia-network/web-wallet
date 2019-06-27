@@ -34,6 +34,8 @@ class App extends React.PureComponent<Props, State> {
       // in all apps, the main wrapper is setup to allow the padding
       // and margins inside the application. (Just from a consistent pov)
       <main>
+        <div>111111111111222222</div>
+        <div>111111111111222222</div>
         <SummaryBar />
         <AccountSelector onChange={this.onAccountChange} />
         <Transfer accountId={accountId} />

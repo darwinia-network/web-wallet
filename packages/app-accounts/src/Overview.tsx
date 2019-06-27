@@ -5,16 +5,22 @@
 import { I18nProps } from '@polkadot/ui-app/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { ComponentProps } from './types';
+import styled from 'styled-components';
 
 import React from 'react';
+import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable } from '@polkadot/ui-api';
 import { Button, CardGrid } from '@polkadot/ui-app';
 
 import CreateModal from './modals/Create';
 import ImportModal from './modals/Import';
+import AccountsListModal from './modals/AccountsList';
+import AccountStatus from './modals/AccountStatus';
 import Account from './Account';
+import AccountDarwinia from './AccountDarwinia';
 import translate from './translate';
+import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[]
@@ -22,39 +28,52 @@ type Props = ComponentProps & I18nProps & {
 
 type State = {
   isCreateOpen: boolean,
-  isImportOpen: boolean
+  isImportOpen: boolean,
+  isAccountsListOpen: boolean,
+  AccountMain: string
 };
 
 class Overview extends React.PureComponent<Props, State> {
   state: State = {
     isCreateOpen: false,
-    isImportOpen: false
+    isImportOpen: false,
+    isAccountsListOpen: false,
+    AccountMain: ''
   };
 
-  render () {
+  componentDidMount() {
+    const AccountMain = this.getAccountMain() || '';
+    this.setState({
+      AccountMain
+    })
+  }
+
+  render() {
     const { accounts, onStatusChange, t } = this.props;
-    const { isCreateOpen, isImportOpen } = this.state;
+
+    const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
 
     return (
-      <CardGrid
-        buttons={
-          <Button.Group>
-            <Button
-              isPrimary
-              label={t('Add account')}
-              onClick={this.toggleCreate}
-            />
-            <Button.Or />
-            <Button
-              isPrimary
-              label={t('Restore JSON')}
-              onClick={this.toggleImport}
-            />
-          </Button.Group>
-        }
-      >
+      <Wrapper>
+        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
+
+        <div className={'titleRow'}>
+          Darwinia asset
+        </div>
+
+        {AccountMain && <AccountDarwinia
+          address={AccountMain}
+          key={AccountMain}
+        />}
+
         {isCreateOpen && (
           <CreateModal
+            onClose={this.toggleCreate}
+            onStatusChange={onStatusChange}
+          />
+        )}
+        {isAccountsListOpen && (
+          <AccountsListModal
             onClose={this.toggleCreate}
             onStatusChange={onStatusChange}
           />
@@ -65,14 +84,27 @@ class Overview extends React.PureComponent<Props, State> {
             onStatusChange={onStatusChange}
           />
         )}
-        {accounts && Object.keys(accounts).map((address) => (
-          <Account
-            address={address}
-            key={address}
-          />
-        ))}
-      </CardGrid>
+        {/* {accounts && Object.keys(accounts).map((address) => (
+            <Account
+              address={address}
+              key={address}
+            />
+          ))} */}
+      </Wrapper>
     );
+  }
+
+  private getAccountMain = (): string | undefined => {
+    const AccountMain = store.get('accountMain')
+    console.log(AccountMain)
+    const { accounts } = this.props;
+    if (AccountMain) {
+      return AccountMain
+    } else if (accounts && accounts[AccountMain]) {
+      return accounts && Object.keys(accounts)[0]
+    } else {
+      return ''
+    }
   }
 
   private toggleCreate = (): void => {
@@ -86,7 +118,33 @@ class Overview extends React.PureComponent<Props, State> {
       isImportOpen: !isImportOpen
     }));
   }
+
+  private changeMainAddress = (): void => {
+    this.setState({
+      AccountMain: this.getAccountMain() || ''
+    })
+  }
 }
+
+const Wrapper = styled.div`
+    .titleRow {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .titleRow::before {
+      content: ' ';
+      display: inline-block;
+      background-color: #000;
+      width: 6px;
+      height: 22px;
+      margin-right: 0.5rem;
+    }
+`
 
 export default withMulti(
   Overview,
