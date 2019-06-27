@@ -96,10 +96,12 @@ class App extends React.PureComponent<Props, State> {
   }
 
   componentDidMount() {
-    const AccountMain = this.getAccountMain() || '';
-    this.setState({
-      AccountMain
-    })
+    setTimeout(() => {
+      const AccountMain = this.getAccountMain() || '';
+      this.setState({
+        AccountMain
+      })
+    },0)
   }
 
   render() {
@@ -159,7 +161,7 @@ class App extends React.PureComponent<Props, State> {
     const { allAccounts } = this.props;
     if (AccountMain) {
       return AccountMain
-    } else if (allAccounts && allAccounts[AccountMain]) {
+    } else if (allAccounts) {
       return allAccounts && Object.keys(allAccounts)[0]
     } else {
       return ''

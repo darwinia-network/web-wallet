@@ -101,7 +101,7 @@ class Overview extends React.PureComponent<Props, State> {
     const { accounts } = this.props;
     if (AccountMain) {
       return AccountMain
-    } else if (accounts && accounts[AccountMain]) {
+    } else if (accounts) {
       return accounts && Object.keys(accounts)[0]
     } else {
       return ''
@@ -145,7 +145,7 @@ const Wrapper = styled.div`
       height: 22px;
       margin-right: 0.5rem;
     }
-    
+
     .ringStakingBanner{
       width: 100%;
       margin-top: 20px;
