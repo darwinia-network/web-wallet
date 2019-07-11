@@ -8,12 +8,12 @@ export default function getAddrAtgs (address: string): Array<string> {
   let pair;
 
   try {
-    pair = keyring.getAccount(address).isValid()
+    pair = keyring.getAccount(address)
       ? keyring.getAccount(address)
       : keyring.getAddress(address);
   } catch (error) {
     // all-ok, we have empty fallbacks
   }
 
-  return (pair && pair.isValid() && pair.getMeta().tags) || [];
+  return (pair && pair.isValid() && pair.meta.tags) || [];
 }

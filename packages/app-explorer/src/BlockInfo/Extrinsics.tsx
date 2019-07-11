@@ -21,7 +21,7 @@ class Extrinsics extends React.PureComponent<Props> {
     const { label, t } = this.props;
 
     return (
-      <Column header={label || t('extrinsics')}>
+      <Column headerText={label || t('extrinsics')}>
         {this.renderContent()}
       </Column>
     );

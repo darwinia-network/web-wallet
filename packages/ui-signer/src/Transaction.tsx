@@ -41,7 +41,7 @@ class Transaction extends React.PureComponent<Props> {
         <Modal.Content className='ui--signer-Signer-Content'>
           {this.renderAccount()}
           <Call value={extrinsic} />
-          {this.renderChecks()}
+          {/* {this.renderChecks()} */}
           {children}
         </Modal.Content>
       </>

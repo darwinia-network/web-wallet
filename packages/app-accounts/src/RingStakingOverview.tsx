@@ -10,25 +10,29 @@ import styled from 'styled-components';
 import React from 'react';
 import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
-import { withMulti, withObservable } from '@polkadot/ui-api';
+import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
 import { Button, CardGrid } from '@polkadot/ui-app';
-
-import CreateModal from './modals/Create';
-import ImportModal from './modals/Import';
-import AccountsListModal from './modals/AccountsList';
+import BN from 'bn.js';
 import AccountStatus from './modals/AccountStatus';
 import Account from './Account';
 import AccountDarwinia from './AccountDarwinia';
 import translate from './translate';
+import { formatBalance, formatNumber } from '@polkadot/util';
+
 import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
-const ringStakingBanner =  require('./img/ringStakingBanner.png');
+import RingStaking from './modals/RingStaking'
+import ringStakingBtn from './img/stakingBtn.svg';
+import RingStakingList from './RingStakingList';
+const ringStakingBanner = require('./img/ringStakingBanner.png');
 
 type Props = ComponentProps & I18nProps & {
-  accounts?: SubjectInfo[]
+  allAccounts?: SubjectInfo[],
+  balances_locks: Array<{ amount: BN }>
 };
 
 type State = {
   isCreateOpen: boolean,
+  isRingStakingOpen: boolean,
   isImportOpen: boolean,
   isAccountsListOpen: boolean,
   AccountMain: string
@@ -36,6 +40,7 @@ type State = {
 
 class Overview extends React.PureComponent<Props, State> {
   state: State = {
+    isRingStakingOpen: false,
     isCreateOpen: false,
     isImportOpen: false,
     isAccountsListOpen: false,
@@ -50,62 +55,44 @@ class Overview extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t } = this.props;
-
-    const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
+    const { allAccounts, onStatusChange, t, balances_locks = [] } = this.props;
+    
+    const { isRingStakingOpen, isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
 
     return (
       <Wrapper>
-        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
-        <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton"/>
-        <div className={'titleRow'}>
-          Darwinia asset
+        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
+        <div className='bannerBox'>
+          <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton" />
+          <div className='stakingBtn' onClick={this.toggleRingStaking}><p>Staking now</p></div>
         </div>
 
-        {AccountMain && <AccountDarwinia
-          address={AccountMain}
-          key={AccountMain}
-        />}
-
-        {isCreateOpen && (
-          <CreateModal
-            onClose={this.toggleCreate}
-            onStatusChange={onStatusChange}
-          />
-        )}
-        {isAccountsListOpen && (
-          <AccountsListModal
-            onClose={this.toggleCreate}
-            onStatusChange={onStatusChange}
-          />
-        )}
-        {isImportOpen && (
-          <ImportModal
-            onClose={this.toggleImport}
-            onStatusChange={onStatusChange}
-          />
-        )}
-        {/* {accounts && Object.keys(accounts).map((address) => (
-            <Account
-              address={address}
-              key={address}
-            />
-          ))} */}
+        <div className={'titleRow'}>
+          Staking Ring
+        </div>
+        <RingStakingList account={AccountMain} />
+        {isRingStakingOpen && <RingStaking senderId={AccountMain} onClose={this.toggleRingStaking}/>}
       </Wrapper>
     );
   }
 
   private getAccountMain = (): string | undefined => {
     const AccountMain = store.get('accountMain')
-    console.log(AccountMain)
-    const { accounts } = this.props;
-    if (AccountMain) {
+    const { allAccounts } = this.props;
+
+    if (AccountMain && allAccounts && allAccounts[AccountMain]) {
       return AccountMain
-    } else if (accounts) {
-      return accounts && Object.keys(accounts)[0]
+    } else if (allAccounts) {
+      return allAccounts && Object.keys(allAccounts)[0]
     } else {
       return ''
     }
+  }
+
+  private toggleRingStaking = (): void => {
+    this.setState(({ isRingStakingOpen }) => ({
+      isRingStakingOpen: !isRingStakingOpen
+    }));
   }
 
   private toggleCreate = (): void => {
@@ -150,10 +137,30 @@ const Wrapper = styled.div`
       width: 100%;
       margin-top: 20px;
     }
+
+    .bannerBox{
+      position: relative;
+      .stakingBtn{
+        background: url(${ringStakingBtn});
+        width: 235px;
+        height: 77px;
+        position: absolute;
+        top: 40%;
+        right: 20px;
+        cursor: pointer;
+        p{
+          text-align: center;
+          font-size: 24px;
+          color: #fff;
+          line-height: 33px;
+          line-height: 67px;
+        }
+      }
+    }
 `
 
 export default withMulti(
   Overview,
   translate,
-  withObservable(accountObservable.subject, { propName: 'accounts' })
+  // withObservable(accountObservable.subject, { propName: 'accounts' }),
 );

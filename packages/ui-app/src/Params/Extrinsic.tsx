@@ -17,7 +17,7 @@ type Props = I18nProps & {
   isDisabled?: boolean,
   isError?: boolean,
   isPrivate: boolean,
-  label: string,
+  label: React.ReactNode,
   onChange?: RawParam$OnChange,
   onEnter?: RawParam$OnEnter,
   withLabel?: boolean
@@ -34,11 +34,8 @@ class ExtrinsicDisplay extends React.PureComponent<Props> {
         isDisabled={isDisabled}
         isError={isError}
         isPrivate={isPrivate}
-        label={t('{{label}} (extrinsic)', {
-          replace: {
-            label
-          }
-        })}
+        // @ts-ignore
+        label={<>{label} {t('(extrinsic)')}</>}
         onChange={this.onChange}
         onEnter={onEnter}
         style={style}

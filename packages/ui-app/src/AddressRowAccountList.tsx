@@ -19,7 +19,7 @@ import CopyButton from './CopyButton';
 import IdentityIcon from './IdentityIcon';
 import LinkPolkascan from './LinkPolkascan';
 import translate from './translate';
-import { classes, getAddrName, getAddrTags, toShortAddress } from './util';
+import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
 import { noop } from 'rxjs';
 import store from 'store';
 
@@ -73,8 +73,8 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
     const address = accountId
       ? accountId.toString()
       : DEFAULT_ADDR;
-    const name = getAddrName(address, false, defaultName) || '';
-    const tags = getAddrTags(address);
+    const name = getAddressName(address, null, false, defaultName) || '';
+    const tags = getAddressTags(address);
     const state = { tags } as State;
     let hasChanged = false;
 
@@ -130,8 +130,8 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
     const address = accountId
       ? accountId.toString()
       : DEFAULT_ADDR;
-    const name = getAddrName(address, false, defaultName) || '';
-    const tags = getAddrTags(address);
+    const name = getAddressName(address, null, false, defaultName) || '';
+    const tags = getAddressTags(address);
 
     return {
       address,

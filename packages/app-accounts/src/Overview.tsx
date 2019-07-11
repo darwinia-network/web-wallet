@@ -45,20 +45,26 @@ class Overview extends React.PureComponent<Props, State> {
   componentDidMount() {
     setTimeout(() => {
       const AccountMain = this.getAccountMain() || '';
+
       this.setState({
         AccountMain
       })
-    },0)
+    }, 0)
   }
 
   private _wrapperStatusChange = (e) => {
     const { accounts, onStatusChange, t } = this.props;
     onStatusChange(e);
-    const AccountMain = this.getAccountMain() || '';
-    this.setState({
-      AccountMain
-    })
+
+    setTimeout(() => {
+      const AccountMain = this.getAccountMain() || '';
+
+      this.setState({
+        AccountMain
+      })
+    }, 1000);
   }
+
   render() {
     const { accounts, onStatusChange, t } = this.props;
     const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
@@ -98,19 +104,19 @@ class Overview extends React.PureComponent<Props, State> {
         {isCreateOpen && (
           <CreateModal
             onClose={this.toggleCreate}
-            onStatusChange={onStatusChange}
+            onStatusChange={this._wrapperStatusChange}
           />
         )}
         {isAccountsListOpen && (
           <AccountsListModal
             onClose={this.toggleCreate}
-            onStatusChange={onStatusChange}
+            onStatusChange={this._wrapperStatusChange}
           />
         )}
         {isImportOpen && (
           <ImportModal
             onClose={this.toggleImport}
-            onStatusChange={onStatusChange}
+            onStatusChange={this._wrapperStatusChange}
           />
         )}
         {/* {accounts && Object.keys(accounts).map((address) => (
@@ -126,8 +132,8 @@ class Overview extends React.PureComponent<Props, State> {
   private getAccountMain = (): string | undefined => {
     const AccountMain = store.get('accountMain');
     const { accounts } = this.props;
-
-    if (AccountMain) {
+    console.log(1111, AccountMain, accounts)
+    if (AccountMain && accounts && accounts[AccountMain]) {
       return AccountMain
     } else if (accounts) {
       return accounts && Object.keys(accounts)[0]

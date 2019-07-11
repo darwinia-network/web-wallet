@@ -32,7 +32,7 @@ class Staking extends TxComponent<Props, State> {
 
   // inject the preferences are returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
-  static getDerivedStateFromProps (props: Props, state: State): State | null {
+  static getDerivedStateFromProps(props: Props, state: State): State | null {
     if (state.unstakeThreshold) {
       return null;
     }
@@ -45,8 +45,8 @@ class Staking extends TxComponent<Props, State> {
     };
   }
 
-  render () {
-    const { isOpen } = this.props;
+  render() {
+    const { isOpen, onClose } = this.props;
 
     if (!isOpen) {
       return null;
@@ -58,6 +58,7 @@ class Staking extends TxComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         {this.renderButtons()}
@@ -65,19 +66,13 @@ class Staking extends TxComponent<Props, State> {
     );
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { accountId, onClose, t } = this.props;
     const { unstakeThreshold, validatorPayment } = this.state;
 
     return (
       <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
           <TxButton
             accountId={accountId}
             isPrimary
@@ -90,12 +85,19 @@ class Staking extends TxComponent<Props, State> {
             tx='staking.validate'
             ref={this.button}
           />
+          <Button
+            isBasic
+            isSecondary
+            label={t('Cancel')}
+            onClick={onClose}
+          />
+
         </Button.Group>
       </Modal.Actions>
     );
   }
 
-  private renderContent () {
+  private renderContent() {
     const { accountId, stashId, t } = this.props;
     const { unstakeThreshold, validatorPayment } = this.state;
 

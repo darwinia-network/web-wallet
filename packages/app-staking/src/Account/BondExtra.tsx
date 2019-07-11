@@ -23,7 +23,8 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   isOpen: boolean,
   onClose: () => void,
   staking_ledger?: Option<StakingLedger>,
-  ktonBalances_freeBalance: BN, ktonBalances_locks: Array<BN>
+  kton_freeBalance: BN, 
+  kton_locks: Array<any>
 };
 
 type State = {
@@ -68,6 +69,7 @@ class BondExtra extends TxComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         <Modal.Actions>
@@ -138,7 +140,7 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
   private setMaxBalance = () => {
-    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, staking_ledger, ktonBalances_freeBalance, ktonBalances_locks } = this.props;
+    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, staking_ledger, kton_freeBalance = ZERO, kton_locks } = this.props;
     const { maxAdditional } = this.state;
 
     const { transactionBaseFee, transactionByteFee } = balances_fees;
@@ -165,16 +167,16 @@ class BondExtra extends TxComponent<Props, State> {
       const fees = transactionBaseFee
         .add(transactionByteFee.muln(txLength));
 
-      let _ktonBalances_locks = new BN(0)
-
-      if (ktonBalances_locks && ktonBalances_locks.length) {
-        // @ts-ignore
-        _ktonBalances_locks = ktonBalances_locks[0].amount
-      }
-      
-      console.log(maxBalance)
-
-      maxBalance = new BN(ktonBalances_freeBalance).sub(_ktonBalances_locks);
+        let _ktonBalances_locks = ZERO
+        console.log(1,kton_locks)
+        if (kton_locks) {
+          kton_locks.forEach((item, index) => {
+            console.log(2, index,new BN(item.amount))
+            _ktonBalances_locks = _ktonBalances_locks.add(new BN(item.amount))
+          })
+        }
+        console.log(3, _ktonBalances_locks, kton_freeBalance)
+        maxBalance = kton_freeBalance.sub(_ktonBalances_locks);
     }
 
     this.nextState({
@@ -197,7 +199,7 @@ export default withMulti(
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
     ['query.staking.ledger', { paramName: 'controllerId' }],
-    ['query.ktonBalances.locks', { paramName: 'accountId' }],
-    ['query.ktonBalances.freeBalance', { paramName: 'accountId' }]
+    ['query.kton.locks', { paramName: 'accountId' }],
+    ['query.kton.freeBalance', { paramName: 'accountId' }]
   )
 );

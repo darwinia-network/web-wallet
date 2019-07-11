@@ -32,13 +32,14 @@ class ChangePass extends TxComponent<Props, State> {
   };
 
   render () {
-    const { t } = this.props;
+    const { t, onClose } = this.props;
 
     return (
       <Modal
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        onClose={onClose}
       >
         <Modal.Header>{t('Change account password')}</Modal.Header>
         {this.renderContent()}
@@ -55,17 +56,17 @@ class ChangePass extends TxComponent<Props, State> {
       <Modal.Actions>
         <Button.Group>
           <Button
-            isNegative
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
-          <Button
             isDisabled={!isNewValid || !isOldValid}
             isPrimary
             label={t('Change')}
             onClick={this.doChange}
             ref={this.button}
+          />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            label={t('Cancel')}
+            onClick={onClose}
           />
         </Button.Group>
       </Modal.Actions>
@@ -125,7 +126,7 @@ class ChangePass extends TxComponent<Props, State> {
       }
 
       try {
-        if (!account.isLocked()) {
+        if (!account.isLocked) {
           account.lock();
         }
 

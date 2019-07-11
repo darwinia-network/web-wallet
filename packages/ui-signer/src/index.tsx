@@ -13,12 +13,13 @@ import { QueueConsumer } from '@polkadot/ui-app/Status/Context';
 import Modal from './Modal';
 
 type Props = BareProps & {
-  children: React.ReactNode
+  children: React.ReactNode,
+  onClose?: () => void
 };
 
 export default class Signer extends React.PureComponent<Props> {
   render () {
-    const { children, className, style } = this.props;
+    const { children, className, style, onClose } = this.props;
 
     return (
       <>
@@ -31,6 +32,7 @@ export default class Signer extends React.PureComponent<Props> {
               queue={txqueue}
               queueSetTxStatus={queueSetTxStatus}
               style={style}
+              onClose={onClose}
             />
           )}
         </QueueConsumer>

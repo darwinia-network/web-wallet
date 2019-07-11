@@ -86,7 +86,7 @@ class SideBar extends React.PureComponent<Props, State> {
     return (
       <Responsive
         onUpdate={handleResize}
-        className={classes('apps-SideBar-Wrapper', isCollapsed ? 'collapsed' : 'expanded')}
+        className={classes('apps-SideBar-Wrapper', false ? 'collapsed' : 'expanded')}
       >
         <Toggle
           alt='logo'

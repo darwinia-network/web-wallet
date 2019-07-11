@@ -16,7 +16,6 @@ type State = {
   sub: Array<string>,
   subTypes: Array<TypeDef>,
   type?: string,
-  // @ts-ignore
   values: Array<RawParam>
 };
 
@@ -36,12 +35,9 @@ export default class Tuple extends React.PureComponent<Props, State> {
     const subTypes = sub && Array.isArray(sub)
       ? sub
       : [];
-      // @ts-ignore
     const values = (value as Array<any>).map((value) =>
-    // @ts-ignore
       isUndefined(value) || isUndefined(value.isValid)
         ? {
-          // @ts-ignore
           isValid: !isUndefined(value),
           value
         }
@@ -67,7 +63,6 @@ export default class Tuple extends React.PureComponent<Props, State> {
         style={style}
       >
         {Components.map((Component, index) => (
-          // @ts-ignore
           <Component
           // @ts-ignore
             defaultValue={values[index] || {}}
@@ -85,7 +80,6 @@ export default class Tuple extends React.PureComponent<Props, State> {
   }
 
   private onChange = (index: number) => {
-    // @ts-ignore
     return (value: RawParam): void => {
       this.setState(
         ({ values }: State) => ({
@@ -98,9 +92,7 @@ export default class Tuple extends React.PureComponent<Props, State> {
           const { values } = this.state;
           const { onChange } = this.props;
 
-          // @ts-ignore
           onChange && onChange({
-            // @ts-ignore
             isValid: values.reduce((result: boolean, { isValid }) => result && isValid, true),
             value: values.map(({ value }) => value)
           });

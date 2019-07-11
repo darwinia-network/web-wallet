@@ -2,18 +2,21 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { ApiProps } from '@polkadot/ui-api/types';
 import { I18nProps } from '@polkadot/ui-app/types';
 
 import React from 'react';
 import { Button, InputAddress, Modal, TxButton } from '@polkadot/ui-app';
+import { withApi, withMulti } from '@polkadot/ui-api';
 
-import ValidateSession from './ValidateSession';
+import ValidateSession from './InputValidationSession';
 import translate from '../translate';
 
-type Props = I18nProps & {
-  accountId: string,
+type Props = I18nProps & ApiProps & {
+  controllerId: string,
   isOpen: boolean,
   onClose: () => void,
+  sessionId?: string | null,
   stashId: string
 };
 
@@ -22,7 +25,7 @@ type State = {
   sessionId: string
 };
 
-class Key extends React.PureComponent<Props, State> {
+class SetSessionKey extends React.PureComponent<Props, State> {
   state: State;
 
   constructor (props: Props) {
@@ -30,13 +33,16 @@ class Key extends React.PureComponent<Props, State> {
 
     this.state = {
       sessionError: null,
-      sessionId: props.accountId
+      sessionId: props.sessionId || props.controllerId
     };
   }
 
   render () {
-    const { accountId, isOpen, onClose, t } = this.props;
+    const { api, controllerId, isOpen, onClose, t } = this.props;
     const { sessionError, sessionId } = this.state;
+    const isV2 = !!api.tx.session.setKeys;
+
+    console.log('sessionId', sessionId);
 
     if (!isOpen) {
       return null;
@@ -44,61 +50,61 @@ class Key extends React.PureComponent<Props, State> {
 
     return (
       <Modal
-        className='staking--Stash'
+        className='staking--SetSessionAccount'
         dimmer='inverted'
         open
         size='small'
       >
         {this.renderContent()}
         <Modal.Actions>
-        <Button.Group>
-          <Button
-            isNegative
-            onClick={onClose}
-            label={t('Cancel')}
-          />
-          <Button.Or />
-          <TxButton
-            accountId={accountId}
-            isDisabled={!sessionId || !!sessionError}
-            isPrimary
-            label={t('Set Session Key')}
-            onClick={onClose}
-            params={[sessionId]}
-            tx='session.setKey'
-          />
-        </Button.Group>
-      </Modal.Actions>
+          <Button.Group>
+            <Button
+              isNegative
+              onClick={onClose}
+              label={t('Cancel')}
+            />
+            <Button.Or />
+            <TxButton
+              accountId={controllerId}
+              isDisabled={!sessionId || !!sessionError}
+              isPrimary
+              label={t('Set Session Key')}
+              onClick={ onClose }
+              params={ isV2 ? [{ auraKey: sessionId, grandpaKey: sessionId }, new Uint8Array([])] : [sessionId]}
+              tx={isV2 ? 'session.setKeys' : 'session.setKey'}
+            />
+          </Button.Group>
+        </Modal.Actions>
       </Modal>
     );
   }
 
   private renderContent () {
-    const { accountId, stashId, t } = this.props;
+    const { controllerId, stashId, t } = this.props;
     const { sessionId } = this.state;
 
     return (
       <>
         <Modal.Header>
-          {t('Session Key')}
+          {t('Set Session Key')}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'
-            defaultValue={accountId}
+            defaultValue={controllerId}
             isDisabled
             label={t('controller account')}
           />
           <InputAddress
             className='medium'
-            help={t('Changing the key only takes effect at the start of the next session. If validating, you should (currently) use an ed25519 key.')}
+            help={t('Changing the key only takes effect at the start of the next session. If validating, it must be an ed25519 key.')}
             label={t('session key')}
             onChange={this.onChangeSession}
             type='account'
             value={sessionId}
           />
           <ValidateSession
-            controllerId={accountId}
+            controllerId={controllerId}
             onError={this.onSessionError}
             sessionId={sessionId}
             stashId={stashId}
@@ -117,4 +123,8 @@ class Key extends React.PureComponent<Props, State> {
   }
 }
 
-export default translate(Key);
+export default withMulti(
+  SetSessionKey,
+  translate,
+  withApi
+);

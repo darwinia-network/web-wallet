@@ -11,7 +11,7 @@ import { withCalls } from '@polkadot/ui-api';
 import { InfoForInput } from '@polkadot/ui-app';
 import { isHex } from '@polkadot/util';
 
-import translate from './translate';
+import translate from '../translate';
 
 type Props = ApiProps & I18nProps & {
   codeHash?: string | null,
@@ -69,6 +69,7 @@ class ValidateCode extends React.PureComponent<Props> {
 
 export default translate(
   withCalls<Props>(
-    ['query.contract.codeStorage', { paramName: 'codeHash' }]
+    ['query.contracts.codeStorage', { paramName: 'codeHash' }], // 2.x
+    ['query.contract.codeStorage', { paramName: 'codeHash' }] // 1.x
   )(ValidateCode)
 );

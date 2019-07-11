@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ContractABIArgs } from '@polkadot/types/ContractAbi';
+import { ContractABIFn$Arg } from '@polkadot/api-contract/types';
 import { RawParams } from '@polkadot/ui-params/types';
 
 import React from 'react';
@@ -10,7 +10,8 @@ import UIParams from '@polkadot/ui-params';
 import { getTypeDef, TypeDef } from '@polkadot/types';
 
 type Props = {
-  params?: ContractABIArgs,
+  isDisabled?: boolean,
+  params?: Array<ContractABIFn$Arg>,
   onChange: (values: Array<any>) => void,
   onEnter?: () => void
 };
@@ -36,7 +37,7 @@ export default class Params extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { onEnter } = this.props;
+    const { isDisabled, onEnter } = this.props;
     const { params } = this.state;
 
     if (!params.length) {
@@ -45,6 +46,7 @@ export default class Params extends React.PureComponent<Props, State> {
 
     return (
       <UIParams
+        isDisabled={isDisabled}
         onChange={this.onChange}
         onEnter={onEnter}
         params={params}

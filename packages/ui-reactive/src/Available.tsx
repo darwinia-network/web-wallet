@@ -12,28 +12,23 @@ import { withCalls } from '@polkadot/ui-api';
 
 type Props = BareProps & CallProps & {
   balances_all?: DerivedBalances,
-  ringBalances_freeBalance?: BN,
-  ktonBalances_freeBalance?: BN,
+  kton_freeBalance?: BN,
   children?: React.ReactNode,
   label?: React.ReactNode,
   params?: AccountId | AccountIndex | Address | string | Uint8Array | null,
-  type?: 'ring' | 'kton'
+
 };
 
 export class AvailableDisplay extends React.PureComponent<Props> {
-  render () {
-    const { balances_all, ringBalances_freeBalance,ktonBalances_freeBalance, children, className, label = '', type = 'ring' } = this.props;
-    console.log('balance_ring_tr', ringBalances_freeBalance)
+  render() {
+    const { balances_all, kton_freeBalance, children, className, label = '' } = this.props;
+
     return (
       <div className={className}>
-    
-        {/* {
-          balances_all ?
+        <p>{label}{balances_all ?
           formatBalance(balances_all.availableBalance) :
-          '0'
-        } */}
-        <p>{label}{ringBalances_freeBalance ? formatBalance(ringBalances_freeBalance) : '0'} Ring</p>
-        <p>{label}{ktonBalances_freeBalance ? formatBalance(ktonBalances_freeBalance) : '0'} Kton</p>
+          '0'} Ring</p>
+        <p>{label}{kton_freeBalance ? formatBalance(kton_freeBalance) : '0'} Kton</p>
         {children}
       </div>
     );
@@ -42,6 +37,5 @@ export class AvailableDisplay extends React.PureComponent<Props> {
 
 export default withCalls<Props>(
   ['derive.balances.all', { paramName: 'params' }],
-  ['query.ringBalances.freeBalance', { paramName: 'params' }],
-  ['query.ktonBalances.freeBalance', { paramName: 'params' }]
+  ['query.kton.freeBalance', { paramName: 'params' }]
 )(AvailableDisplay);

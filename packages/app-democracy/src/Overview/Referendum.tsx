@@ -4,20 +4,21 @@
 
 import { DerivedReferendumVote } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
+import { ReferendumInfoExtended } from '@polkadot/api-derive/type';
 import { RawParam } from '@polkadot/ui-params/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { ReferendumInfoExtended } from '@polkadot/api-derive/type';
+import styled from 'styled-components';
 import { Chart, Static } from '@polkadot/ui-app';
-import VoteThreshold from '@polkadot/ui-params/Param/VoteThreshold';
-import { withCalls } from '@polkadot/ui-api';
-import settings from '@polkadot/ui-settings';
 import { formatBalance, formatNumber } from '@polkadot/util';
+import settings from '@polkadot/ui-settings';
+import VoteThreshold from '@polkadot/ui-params/Param/VoteThreshold';
+import { withCalls, withMulti } from '@polkadot/ui-api';
 
 import Item from './Item';
-import Voting from './Voting';
 import translate from '../translate';
+import Voting from './Voting';
 
 const COLORS_YAY = settings.uiTheme === 'substrate'
   ? ['#4d4', '#4e4']
@@ -59,6 +60,7 @@ class Referendum extends React.PureComponent<Props, State> {
     }
 
     const newState: State = democracy_referendumVotesFor.reduce((state, { balance, vote }) => {
+      // @ts-ignore
       if (vote.ltn(0)) {
         state.voteCountYay++;
         state.votedYay = state.votedYay.add(balance);
@@ -88,7 +90,7 @@ class Referendum extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { chain_bestNumber, value } = this.props;
+    const { chain_bestNumber, className, value } = this.props;
 
     if (!chain_bestNumber || value.end.sub(chain_bestNumber).lten(0)) {
       return null;
@@ -96,12 +98,12 @@ class Referendum extends React.PureComponent<Props, State> {
 
     return (
       <Item
+        className={className}
         idNumber={value.index}
         proposal={value.proposal}
         proposalExtra={this.renderExtra()}
       >
         <Voting referendumId={value.index} />
-        {this.renderResults()}
       </Item>
     );
   }
@@ -116,7 +118,8 @@ class Referendum extends React.PureComponent<Props, State> {
     const enactBlock = (democracy_publicDelay || new BN(0)).add(end);
 
     return (
-      <div className='democracy--Referendum-info'>
+      <div>
+        {this.renderResults()}
         <Static label={t('ending at')}>
           {t('block #{{blockNumber}}, {{remaining}} blocks remaining', {
             replace: {
@@ -155,16 +158,16 @@ class Referendum extends React.PureComponent<Props, State> {
 
     return (
       <div className='democracy--Referendum-results chart'>
-        <Chart.Doughnut
+        <Chart.HorizBar
           values={[
             {
               colors: COLORS_YAY,
-              label: `${formatBalance(votedYay)} (${formatNumber(voteCountYay)})`,
+              label: `Yay, ${formatBalance(votedYay)} (${formatNumber(voteCountYay)})`,
               value: votedYay.muln(10000).div(votedTotal).toNumber() / 100
             },
             {
               colors: COLORS_NAY,
-              label: `${formatBalance(votedNay)} (${formatNumber(voteCountNay)})`,
+              label: `Nay, ${formatBalance(votedNay)} (${formatNumber(voteCountNay)})`,
               value: votedNay.muln(10000).div(votedTotal).toNumber() / 100
             }
           ]}
@@ -174,10 +177,20 @@ class Referendum extends React.PureComponent<Props, State> {
   }
 }
 
-export default translate(
+export default withMulti(
+  styled(Referendum as React.ComponentClass<Props>)`
+    .democracy--Referendum-results {
+      margin-bottom: 1em;
+
+      &.chart {
+        text-align: center;
+      }
+    }
+  `,
+  translate,
   withCalls<Props>(
     'derive.chain.bestNumber',
     ['derive.democracy.referendumVotesFor', { paramName: 'idNumber' }],
     'query.democracy.publicDelay'
-  )(Referendum)
+  )
 );

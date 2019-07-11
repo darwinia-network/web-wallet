@@ -31,19 +31,19 @@ type State = {
 class Account extends React.PureComponent<Props> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
       isBackupOpen: false,
-      isEditable: !(keyring.getAccount(props.address).getMeta().isInjected),
+      isEditable: !(keyring.getAccount(props.address).meta.isInjected),
       isForgetOpen: false,
       isPasswordOpen: false,
       isTransferOpen: false
     };
   }
 
-  render () {
+  render() {
     const { address } = this.props;
     const { isEditable } = this.state;
 
@@ -68,15 +68,15 @@ class Account extends React.PureComponent<Props> {
         </AddressRow> */}
 
         <AddressInfo
-            withBalance
-            withExtended
-            value={address}
-          />
+          withBalance
+          withExtended
+          value={address}
+        />
       </Card>
     );
   }
 
-  private renderModals () {
+  private renderModals() {
     const { address } = this.props;
     const { isBackupOpen, isForgetOpen, isPasswordOpen, isTransferOpen } = this.state;
 
@@ -184,7 +184,7 @@ class Account extends React.PureComponent<Props> {
     }
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { t } = this.props;
     const { isEditable } = this.state;
 
@@ -216,12 +216,12 @@ class Account extends React.PureComponent<Props> {
           </>
         )}
         <Button
-        isPrimary
-        label={<><Icon name='paper plane' /> {t('send')}</>}
-        onClick={this.toggleTransfer}
-        size='small'
-        tooltip={t('Send funds from this account')}
-      />
+          isPrimary
+          label={<><Icon name='paper plane' /> {t('send')}</>}
+          onClick={this.toggleTransfer}
+          size='small'
+          tooltip={t('Send funds from this account')}
+        />
       </div>
     );
   }

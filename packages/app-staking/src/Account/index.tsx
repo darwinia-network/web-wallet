@@ -10,10 +10,11 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 import React from 'react';
-import { AddressInfo, AddressMini, AddressRow, Button, Card, TxButton, AddressInfoStaking } from '@polkadot/ui-app';
+import { AddressInfo, AddressMini, AddressRow, Button, Card, TxButton, Menu, AddressInfoStaking } from '@polkadot/ui-app';
 import { withCalls } from '@polkadot/ui-api';
 import { formatBalance, formatNumber } from '@polkadot/util';
 import BN from 'bn.js';
+import { Popup } from 'semantic-ui-react';
 
 import styled from 'styled-components'
 import Bond from './Bond';
@@ -21,8 +22,13 @@ import BondExtra from './BondExtra';
 import Nominating from './Nominating';
 import SessionKey from './SessionKey';
 import translate from '../translate';
+import SetControllerAccount from './SetControllerAccount';
+import SetRewardDestination from './SetRewardDestination';
+import SetSessionAccount from './SetSessionAccount';
 import Unbond from './Unbond';
 import Validating from './Validating';
+import Validate from './Validate';
+
 
 type Props = ApiProps & I18nProps & {
   accountId: string,
@@ -33,20 +39,28 @@ type Props = ApiProps & I18nProps & {
   balances_all?: DerivedBalances,
   staking_info?: DerivedStaking,
   stashOptions: Array<KeyringSectionOption>,
-  ktonBalances_freeBalance: BN
+  kton_freeBalance: BN
 };
 
 type State = {
   controllerId: string | null,
+  destination: number,
   isActiveController: boolean,
   isActiveSession: boolean,
   isActiveStash: boolean,
   isBondOpen: boolean,
+  isSetControllerAccountOpen: boolean,
+  isSetRewardDestinationOpen: boolean,
+  isSetSessionAccountOpen: boolean,
+  isSettingPopupOpen: boolean,
+  isStashNominating: boolean,
+  isStashValidating: boolean,
   isBondExtraOpen: boolean,
   isNominateOpen: boolean,
   isSessionKeyOpen: boolean,
   isValidatingOpen: boolean,
   isUnbondOpen: boolean,
+  isValidateOpen: boolean,
   nominators?: Array<AccountId>,
   sessionId: string | null,
   stakers?: Exposure,
@@ -123,22 +137,31 @@ const StyledWrapper = styled.div`
       border: 0;
       border-radius: 2px;
       margin-top: 20px;
+      cursor: pointer;
     }
   }
 `
 
 class Account extends React.PureComponent<Props, State> {
   state: State = {
+    destination: 0,
     isActiveController: false,
     isActiveSession: false,
-    isActiveStash: false,
+    isActiveStash: true,
     controllerId: null,
     isBondOpen: false,
     isBondExtraOpen: false,
     isSessionKeyOpen: false,
     isNominateOpen: false,
+    isSetControllerAccountOpen: false,
+    isSettingPopupOpen: false,
+    isSetRewardDestinationOpen: false,
+    isSetSessionAccountOpen: false,
     isValidatingOpen: false,
     isUnbondOpen: false,
+    isValidateOpen: false,
+    isStashNominating: false,
+    isStashValidating: false,
     sessionId: null,
     stashId: null
   };
@@ -148,10 +171,11 @@ class Account extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const { accountId, controllerId, nextSessionId, nominators, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
+    const { accountId, controllerId, nextSessionId, nominators,rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
 
     return {
       controllerId: toIdString(controllerId),
+      destination: rewardDestination && rewardDestination.toNumber(),
       isActiveController: accountId.eq(controllerId),
       isActiveSession: accountId.eq(nextSessionId),
       isActiveStash: accountId.eq(stashId),
@@ -165,7 +189,7 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accountId, filter, ktonBalances_freeBalance } = this.props;
+    const { accountId, filter, kton_freeBalance } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId } = this.state;
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
@@ -185,13 +209,17 @@ class Account extends React.PureComponent<Props, State> {
           {this.renderSessionKey()}
           {this.renderUnbond()}
           {this.renderValidating()}
+          {this.renderSetValidatorPrefs()}
+          {/* {this.renderNominate()} */}
+          {this.renderSetControllerAccount()}
+          {this.renderSetRewardDestination()}
+          {this.renderSetSessionAccount()}
           <div className="ui--address-box">
             <AddressRow
               buttons={this.renderButtons()}
               value={accountId}
               className="ui--AddressRow"
             ></AddressRow>
-
           <AddressInfoStaking
             value={accountId}
             withBalance={true}
@@ -202,11 +230,13 @@ class Account extends React.PureComponent<Props, State> {
           <h1>Start a KTON staking</h1>
           <p>note: </p>
           <p>
-            1. Please make sure you have 2 available accounts. Add account<br />
+            1. Please make sure you have 2 available accounts. Add account.<br />
             2. Please make sure that there are a few ring in the account as gas fee.<br />
             3. After the kton is bonded, you can apply to become a verifier or vote for the verifier and get earnings from it.
             </p>
-          <button>Staking now</button>
+          <button 
+            onClick={this.toggleBond}
+          >Staking now</button>
         </div>}
         {/* <AddressRow
           buttons={this.renderButtons()}
@@ -226,6 +256,75 @@ class Account extends React.PureComponent<Props, State> {
         </AddressRow> */}
 
       </StyledWrapper >
+    );
+  }
+
+  private renderSetValidatorPrefs () {
+    const { controllerId, isValidateOpen, stashId, validatorPrefs } = this.state;
+
+    if (!controllerId || !validatorPrefs || !stashId) {
+      return null;
+    }
+
+    return (
+      <Validate
+        controllerId={controllerId}
+        isOpen={isValidateOpen}
+        onClose={this.toggleValidate}
+        stashId={stashId}
+        validatorPrefs={validatorPrefs}
+      />
+    );
+  }
+
+  private renderSetControllerAccount () {
+    const { controllerId, isSetControllerAccountOpen, isStashValidating, stashId } = this.state;
+
+    if (!isSetControllerAccountOpen || !stashId) {
+      return null;
+    }
+
+    return (
+      <SetControllerAccount
+        defaultControllerId={controllerId}
+        isValidating={isStashValidating}
+        onClose={this.toggleSetControllerAccount}
+        stashId={stashId}
+      />
+    );
+  }
+
+  private renderSetRewardDestination () {
+    const { controllerId, destination, isSetRewardDestinationOpen } = this.state;
+    console.log('destination', destination)
+    if (!isSetRewardDestinationOpen || !controllerId) {
+      return null;
+    }
+
+    return (
+      <SetRewardDestination
+        controllerId={controllerId}
+        defaultDestination={destination}
+        onClose={this.toggleSetRewardDestination}
+      />
+    );
+  }
+
+  private renderSetSessionAccount () {
+    const { controllerId, isSetSessionAccountOpen, stashId, sessionId } = this.state;
+
+    if (!controllerId || !stashId) {
+      return null;
+    }
+
+    return (
+      <SetSessionAccount
+        controllerId={controllerId}
+        isOpen={isSetSessionAccountOpen}
+        onClose={this.toggleSetSessionAccount}
+        sessionId={sessionId}
+        stashId={stashId}
+      />
     );
   }
 
@@ -409,7 +508,7 @@ class Account extends React.PureComponent<Props, State> {
 
   private renderButtons() {
     const { accountId, balances_all, t } = this.props;
-    const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs } = this.state;
+    const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen } = this.state;
     const buttons = [];
 
     if (isActiveStash) {
@@ -418,7 +517,8 @@ class Account extends React.PureComponent<Props, State> {
       if (balances_all && stakingLedger && stakingLedger.total && (balances_all.freeBalance.gt(stakingLedger.total))) {
         buttons.push(
           <Button
-            isPrimary
+            isBasic={true}
+            isSecondary={true}
             key='bond'
             onClick={this.toggleBondExtra}
             label={t('Bond Additional')}
@@ -429,14 +529,32 @@ class Account extends React.PureComponent<Props, State> {
       // don't show the `unbond` button if there's nothing to unbond
       // staking_ledger.active gives the amount that can be unbonded (total - what's being unlocked).
       if (stakingLedger && stakingLedger.active && stakingLedger.active.gtn(0)) {
-        buttons.length && buttons.push(<Button.Or key='bondAdditional.or' />);
+        // buttons.length && buttons.push(<Button.Or key='bondAdditional.or' />);
         buttons.push(
           <Button
-            isNegative
+            isBasic={true}
+            isSecondary={true}
             key='unbond'
             onClick={this.toggleUnbond}
             label={t('Unbond')}
           />
+        );
+        buttons.push(
+          <Popup
+            key='settings'
+            onClose={this.toggleSettingPopup}
+            open={isSettingPopupOpen}
+            position='bottom left'
+            trigger={
+              <Button
+                icon='setting'
+                onClick={this.toggleSettingPopup}
+                size='tiny'
+              />
+            }
+          >
+            {this.renderPopupMenu()}
+          </Popup>
         );
       }
     } else if (isActiveController) {
@@ -462,7 +580,8 @@ class Account extends React.PureComponent<Props, State> {
         if (!sessionId) {
           buttons.push(
             <Button
-              isPrimary
+              isBasic={true}
+              isSecondary={true}
               key='session'
               onClick={this.toggleSessionKey}
               label={t('Set Session Key')}
@@ -471,29 +590,35 @@ class Account extends React.PureComponent<Props, State> {
         } else {
           buttons.push(
             <Button
-              isPrimary
+              isBasic={true}
+              isSecondary={true}
               key='validate'
               onClick={this.toggleValidating}
               label={t('Validate')}
             />
           );
         }
-
-        buttons.push(<Button.Or key='nominate.or' />);
         buttons.push(
           <Button
-            isPrimary
+            isBasic={true}
+            isSecondary={true}
             key='nominate'
             onClick={this.toggleNominate}
             label={t('Nominate')}
           />
         );
+
+        
       }
+
+   
+
     } else {
       // we have nothing here, show the bond to get started
       buttons.push(
         <Button
-          isPrimary
+          isBasic={true}
+          isSecondary={true}
           key='bond'
           onClick={this.toggleBond}
           label={t('Bond Funds')}
@@ -501,10 +626,59 @@ class Account extends React.PureComponent<Props, State> {
       );
     }
 
+    
+
     return (
       <Button.Group>
         {buttons}
       </Button.Group>
+    );
+  }
+
+  private renderPopupMenu () {
+    const { balances_all, t } = this.props;
+    const { isStashNominating, isStashValidating, sessionId } = this.state;
+
+    // only show a "Bond Additional" button if this stash account actually doesn't bond everything already
+    // staking_ledger.total gives the total amount that can be slashed (any active amount + what is being unlocked)
+    const canBondExtra = balances_all && balances_all.availableBalance.gtn(0);
+
+    return (
+      <Menu
+        vertical
+        text
+        onClick={this.toggleSettingPopup}
+      >
+        {canBondExtra &&
+          <Menu.Item onClick={this.toggleBondExtra}>
+            {t('Bond more funds')}
+          </Menu.Item>
+        }
+        <Menu.Item onClick={this.toggleUnbond}>
+          {t('Unbond funds')}
+        </Menu.Item>
+        <Menu.Item onClick={this.toggleSetControllerAccount}>
+          {t('Change controller account')}
+        </Menu.Item>
+        <Menu.Item onClick={this.toggleSetRewardDestination}>
+          {t('Change reward destination')}
+        </Menu.Item>
+        {isStashValidating &&
+          <Menu.Item onClick={this.toggleValidate}>
+            {t('Change validator preferences')}
+          </Menu.Item>
+        }
+        {sessionId &&
+          <Menu.Item onClick={this.toggleSetSessionAccount}>
+            {t('Change session account')}
+          </Menu.Item>
+        }
+        {isStashNominating &&
+          <Menu.Item onClick={this.toggleNominate}>
+            {t('Change nominee(s)')}
+          </Menu.Item>
+        }
+      </Menu>
     );
   }
 
@@ -532,6 +706,31 @@ class Account extends React.PureComponent<Props, State> {
     }));
   }
 
+
+  private toggleSetControllerAccount = () => {
+    this.setState(({ isSetControllerAccountOpen }) => ({
+      isSetControllerAccountOpen: !isSetControllerAccountOpen
+    }));
+  }
+
+  private toggleSetRewardDestination = () => {
+    this.setState(({ isSetRewardDestinationOpen }) => ({
+      isSetRewardDestinationOpen: !isSetRewardDestinationOpen
+    }));
+  }
+
+  private toggleSetSessionAccount = () => {
+    this.setState(({ isSetSessionAccountOpen }) => ({
+      isSetSessionAccountOpen: !isSetSessionAccountOpen
+    }));
+  }
+
+  private toggleSettingPopup = () => {
+    this.setState(({ isSettingPopupOpen }) => ({
+      isSettingPopupOpen: !isSettingPopupOpen
+    }));
+  }
+
   private toggleUnbond = () => {
     this.setState(({ isUnbondOpen }) => ({
       isUnbondOpen: !isUnbondOpen
@@ -543,6 +742,12 @@ class Account extends React.PureComponent<Props, State> {
       isValidatingOpen: !isValidatingOpen
     }));
   }
+
+  private toggleValidate = () => {
+    this.setState(({ isValidateOpen }) => ({
+      isValidateOpen: !isValidateOpen
+    }));
+  }
 }
 
 export default translate(
@@ -550,7 +755,6 @@ export default translate(
     ['derive.staking.info', { paramName: 'accountId' }],
     'query.staking.recentlyOffline',
     ['derive.balances.all', { paramName: 'accountId' }],
-    ['query.ringBalances.freeBalance', { paramName: 'accountId' }],
-    ['query.ktonBalances.freeBalance', { paramName: 'accountId' }],
+    ['query.kton.freeBalance', { paramName: 'accountId' }],
   )(Account)
 );

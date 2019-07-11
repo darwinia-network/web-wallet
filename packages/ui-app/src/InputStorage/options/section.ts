@@ -7,9 +7,11 @@ import { DropdownOptions } from '../../util/types';
 import ApiPromise from '@polkadot/api/promise';
 
 export default function createOptions (api: ApiPromise): DropdownOptions {
+
   return Object
     .keys(api.query)
     .sort()
+    .filter((name) => {return Object.keys(api.query[name]).length})
     .map((name) => ({
       text: name,
       value: name

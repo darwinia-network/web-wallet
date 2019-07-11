@@ -17,13 +17,14 @@ type Props = I18nProps & {
 
 class Forgetting extends React.PureComponent<Props> {
   render () {
-    const { t } = this.props;
+    const { t, onClose } = this.props;
 
     return (
       <Modal
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        onClose={onClose}
       >
         <Modal.Header>{t('Confirm account removal')}</Modal.Header>
         {this.renderContent()}
@@ -39,15 +40,15 @@ class Forgetting extends React.PureComponent<Props> {
       <Modal.Actions>
         <Button.Group>
           <Button
-            isNegative
-            onClick={onClose}
-            label={t('Cancel')}
-          />
-          <Button.Or />
-          <Button
             isPrimary
             onClick={doForget}
             label={t('Forget')}
+          />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            onClick={onClose}
+            label={t('Cancel')}
           />
         </Button.Group>
       </Modal.Actions>

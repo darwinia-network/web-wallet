@@ -157,9 +157,9 @@ class App extends React.PureComponent<Props, State> {
 
   private getAccountMain = (): string | undefined => {
     const AccountMain = store.get('accountMain')
-    console.log(AccountMain)
+
     const { allAccounts } = this.props;
-    if (AccountMain) {
+    if (AccountMain && allAccounts && allAccounts[AccountMain]) {
       return AccountMain
     } else if (allAccounts) {
       return allAccounts && Object.keys(allAccounts)[0]

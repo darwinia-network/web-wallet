@@ -25,6 +25,7 @@ export type RawParam$OnEnter = () => void;
 export type RawParams = Array<RawParam>;
 
 export type BaseProps = BareProps & {
+  // @ts-ignore
   defaultValue: RawParam,
   name?: string,
   onChange?: RawParam$OnChange,
@@ -36,7 +37,7 @@ export type Props = BaseProps & {
   isDisabled?: boolean,
   isError?: boolean,
   isReadOnly?: boolean,
-  label: string,
+  label?: React.ReactNode,
   withLabel?: boolean
 };
 

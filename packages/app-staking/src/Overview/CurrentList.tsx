@@ -54,10 +54,10 @@ class CurrentList extends React.PureComponent<Props, State> {
       <div>
         
         <Columar className='validator--ValidatorsList'>
-          <Column header={t('validators')}>
+          <Column headerText={t('validators')}>
             {this.renderColumn(current, t('validator (stash)'))}
           </Column>
-          <Column header={t('next up')}>
+          <Column headerText={t('next up')}>
             {this.renderColumn(next, t('intention (stash)'))}
           </Column>
         </Columar>

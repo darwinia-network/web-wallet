@@ -79,13 +79,13 @@ export default class Apps extends React.Component<Props, State> {
 
     return (
       <ThemeProvider theme={{ theme: settings.uiTheme }}>
-        <Wrapper className={`apps-Wrapper ${isCollapsed ? 'collapsed' : 'expanded'} ${isMenu ? 'fixed' : ''} ${menuOpen ? 'menu-open' : ''} theme--${settings.uiTheme}`}>
+        <Wrapper className={`apps-Wrapper ${false ? 'collapsed' : 'expanded'} ${false ? 'fixed' : ''} ${true ? 'menu-open' : ''} theme--${settings.uiTheme}`}>
           {this.renderMenuBg()}
           <SideBar
             collapse={this.collapse}
             handleResize={this.handleResize}
-            menuOpen={menuOpen}
-            isCollapsed={isCollapsed}
+            menuOpen={true}
+            isCollapsed={false}
             toggleMenu={this.toggleMenu}
           />
           <Signer>

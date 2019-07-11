@@ -5,69 +5,75 @@
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = {
-  children: React.ReactNode,
-  className?: string,
-  header: React.ReactNode
-};
+import Collection, { CollectionProps, CollectionState, collectionStyles } from './Collection';
 
-class Column extends React.PureComponent<Props> {
-  render() {
-    const { children, className, header } = this.props;
+import translate from './translate';
+
+type Props = CollectionProps;
+
+type State = CollectionState;
+
+class Column extends Collection<Props, State> {
+  render () {
+    const { className } = this.props;
+    const { isEmpty } = this.state;
 
     return (
       <div className={`ui--Column ${className}`}>
-        <h1 className='titleRow'>{header}</h1>
-        <article className='container'>
-          {children}
-        </article>
+        {this.renderHeader()}
+        {isEmpty ?
+          this.renderEmpty() :
+          this.renderCollection()
+        }
       </div>
     );
   }
+
+  renderCollection () {
+    const { children } = this.props;
+    return (
+      <article className='container'>
+        {children}
+      </article>
+    );
+  }
+
+  // renderEmpty () {
+  //   const { emptyText } = this.props;
+  //   return (
+  //     <article className='container'>
+  //       {emptyText}
+  //     </article>
+  //   );
+  // }
 }
 
-export default styled(Column)`
-  box-sizing: border-box;
-  flex: 1 1;
-  margin: 0;
-  padding: 0.5rem;
+export default translate(
+  styled(Column as React.ComponentClass<Props, State>)`
+    ${collectionStyles}
 
-  .titleRow {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    font-size: 16px;
-    color: #302B3C;
-  }
-
-  .titleRow::before {
-    content: ' ';
-    display: inline-block;
-    background-color: #000;
-    width: 6px;
-    height: 22px;
-    margin-right: 0.5rem;
-  }
-    
-  .container {
+    box-sizing: border-box;
+    flex: 1 1;
     margin: 0;
-    padding: 0;
+    padding: 0.5rem;
 
-    article {
-      border: none;
+    .container {
       margin: 0;
+      padding: 0;
+
+      article {
+        border: none;
+        margin: 0;
+      }
+
+      article+article {
+        border-top: 1px solid #f2f2f2;
+      }
     }
 
-    article+article {
-      border-top: 1px solid #f2f2f2;
+    @media (min-width: 1025px) {
+      max-width: 50%;
+      min-width: 50%;
     }
-  }
-
-  @media (min-width: 1025px) {
-    max-width: 50%;
-    min-width: 50%;
-  }
-`;
+  `
+);

@@ -51,16 +51,11 @@ class Unbond extends TxComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         <Modal.Actions>
           <Button.Group>
-            <Button
-              isNegative
-              onClick={onClose}
-              label={t('Cancel')}
-            />
-            <Button.Or />
             <TxButton
               accountId={controllerId}
               isDisabled={!canSubmit}
@@ -70,6 +65,12 @@ class Unbond extends TxComponent<Props, State> {
               params={[maxUnbond]}
               tx='staking.unbond'
               ref={this.button}
+            />
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              onClick={onClose}
+              label={t('Cancel')}
             />
           </Button.Group>
         </Modal.Actions>
@@ -83,9 +84,6 @@ class Unbond extends TxComponent<Props, State> {
 
     return (
       <>
-        <Modal.Header>
-          {t('Unbond')}
-        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'

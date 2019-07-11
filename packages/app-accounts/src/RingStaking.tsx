@@ -32,7 +32,7 @@ type State = {
 class AccountsApp extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const { allAccounts = {}, t } = props;
@@ -55,14 +55,14 @@ class AccountsApp extends React.PureComponent<Props, State> {
     };
   }
 
-  static showTabsState () {
+  static showTabsState() {
 
     return {
       hidden: []
     };
   }
 
-  static hideTabsState () {
+  static hideTabsState() {
     // Hide vanity as well - since the route order and matching changes, the
     // /create/:seed route become problematic, so don't allow that option
     return {
@@ -70,7 +70,7 @@ class AccountsApp extends React.PureComponent<Props, State> {
     };
   }
 
-  static getDerivedStateFromProps ({ allAccounts = {} }: Props, { hidden }: State) {
+  static getDerivedStateFromProps({ allAccounts = {} }: Props, { hidden }: State) {
     const hasAddresses = Object.keys(allAccounts).length !== 0;
 
     if (hidden.length === 0) {
@@ -84,18 +84,18 @@ class AccountsApp extends React.PureComponent<Props, State> {
       : null;
   }
 
-  render () {
-    const { basePath ,onStatusChange} = this.props;
+  render() {
+    const { basePath, onStatusChange, allAccounts } = this.props;
     const { hidden, tabs } = this.state;
-
+    console.log(111, allAccounts)
     return (
       <main className='accounts--App'>
-        <Overview onStatusChange={onStatusChange}/>
+        {allAccounts && <Overview onStatusChange={onStatusChange} allAccounts={allAccounts}/>}
       </main>
     );
   }
 
-  private renderComponent (Component: React.ComponentType<ComponentProps>) {
+  private renderComponent(Component: React.ComponentType<ComponentProps>) {
     return ({ match }: LocationProps) => {
       const { basePath, location, onStatusChange } = this.props;
 

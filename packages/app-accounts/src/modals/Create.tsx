@@ -93,7 +93,7 @@ function rawValidate(seed: string): boolean {
 function addressFromSeed(phrase: string, derivePath: string, pairType: KeypairType): string {
   return keyring
     .createFromUri(`${phrase.trim()}${derivePath}`, {}, pairType)
-    .address();
+    .address;
 }
 
 class Create extends React.PureComponent<Props, State> {
@@ -125,6 +125,7 @@ class Create extends React.PureComponent<Props, State> {
       <Modal
         dimmer='inverted'
         open
+        onClose={this.onDiscard}
       >
         {/*<Modal.Header>{t('Add an account via seed')}</Modal.Header>*/}
         {this.renderModal()}
@@ -271,6 +272,7 @@ class Create extends React.PureComponent<Props, State> {
       <Modal
         dimmer='inverted'
         open={showWarning}
+        onClose={this.onHideWarning}
       >
         <Modal.Header>
           {t('Important notice')}
@@ -288,15 +290,15 @@ class Create extends React.PureComponent<Props, State> {
         <Modal.Actions>
           <Button.Group>
             <Button
-              isNegative
-              label={t('Cancel')}
-              onClick={this.onHideWarning}
-            />
-            <Button.Or/>
-            <Button
               isPrimary
               label={t('Create and backup account')}
               onClick={this.onCommit}
+            />
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              label={t('Cancel')}
+              onClick={this.onHideWarning}
             />
           </Button.Group>
         </Modal.Actions>
@@ -431,13 +433,13 @@ class Create extends React.PureComponent<Props, State> {
       const {json, pair} = keyring.addUri(`${seed}${derivePath}`, password, {name, tags}, pairType);
       const blob = new Blob([JSON.stringify(json)], {type: 'application/json; charset=utf-8'});
 
-      FileSaver.saveAs(blob, `${pair.address()}.json`);
+      FileSaver.saveAs(blob, `${pair.address}.json`);
 
-      status.account = pair.address();
+      status.account = pair.address;
       status.status = pair ? 'success' : 'error';
       status.message = t('created account');
 
-      InputAddress.setLastValue('account', pair.address());
+      InputAddress.setLastValue('account', pair.address);
     } catch (error) {
       status.status = 'error';
       status.message = error.message;

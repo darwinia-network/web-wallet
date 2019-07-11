@@ -25,7 +25,7 @@ type Props = ApiProps & I18nProps & {
   recipientId?: string,
   senderId?: string,
   system_accountNonce?: BN,
-  type: 'ring' | 'kton'
+  type: 'balances' | 'kton'
 };
 
 type State = {
@@ -97,13 +97,14 @@ class Transfer extends React.PureComponent<Props> {
   }
 
   render() {
-    const { t } = this.props;
+    const { t, onClose } = this.props;
 
     return (
       <Modal
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        onClose={onClose}
       >
         <Modal.Header>{t('Send funds')}</Modal.Header>
         {this.renderContent()}
@@ -174,7 +175,7 @@ class Transfer extends React.PureComponent<Props> {
             onChange={this.onChangeFrom}
             type='account'
           />
-          <div className='balance'><Available label={available} params={senderId} type={type} /></div>
+          <div className='balance'><Available label={available} params={senderId} /></div>
           <InputAddress
             defaultValue={propRecipientId}
             help={t('Select a contact or paste the address you want to send funds to.')}
@@ -183,7 +184,7 @@ class Transfer extends React.PureComponent<Props> {
             onChange={this.onChangeTo}
             type='all'
           />
-          <div className='balance'><Available label={available} params={recipientId} type={type} /></div>
+          <div className='balance'><Available label={available} params={recipientId} /></div>
           <InputBalance
             help={t('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 mili is equivalent to sending 0.001.')}
             isError={!hasAvailable}

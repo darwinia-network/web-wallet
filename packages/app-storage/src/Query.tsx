@@ -2,15 +2,16 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { StorageFunction } from '@polkadot/types/primitive/StorageKey';
+import { StorageEntry } from '@polkadot/types/primitive/StorageKey';
 import { I18nProps } from '@polkadot/ui-app/types';
 import { QueryTypes, StorageModuleQuery } from './types';
 
 import React from 'react';
+import styled from 'styled-components';
 import { Compact } from '@polkadot/types';
 import { Button, Labelled } from '@polkadot/ui-app';
-import valueToText from '@polkadot/ui-params/valueToText';
 import { withCallDiv } from '@polkadot/ui-api';
+import valueToText from '@polkadot/ui-params/valueToText';
 import { isU8a, u8aToHex, u8aToString } from '@polkadot/util';
 
 import translate from './translate';
@@ -56,6 +57,7 @@ class Query extends React.PureComponent<Props, State> {
         paramValid: true,
         params: [key, ...values]
       });
+
       const Component = renderHelper(
         // By default we render a simple div node component with the query results in it
         (value: any) => valueToText(type, value, true, true),
@@ -84,7 +86,7 @@ class Query extends React.PureComponent<Props, State> {
     };
   }
 
-  static getDerivedStateFromProps ({ value }: Props): State | null {
+  static getDerivedStateFromProps ({ value }: Props) {
     const Component = Query.getCachedComponent(value).Component;
     const inputs: Array<React.ReactNode> = isU8a(value.key)
       ? []
@@ -104,7 +106,7 @@ class Query extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { value } = this.props;
+    const { className, value } = this.props;
     const { Component } = this.state;
     const { key } = value;
     const type = isU8a(key)
@@ -116,7 +118,7 @@ class Query extends React.PureComponent<Props, State> {
       );
 
     return (
-      <div className='storage--Query storage--actionrow'>
+      <div className={`storage--Query storage--actionrow ${className}`}>
         <div className='storage--actionrow-value'>
           <Labelled
             label={
@@ -169,7 +171,7 @@ class Query extends React.PureComponent<Props, State> {
     return buttons;
   }
 
-  private keyToName (key: Uint8Array | StorageFunction): string {
+  private keyToName (key: Uint8Array | StorageEntry): string {
     if (isU8a(key)) {
       const u8a = Compact.stripLengthPrefix(key);
 
@@ -206,4 +208,16 @@ class Query extends React.PureComponent<Props, State> {
   }
 }
 
-export default translate(Query);
+export default translate(styled(Query as React.ComponentClass<Props>)`
+  margin-bottom: 0.25em;
+
+  .ui.disabled.dropdown.selection {
+    color: #aaa;
+    opacity: 1;
+  }
+
+  .ui--IdentityIcon {
+    margin: -10px 0;
+    vertical-align: middle;
+  }
+`);

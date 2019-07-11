@@ -8,13 +8,27 @@ import React from 'react';
 import SUIModal from 'semantic-ui-react/dist/commonjs/modules/Modal/Modal';
 import settings from '@polkadot/ui-settings';
 
+import styled from 'styled-components'
 import { classes } from './util';
+import ModalCloseIcon from './styles/icon/modal-close.svg'
+import { noop } from 'rxjs';
 
 type Props = BareProps & {
   children: React.ReactNode,
   [index: string]: any
 };
 
+const Wrapper = styled.div`
+ 
+  img{
+    width: 48px;
+    height: 48px;
+    top: 0px;
+    position: absolute;
+    right: -64px;
+    cursor: pointer;
+  }
+`
 export default class Modal extends React.PureComponent<Props> {
   static Actions = SUIModal.Actions;
   static Content = SUIModal.Content;
@@ -22,13 +36,15 @@ export default class Modal extends React.PureComponent<Props> {
   static Description = SUIModal.Description;
 
   render () {
-    const { className } = this.props;
-
+    const { className, children, onClose } = this.props;
     return (
       <SUIModal
         {...this.props}
         className={classes(`theme--${settings.uiTheme}`, 'ui--Modal', className)}
-      />
+      >
+        {children}
+        <Wrapper><img onClick={onClose || noop} src={ModalCloseIcon}/></Wrapper>
+      </SUIModal>
     );
   }
 }

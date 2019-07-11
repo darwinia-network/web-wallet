@@ -25,8 +25,8 @@ type Props = ApiProps & I18nProps & {
   recipientId?: string,
   senderId?: string,
   system_accountNonce?: BN,
-  type: 'ring' | 'kton',
-  ktonBalances_locks: Array<BN>, ringBalances_locks: Array<BN>,  ktonBalances_freeBalance: BN, ringBalances_freeBalance: BN,
+  type: 'balances' | 'kton',
+  kton_locks: Array<BN>, balances_locks: Array<BN>,  kton_freeBalance: BN, balances_freeBalance: BN,
 };
 
 type State = {
@@ -98,10 +98,11 @@ class TransferDarwinia extends React.PureComponent<Props> {
   }
 
   render() {
-    const { t } = this.props;
+    const { t, onClose } = this.props;
 
     return (
       <Modal
+        onClose={onClose}
         className='app--accounts-Modal'
         dimmer='inverted'
         open
@@ -114,10 +115,11 @@ class TransferDarwinia extends React.PureComponent<Props> {
 
   private nextState(newState: Partial<State>): void {
     this.setState((prevState: State): State => {
-      const { api } = this.props;
+      const { api, type } = this.props;
+
       const { amount = prevState.amount, recipientId = prevState.recipientId, hasAvailable = prevState.hasAvailable, maxBalance = prevState.maxBalance, senderId = prevState.senderId } = newState;
       const extrinsic = recipientId && senderId
-        ? api.tx.balances.transfer(recipientId, amount)
+        ? api.tx[type].transfer(recipientId, amount)
         : null;
 
       return {
@@ -174,7 +176,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
             onChange={this.onChangeFrom}
             type='account'
           />
-          <div className='balance'><Available label={available} params={senderId} type={type} /></div>
+          <div className='balance'><Available label={available} params={senderId}/></div>
           <InputAddress
             defaultValue={propRecipientId}
             help={t('Select a contact or paste the address you want to send funds to.')}
@@ -183,7 +185,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
             onChange={this.onChangeTo}
             type='all'
           />
-          <div className='balance'><Available label={available} params={recipientId} type={type} /></div>
+          <div className='balance'><Available label={available} params={recipientId} /></div>
           <InputBalance
             help={t('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 mili is equivalent to sending 0.001.')}
             isError={!hasAvailable}
@@ -192,12 +194,12 @@ class TransferDarwinia extends React.PureComponent<Props> {
             onChange={this.onChangeAmount}
             withMax
           />
-          <Checks
+          {/* <Checks
             accountId={senderId}
             extrinsic={extrinsic}
             isSendable
             onChange={this.onChangeFees}
-          />
+          /> */}
         </Wrapper>
       </Modal.Content>
     );
@@ -220,7 +222,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
   }
 
   private setMaxBalance = async () => {
-    const { api, balances_fees = ZERO_FEES, ktonBalances_locks, ringBalances_locks,  ktonBalances_freeBalance, ringBalances_freeBalance, type } = this.props;
+    const { api, balances_fees = ZERO_FEES, kton_locks, balances_locks,  kton_freeBalance, balances_freeBalance, type } = this.props;
     const { senderId, recipientId } = this.state;
 
     if (!senderId || !recipientId) {
@@ -233,8 +235,12 @@ class TransferDarwinia extends React.PureComponent<Props> {
     // not really returning an actual `class implements Codec`
     // (if casting to DerivedBalance it would be `as any as DerivedBalance`)
     const accountNonce = await api.query.system.accountNonce(senderId) as Index;
-    const senderBalance = ZERO;
-    const recipientBalance = ZERO
+    const senderBalance = (await api.derive.balances.all(senderId) as any).availableBalance;
+    const recipientBalance = (await api.derive.balances.all(recipientId) as any).availableBalance;
+
+    // const accountNonce = await api.query.system.accountNonce(senderId) as Index;
+    // const senderBalance = ZERO;
+    // const recipientBalance = ZERO
 
     let prevMax = new BN(0);
     let maxBalance = new BN(1);
@@ -242,7 +248,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
 
     while (!prevMax.eq(maxBalance)) {
       prevMax = maxBalance;
-      extrinsic = api.tx.ring.transfer(recipientId, prevMax);
+      extrinsic = api.tx[type].transfer(recipientId, prevMax);
 
       const txLength = calcSignatureLength(extrinsic, accountNonce);
       const fees = transactionBaseFee
@@ -252,23 +258,22 @@ class TransferDarwinia extends React.PureComponent<Props> {
 
       let _ktonBalances_locks = new BN(0)
 
-      if (ktonBalances_locks && ktonBalances_locks.length) {
+      if (kton_locks && kton_locks.length) {
         // @ts-ignore
-        _ktonBalances_locks = ktonBalances_locks[0].amount
+        _ktonBalances_locks = kton_locks[0].amount
       }
       
-      let _ringBalances_locks = new BN(0)
+      let _balances_locks = new BN(0)
 
-      if (ringBalances_locks && ringBalances_locks.length) {
+      if (balances_locks && balances_locks.length) {
         // @ts-ignore
-        _ringBalances_locks = ringBalances_locks[0].amount
+        _balances_locks = balances_locks[0].amount
       }
-      // console.log(111111111, ktonBalances_freeBalance, _ktonBalances_locks)
 
       if(type === 'kton') {
-        maxBalance = new BN(ktonBalances_freeBalance).sub(_ktonBalances_locks);
+        maxBalance = new BN(kton_freeBalance).sub(_ktonBalances_locks);
       } else {
-        maxBalance = new BN(ringBalances_freeBalance).sub(_ringBalances_locks);
+        maxBalance = senderBalance.sub(fees);
       }
     }
 
@@ -285,9 +290,9 @@ export default withMulti(
   withApi,
   withCalls<Props>(
     'derive.balances.fees',
-    ['query.ktonBalances.locks', { paramName: 'senderId' }],
-    ['query.ringBalances.locks', { paramName: 'senderId' }],
-    ['query.ktonBalances.freeBalance', { paramName: 'senderId' }],
-    ['query.ringBalances.freeBalance', { paramName: 'senderId' }]
+    ['query.kton.locks', { paramName: 'senderId' }],
+    ['query.balances.locks', { paramName: 'senderId' }],
+    ['query.kton.freeBalance', { paramName: 'senderId' }],
+    ['query.balances.freeBalance', { paramName: 'senderId' }]
   )
 );

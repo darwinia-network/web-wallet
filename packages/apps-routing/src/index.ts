@@ -55,7 +55,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     sudo,
     null,
     // settings,
-    toolbox,
+    // toolbox,
     // js,
     template
   );

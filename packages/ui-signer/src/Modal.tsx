@@ -16,7 +16,6 @@ import { web3FromSource } from '@polkadot/extension-dapp';
 import { Button, Modal } from '@polkadot/ui-app';
 import { withApi, withMulti, withObservable } from '@polkadot/ui-api';
 import keyring from '@polkadot/ui-keyring';
-import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isFunction } from '@polkadot/util';
 import { format } from '@polkadot/util/logger';
 
@@ -132,8 +131,8 @@ class Signer extends React.PureComponent<Props, State> {
             }
           />
           <Button
-            isBasic={true}
-            isSecondary={true}
+            isBasic
+            isSecondary
             onClick={this.onCancel}
             tabIndex={3}
             label={t('Cancel')}
@@ -192,7 +191,7 @@ class Signer extends React.PureComponent<Props, State> {
 
     const pair = keyring.getPair(publicKey);
 
-    if (!pair.isLocked() || pair.getMeta().isInjected) {
+    if (!pair.isLocked || pair.meta.isInjected) {
       return null;
     }
 
@@ -322,9 +321,8 @@ class Signer extends React.PureComponent<Props, State> {
 
     if (pair) {
       // set the signer
-      if (pair.getMeta().isInjected) {
-        const source = pair.getMeta().source;
-        const address = pair.address();
+      if (pair.meta.isInjected) {
+        const { address, meta: { source } } = pair;
         const injected = await web3FromSource(source);
 
         assert(injected, `Unable to find a signer for ${address}`);
@@ -399,5 +397,5 @@ export default withMulti(
   Signer,
   translate,
   withApi,
-  withObservable(accountObservable.subject, { propName: 'allAccounts' })
+  withObservable(keyring.accounts.subject, { propName: 'allAccounts' })
 );

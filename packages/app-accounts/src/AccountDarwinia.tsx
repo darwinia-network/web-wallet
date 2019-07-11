@@ -38,11 +38,11 @@ class AccountDarwinia extends React.PureComponent<Props> {
 
     this.state = {
       isBackupOpen: false,
-      isEditable: !(keyring.getAccount(props.address).getMeta().isInjected),
+      isEditable: keyring.getAccount(props.address) &&  !(keyring.getAccount(props.address).meta.isInjected),
       isForgetOpen: false,
       isPasswordOpen: false,
       isTransferOpen: false,
-      type: 'ring'
+      type: 'balances'
     };
   }
 

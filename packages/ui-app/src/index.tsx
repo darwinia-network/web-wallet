@@ -65,3 +65,10 @@ export { default as TxButton } from './TxButton';
 export { default as TxComponent } from './TxComponent';
 
 export { default as media } from './media';
+export { default as Forget } from './Forget';
+export { default as AddressCard } from './AddressCard';
+export { default as CodeRow } from './CodeRow';
+export { default as Row } from './Row';
+export { default as Messages } from './Messages';
+
+

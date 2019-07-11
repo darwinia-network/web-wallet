@@ -20,39 +20,26 @@ import Apps from './Apps';
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
 const url = process.env.WS_URL || 'ws://121.199.60.87/';
+// const url = process.env.WS_URL || 'wss://trilobita.darwinia.network/';
+
+// const url = process.env.WS_URL || 'ws://192.168.110.246:9944/';
+// const url = process.env.WS_URL || 'ws://localhost:9944/';
 
 const DARWINIA_TYPES = {
   "TokenBalance": "u128",
-  "RewardBalance": "u128",
-  "RewardBalanceOf": "u128",
-  "Auction": {
-    "seller": "AccountId",
-    "startAt": "Moment",
-    "duration": "u64",
-    "startingPrice": "TokenBalance",
-    "endingPrice": "TokenBalance",
-    "lastRecord": "TokenBalance",
-    "lastBidder": "AccountId",
-    "lastBidStartAt": "Moment"
-  },
   "Currency": "u128",
   "CurrencyOf": "u128",
-  "DepositInfo": {
+  "RewardBalance": "u128",
+  "RewardBalanceOf": "u128",
+  "IndividualDeposit": {
     "month": "Moment",
     "start_at": "Moment",
     "value": "CurrencyOf",
-    "unit_interest": "u64",
     "claimed": "bool"
   },
   "Deposit": {
-    "total_deposit": "CurrencyOf",
-    "deposit_list": "Vec<DepositInfo>"
-  },
-  "Revenue": {
-    "team": "TokenBalance",
-    "contribution": "TokenBalance",
-    "ktoner": "TokenBalance",
-    "lottery": "TokenBalance"
+    "total": "CurrencyOf",
+    "deposit_list": "Vec<IndividualDeposit>"
   }
 }
 

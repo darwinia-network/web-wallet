@@ -11,7 +11,7 @@ import { AccountId, AccountIndex, Address } from '@polkadot/types';
 import { OfflineStatus } from '@polkadot/app-staking/types';
 import { RecentlyOffline } from '@polkadot/ui-app';
 
-import { classes, getAddrName, toShortAddress } from './util';
+import { classes, getAddressName, toShortAddress } from './util';
 import BalanceDisplay from './Balance';
 import BondedDisplay from './Bonded';
 import IdentityIcon from './IdentityIcon';
@@ -68,7 +68,7 @@ class AddressMini extends React.PureComponent<Props> {
       return null;
     }
 
-    const name = getAddrName(address);
+    const name = getAddressName(address);
 
     return (
       <div className={`ui--AddressMini-address ${name ? 'withName' : 'withAddr'}`}>{

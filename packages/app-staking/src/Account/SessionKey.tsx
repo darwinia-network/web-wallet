@@ -48,24 +48,25 @@ class Key extends React.PureComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            onClick={onClose}
-            label={t('Cancel')}
-          />
-          <Button.Or />
           <TxButton
             accountId={accountId}
             isDisabled={!sessionId || !!sessionError}
             isPrimary
             label={t('Set Session Key')}
             onClick={onClose}
-            params={[sessionId]}
-            tx='session.setKey'
+            params={[[sessionId, sessionId],'0x']}
+            tx='session.setKeys'
+          />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            onClick={onClose}
+            label={t('Cancel')}
           />
         </Button.Group>
       </Modal.Actions>
@@ -92,11 +93,19 @@ class Key extends React.PureComponent<Props, State> {
           <InputAddress
             className='medium'
             help={t('Changing the key only takes effect at the start of the next session. If validating, you should (currently) use an ed25519 key.')}
-            label={t('session key')}
+            label={t('session key:')}
             onChange={this.onChangeSession}
             type='account'
             value={sessionId}
           />
+          {/* <InputAddress
+            className='medium'
+            help={t('Changing the key only takes effect at the start of the next session. If validating, you should (currently) use an ed25519 key.')}
+            label={t('aura key')}
+            onChange={this.onChangeSession}
+            type='account'
+            value={sessionId}
+          /> */}
           <ValidateSession
             controllerId={accountId}
             onError={this.onSessionError}

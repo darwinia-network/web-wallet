@@ -21,7 +21,9 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
   controllerId?: string | null,
   isOpen: boolean,
-  onClose: () => void
+  onClose: () => void,
+  kton_locks: Array<any>,
+  kton_freeBalance: BN
 };
 
 type State = {
@@ -34,7 +36,7 @@ type State = {
 };
 
 const stashOptions = [
-  { text: 'Stash account (increase the amount at stake)', value: 0 },
+  // { text: 'Stash account (increase the amount at stake)', value: 0 },
   { text: 'Stash account (do not increase the amount at stake)', value: 1 },
   { text: 'Controller account', value: 2 }
 ];
@@ -44,7 +46,7 @@ const ZERO = new BN(0);
 class Bond extends TxComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     const { accountId, controllerId } = this.props;
@@ -57,7 +59,7 @@ class Bond extends TxComponent<Props, State> {
     };
   }
 
-  componentDidUpdate (prevProps: Props, prevState: State) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const { balances_fees } = this.props;
     const { controllerId, destination, extrinsic } = this.state;
 
@@ -72,7 +74,7 @@ class Bond extends TxComponent<Props, State> {
     }
   }
 
-  render () {
+  render() {
     const { accountId, isOpen, onClose, t } = this.props;
     const { bondValue, controllerError, controllerId, extrinsic, maxBalance } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0) && (!maxBalance || bondValue.lte(maxBalance));
@@ -88,6 +90,7 @@ class Bond extends TxComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         <Modal.Actions>
@@ -113,7 +116,7 @@ class Bond extends TxComponent<Props, State> {
     );
   }
 
-  private renderContent () {
+  private renderContent() {
     const { accountId, t } = this.props;
     const { controllerId, controllerError, bondValue, destination, maxBalance } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0);
@@ -166,7 +169,7 @@ class Bond extends TxComponent<Props, State> {
     );
   }
 
-  private nextState (newState: Partial<State>): void {
+  private nextState(newState: Partial<State>): void {
     this.setState((prevState: State): State => {
       const { api } = this.props;
       const { bondValue = prevState.bondValue, controllerError = prevState.controllerError, controllerId = prevState.controllerId, destination = prevState.destination, maxBalance = prevState.maxBalance } = newState;
@@ -186,7 +189,7 @@ class Bond extends TxComponent<Props, State> {
   }
 
   private setMaxBalance = () => {
-    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE } = this.props;
+    const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, kton_locks, kton_freeBalance = ZERO } = this.props;
     const { controllerId, destination } = this.state;
 
     const { transactionBaseFee, transactionByteFee } = balances_fees;
@@ -208,7 +211,15 @@ class Bond extends TxComponent<Props, State> {
       const fees = transactionBaseFee
         .add(transactionByteFee.muln(txLength));
 
-      maxBalance = new BN(freeBalance).sub(fees);
+
+      let _ktonBalances_locks = new BN(0)
+
+      if (kton_locks) {
+        kton_locks.forEach((item) => {
+          _ktonBalances_locks = _ktonBalances_locks.add(item.amount)
+        })
+      }
+      maxBalance = kton_freeBalance.sub(_ktonBalances_locks);
     }
 
     this.nextState({
@@ -242,5 +253,7 @@ export default withMulti(
     'derive.balances.fees',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
+    ['query.kton.locks', { paramName: 'accountId' }],
+    ['query.kton.freeBalance', { paramName: 'accountId' }]
   )
 );

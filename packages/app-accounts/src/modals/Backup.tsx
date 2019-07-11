@@ -29,13 +29,14 @@ class Backup extends TxComponent<Props, State> {
   };
 
   render () {
-    const { t } = this.props;
+    const { t, onClose } = this.props;
 
     return (
       <Modal
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        onClose={onClose}
       >
         <Modal.Header>{t('Backup account')}</Modal.Header>
         {this.renderContent()}
@@ -52,7 +53,8 @@ class Backup extends TxComponent<Props, State> {
       <Modal.Actions>
         <Button.Group>
           <Button
-            isNegative
+            isBasic={true}
+            isSecondary={true}
             label={t('Cancel')}
             onClick={onClose}
           />

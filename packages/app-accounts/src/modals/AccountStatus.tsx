@@ -51,7 +51,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
     this.state = {
       isCreateOpen: false,
       isImportOpen: false,
-      isEditable: !(keyring.getAccount(props.address).getMeta().isInjected),
+      isEditable: keyring.getAccount(props.address) && !(keyring.getAccount(props.address).meta.isInjected),
       isForgetOpen: false,
       isBackupOpen: false,
       isPasswordOpen: false,
@@ -95,7 +95,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
 
   private togglePass = (): void => {
     const { isPasswordOpen } = this.state;
-
+    console.log(11111, isPasswordOpen)
     this.setState({
       isPasswordOpen: !isPasswordOpen
     });
@@ -190,7 +190,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
 
   private renderModals() {
 
-    const {address, changeAccountMain} = this.props;
+    const {address, changeAccountMain, accounts} = this.props;
     const { isForgetOpen, isBackupOpen, isPasswordOpen, isAccountOpen } = this.state;
     const {onStatusChange} = this.props
     if (!address) {
@@ -235,6 +235,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
       modals.push(
         <AccountsList
           address={address}
+          accounts={accounts}
           key='modal-accounts'
           onClose={this.toggleAccount}
           onStatusChange={onStatusChange}
@@ -263,7 +264,7 @@ const ButtonStyledWrapper = styled.div`
 
 const StyledWrapper = styled.div`
   background: #fff;
-  padding: 5px 40px;
+  padding: 8px 40px;
   .ui--AccountStatus-Box{
     display: flex;
     justify-content: space-between;
@@ -287,7 +288,7 @@ const StyledWrapper = styled.div`
 
 // @ts-ignore
 const PopupExampleFlowing = (Box, address: string) => (
-  <Popup trigger={<div><AddressRowReverse
+  <Popup basic position='bottom right' trigger={<div><AddressRowReverse
     isEditable={false}
     value={address}
   // withExplorer

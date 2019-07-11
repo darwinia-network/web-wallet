@@ -6,8 +6,6 @@ import { AppProps, I18nProps } from '@polkadot/ui-app/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { ComponentProps } from './types';
 
-import './index.css';
-
 import React from 'react';
 import { Route, Switch } from 'react-router';
 import addressObservable from '@polkadot/ui-keyring/observable/addresses';
@@ -45,6 +43,7 @@ class AddressBookApp extends React.PureComponent<Props, State> {
       isCreateOpen: false,
       items: [
         {
+          isRoot: true,
           name: 'overview',
           text: t('My contacts')
         }

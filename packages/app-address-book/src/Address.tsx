@@ -7,11 +7,10 @@ import { ActionStatus } from '@polkadot/ui-app/Status/types';
 import { I18nProps } from '@polkadot/ui-app/types';
 
 import React from 'react';
-import { AddressInfo, AddressRow, Button, Card, Icon } from '@polkadot/ui-app';
+import { AddressCard, AddressInfo, Button, Forget, Icon } from '@polkadot/ui-app';
 import keyring from '@polkadot/ui-keyring';
 
 import Transfer from '@polkadot/app-accounts/modals/Transfer';
-import Forgetting from './modals/Forgetting';
 
 import translate from './translate';
 
@@ -20,7 +19,7 @@ type Props = I18nProps & {
 };
 
 type State = {
-  current: KeyringAddress,
+  current?: KeyringAddress,
   isEditable: boolean,
   isForgetOpen: boolean,
   isTransferOpen: boolean
@@ -46,24 +45,25 @@ class Address extends React.PureComponent<Props, State> {
     const { address } = this.props;
     const { isEditable } = this.state;
 
+    
     return (
-      <Card>
+      // @ts-ignore
+      <AddressCard
+        buttons={this.renderButtons()}
+        isEditable={isEditable}
+        type='address'
+        value={address}
+        withExplorer
+        withIndex
+        withTags
+      >
         {this.renderModals()}
-        <AddressRow
-          buttons={this.renderButtons()}
-          isEditable={isEditable}
-          value={address}
-          withExplorer
-          withIndex
-          withTags
-        >
-          <AddressInfo
-            withBalance={{ available: true, free: true, total: true }}
-            withExtended={{ nonce: true }}
-            value={address}
-          />
-        </AddressRow>
-      </Card>
+        <AddressInfo
+          address={address}
+          withBalance={{ available: true, free: true, total: true }}
+          withExtended={{ nonce: true }}
+        />
+      </AddressCard>
     );
   }
 
@@ -71,7 +71,7 @@ class Address extends React.PureComponent<Props, State> {
     const { address } = this.props;
     const { isForgetOpen, isTransferOpen, current } = this.state;
 
-    if (!address) {
+    if (!address || !current) {
       return null;
     }
 
@@ -79,10 +79,11 @@ class Address extends React.PureComponent<Props, State> {
 
     if (isForgetOpen) {
       modals.push(
-        <Forgetting
-          currentAddress={current}
-          doForget={this.onForget}
-          key='modal-forget'
+        <Forget
+          address={current.address}
+          onForget={this.onForget}
+          key='modal-forget-account'
+          mode='address'
           onClose={this.toggleForget}
         />
       );

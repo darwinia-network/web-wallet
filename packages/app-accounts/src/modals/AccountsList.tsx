@@ -12,6 +12,7 @@ import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable } from '@polkadot/ui-api';
 import { Button, CardGrid, Modal, AddressRowAccountList } from '@polkadot/ui-app';
+import keyring from '@polkadot/ui-keyring';
 
 import CreateModal from '../modals/Create';
 import ImportModal from '../modals/Import';
@@ -48,7 +49,7 @@ class AccountsList extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t } = this.props;
+    const { accounts, onStatusChange, t, onClose } = this.props;
 
     const { isCreateOpen, isImportOpen, AccountMain } = this.state;
 
@@ -57,6 +58,7 @@ class AccountsList extends React.PureComponent<Props, State> {
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        onClose={onClose}
       >
         <Wrapper>
           <CardGrid
@@ -117,9 +119,9 @@ class AccountsList extends React.PureComponent<Props, State> {
 
   private getAccountMain = (): string | undefined => {
     const AccountMain = store.get('accountMain')
-    console.log(AccountMain)
     const { accounts } = this.props;
-    if (AccountMain) {
+
+    if (AccountMain && accounts && accounts[AccountMain]) {
       return AccountMain
     } else if(accounts && accounts[AccountMain]){
       return accounts && Object.keys(accounts)[0]
@@ -181,5 +183,5 @@ const Wrapper = styled.div`
 export default withMulti(
   AccountsList,
   translate,
-  withObservable(accountObservable.subject, { propName: 'accounts' })
+  // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

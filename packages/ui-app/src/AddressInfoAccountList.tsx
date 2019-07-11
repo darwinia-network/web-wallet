@@ -17,11 +17,6 @@ import CryptoType from './CryptoType';
 import Label from './Label';
 import { StructAny } from '@polkadot/types';
 
-export interface DerivedRingBalances extends StructAny {
-  freeBalance: BN;
-  transferFee: BN;
-}
-
 export interface DerivedKtonBalances extends StructAny {
   freeBalance: BN;
   transferFee: BN;
@@ -48,8 +43,7 @@ type Props = BareProps & I18nProps & {
   value: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
-  ringBalances_freeBalance?: DerivedRingBalances,
-  ktonBalances_freeBalance?: DerivedKtonBalances,
+  kton_freeBalance?: DerivedKtonBalances,
 };
 
 // <AddressInfo
@@ -62,7 +56,7 @@ type Props = BareProps & I18nProps & {
 //
 // <AddressInfo withBalance={{ available: true }} />
 class AddressInfoAccountList extends React.PureComponent<Props> {
-  render () {
+  render() {
     const { children, className } = this.props;
 
     return (
@@ -78,8 +72,8 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     );
   }
 
-  private renderBalances () {
-    const { balances_all, ringBalances_freeBalance,ktonBalances_freeBalance,staking_info, t, withBalance = true } = this.props;
+  private renderBalances() {
+    const { balances_all, kton_freeBalance, staking_info, t, withBalance = true } = this.props;
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -94,14 +88,14 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       <div className='column'>
         {balanceDisplay.free && (
           <>
-            <Label label={t('RING')+':'} />
-            <div className='result'>{formatBalance(ringBalances_freeBalance?ringBalances_freeBalance.toString():'0')}</div>
+            <Label label={t('RING') + ':'} />
+            <div className='result'>{formatBalance(balances_all.freeBalance)}</div>
           </>
         )}
         {balanceDisplay.available && (
           <>
-            <Label label={t('KTON')+':'} />
-            <div className='result'>{formatBalance(ktonBalances_freeBalance?ktonBalances_freeBalance.toString():'0')}</div>
+            <Label label={t('KTON') + ':'} />
+            <div className='result'>{formatBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</div>
           </>
         )}
         {balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}
@@ -127,7 +121,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   // either true (filtered above already) or [own, ...all extras]
-  private renderBonded (bonded: true | Array<BN>) {
+  private renderBonded(bonded: true | Array<BN>) {
     const { staking_info, t } = this.props;
     let value = undefined;
 
@@ -153,7 +147,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       : undefined;
   }
 
-  private renderExtended () {
+  private renderExtended() {
     const { balances_all, t, value, withExtended } = this.props;
     const extendedDisplay = withExtended === true
       ? { crypto: true, nonce: true }
@@ -186,7 +180,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     );
   }
 
-  private renderRedeemButton () {
+  private renderRedeemButton() {
     const { staking_info, t } = this.props;
 
     return (staking_info && staking_info.controllerId && (
@@ -204,7 +198,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     ));
   }
 
-  private renderUnlocking () {
+  private renderUnlocking() {
     const { staking_info, t } = this.props;
 
     return (
@@ -267,7 +261,6 @@ export default withMulti(
   withCalls<Props>(
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
-    ['query.ringBalances.freeBalance', { paramName: 'value' }],
-    ['query.ktonBalances.freeBalance', { paramName: 'value' }]
+    ['query.kton.freeBalance', { paramName: 'value' }]
   )
 );

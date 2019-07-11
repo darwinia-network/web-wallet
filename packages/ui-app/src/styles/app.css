@@ -133,3 +133,7 @@ details {
     outline: none;
   }
 }
+
+div .ui.basic.secondary.button,div .ui.basic.secondary.buttons .button{
+  background-color: #fff !important;
+}

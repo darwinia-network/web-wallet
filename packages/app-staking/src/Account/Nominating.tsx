@@ -28,7 +28,7 @@ class Nominating extends React.PureComponent<Props, State> {
   };
 
   render () {
-    const { isOpen } = this.props;
+    const { isOpen, onClose } = this.props;
 
     if (!isOpen) {
       return null;
@@ -40,6 +40,7 @@ class Nominating extends React.PureComponent<Props, State> {
         dimmer='inverted'
         open
         size='small'
+        onClose={onClose}
       >
         {this.renderContent()}
         {this.renderButtons()}
@@ -54,12 +55,6 @@ class Nominating extends React.PureComponent<Props, State> {
     return (
       <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            onClick={onClose}
-            label={t('Cancel')}
-          />
-          <Button.Or />
           <TxButton
             accountId={accountId}
             isDisabled={nominees.length === 0}
@@ -68,6 +63,12 @@ class Nominating extends React.PureComponent<Props, State> {
             params={[nominees]}
             label={t('Nominate')}
             tx='staking.nominate'
+          />
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            onClick={onClose}
+            label={t('Cancel')}
           />
         </Button.Group>
       </Modal.Actions>

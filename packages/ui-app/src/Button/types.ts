@@ -19,6 +19,7 @@ export type ButtonProps = BareProps & {
   isPrimary?: boolean,
   isSecondary?:boolean,
   label?: React.ReactNode,
+  labelIcon?: string,
   onClick?: () => void | Promise<void>,
   ref?: any,
   size?: Button$Sizes,
