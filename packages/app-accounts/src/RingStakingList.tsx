@@ -46,14 +46,24 @@ class Overview extends React.PureComponent<Props, State> {
   componentDidMount() {
   }
 
-  formatDate(date){
-    if(date){
+  formatDate(date) {
+    if (date) {
       return dayjs(date).format("YYYY-MM-DD")
     }
   }
 
+  process(start, month): number {
+    const now = dayjs().unix();
+    const end = dayjs(start).add(month * 30, 'day').unix();
+    if (end <= now) {
+        return 100
+    } else {
+       return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
+    }
+  }
+
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } }} = this.props;
+    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } } } = this.props;
     console.log('locks', balances_locks, account, kton_depositLedger)
     return (
       <Wrapper>
@@ -61,7 +71,17 @@ class Overview extends React.PureComponent<Props, State> {
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
             {kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.map((item, index) => {
-              return <tr key={index}><td>{`${this.formatDate(item.start_at)} - ${this.formatDate(dayjs(item.start_at).add(dayjs(item.month).unix(), 'month').valueOf())}`}</td><td>{formatBalance(item.value)}</td><td>----</td><td>----</td></tr>
+              return <tr key={index}>
+                <td>
+                  <p className="stakingRange">{`${this.formatDate(item.start_at)} - ${this.formatDate(dayjs(item.start_at).add(dayjs(item.month).unix() * 30, 'day').valueOf())}`}</p>
+                  <div className="stakingProcess">
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_at, dayjs(item.month).unix())}%` }}></div>
+                  </div>
+                </td>
+                <td>{formatBalance(item.value)}</td>
+                <td>----</td>
+                <td>----</td>
+              </tr>
             })}
           </tbody>
         </table>
@@ -78,6 +98,20 @@ const Wrapper = styled.div`
       td{
         width: 25%;
         font-weight: bold;
+      }
+      .stakingProcess{
+        height:3px;
+        background:rgba(216,216,216,1);
+        border-radius:4px;
+        margin: 0 12%;
+      }
+      .stakingRange{
+        margin-bottom: 6px;
+      }
+      .stakingProcessPassed{
+        height:3px;
+        background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
+        border-radius:4px;
       }
       .stakingTh{
         td{

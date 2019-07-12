@@ -87,7 +87,7 @@ class AccountsApp extends React.PureComponent<Props, State> {
   render() {
     const { basePath, onStatusChange, allAccounts } = this.props;
     const { hidden, tabs } = this.state;
-    console.log(111, allAccounts)
+
     return (
       <main className='accounts--App'>
         {allAccounts && <Overview onStatusChange={onStatusChange} allAccounts={allAccounts}/>}

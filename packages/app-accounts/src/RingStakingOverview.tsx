@@ -121,15 +121,15 @@ const Wrapper = styled.div`
       align-items: center;
       margin-top: 20px;
       margin-bottom: 20px;
-      font-weight: bold;
+      font-size: 16px;
     }
 
     .titleRow::before {
       content: ' ';
       display: inline-block;
-      background-color: #000;
-      width: 6px;
-      height: 22px;
+      width:3px;
+      height:18px;
+      background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
       margin-right: 0.5rem;
     }
 

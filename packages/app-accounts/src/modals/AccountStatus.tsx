@@ -66,7 +66,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
       <StyledWrapper>
         <div className="ui--AccountStatus-Box">
           <div className="ui--AccountStatus-Network">
-            <span>•</span><span>Alexander</span>
+            <span>•</span><span>Trilobita</span>
           </div>
 
           {PopupExampleFlowing(this.renderButtons(), address)}
@@ -289,7 +289,7 @@ const StyledWrapper = styled.div`
 // @ts-ignore
 const PopupExampleFlowing = (Box, address: string) => (
   <Popup basic position='bottom right' trigger={<div><AddressRowReverse
-    isEditable={false}
+    isEditable={true}
     value={address}
   // withExplorer
   // withIndex

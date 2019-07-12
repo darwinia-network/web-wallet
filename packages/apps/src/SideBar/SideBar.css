@@ -47,7 +47,7 @@
 
   .apps--SideBar {
     align-items: center;
-    background: #3f3f3f;
+    background: #302B3C;
     display: flex;
     flex-flow: column;
     height: auto;
@@ -80,6 +80,8 @@
     }
 
     .apps--SideBar-Item {
+      font-size: 16px;
+
       align-self: flex-end;
       flex-grow: 0;
       padding: 0 !important;
@@ -192,9 +194,10 @@
 }
 
 a.apps--SideBar-Item-NavLink {
-  color: #eee;
+  color: #97959D;
   display: block;
-  padding: 0.75em 0.75em;
+  text-align: center;
+  padding: 1.4em 0.75em;
   transition: background 0.15s;
   white-space: nowrap;
 

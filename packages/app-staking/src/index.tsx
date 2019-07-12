@@ -55,6 +55,7 @@ class App extends React.PureComponent<Props, State> {
       stashes: [],
       tabs: [
         {
+          isRoot: true,
           name: 'overview',
           text: t('Staking overview')
         },

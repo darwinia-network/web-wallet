@@ -118,8 +118,12 @@ class RingStaking extends React.PureComponent<Props> {
 
   private getDepositFunctionName() {
     const { kton_depositLedger = { raw: { total: new BN('0') } } } = this.props;
+    let totalNum = new BN('0')
+    if(kton_depositLedger && kton_depositLedger.raw && kton_depositLedger.raw.total) {
+      totalNum = kton_depositLedger.raw.total
+    }
 
-    if (kton_depositLedger.raw.total.eq(new BN('0'))) {
+    if (totalNum.eq(new BN('0'))) {
       return 'deposit'
     } else {
       return 'depositExtra'

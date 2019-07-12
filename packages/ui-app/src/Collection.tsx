@@ -36,6 +36,10 @@ export const collectionStyles = `
   .ui--Collection-lowercase {
     text-transform: lowercase;
   }
+
+  .ui--Collection-buttons{
+    width: 100%;
+  }
 `;
 
 export default class Collection<P extends CollectionProps, S extends CollectionState> extends React.PureComponent<P, S> {
@@ -74,9 +78,9 @@ export default class Collection<P extends CollectionProps, S extends CollectionS
 
     return (
       <div className='ui--Collection-header'>
-        <h1>
+        {/* <h1>
           {headerText && headerText}
-        </h1>
+        </h1> */}
         {buttons && (
           <div className='ui--Collection-buttons'>
             {buttons}
