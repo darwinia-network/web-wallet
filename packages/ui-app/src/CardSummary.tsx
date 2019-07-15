@@ -111,7 +111,7 @@ export default styled(CardSummary)`
 
     > label {
       line-height: 1rem;
-      font-size: 0.95rem;
+      font-size: 1.285rem;
       min-height: 1rem;
     }
 

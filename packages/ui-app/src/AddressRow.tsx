@@ -440,7 +440,11 @@ export default withMulti(
       right: -2.3em;
       z-index: 1;
     }
-
+    .ui--AddressRow-accountId{
+      span{
+        color: #98959F;
+      }
+    }
     .ui--AddressRow-accountId,
     .ui--AddressRow-accountIndex {
       font-family: monospace;
@@ -475,7 +479,7 @@ export default withMulti(
     .ui--AddressRow-buttons {
       position: absolute;
       right: 0.75rem;
-      top: 0.75rem;
+      top: 1.2rem;
     }
 
     .ui--AddressRow-children {
@@ -521,6 +525,8 @@ export default withMulti(
       text-transform: uppercase;
       white-space: normal;
       width: 17rem;
+      font-size: 18px;
+      color: #302B3C;
     }
 
     .ui--AddressRow-name-input {

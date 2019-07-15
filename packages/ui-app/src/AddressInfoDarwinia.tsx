@@ -102,7 +102,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           <div className="info-bottom">
             <div className="ui--value-box">
               <p>availible:</p>
-              <p>{ringBalance[0]}</p>
+              <p className="p-amount">{ringBalance[0]}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -112,7 +112,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div className="ui--value-box">
               <p>bonded:</p>
-              <p>{ringBalance[1]}</p>
+              <p className="p-amount">{ringBalance[1]}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -138,7 +138,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           <div className="info-bottom">
             <div className="ui--value-box">
               <p>availible:</p>
-              <p>{formatBalance(kton_freeBalance)}</p>
+              <p className="p-amount">{formatBalance(kton_freeBalance)}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -148,7 +148,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div className="ui--value-box">
               <p>bonded:</p>
-              <p>{balanceDisplay.bonded ? this.renderBonded(balanceDisplay.bonded) : '0'}</p>
+              <p className="p-amount">{balanceDisplay.bonded ? this.renderBonded(balanceDisplay.bonded) : '0'}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -380,6 +380,12 @@ export default withMulti(
         margin-bottom: 0;
         color: #98959F;
       }
+      .p-amount{
+        // flex: 1;
+        // text-align: left;
+        color: #302B3C;
+        font-size: 16px;
+      }
       button{
         width: 110px;
         padding: 8px 0px;
@@ -405,6 +411,7 @@ export default withMulti(
         font-weight: bold;
         margin-bottom: 0px;
         text-transform: uppercase;
+        color: #302B3C;
       }
       p{
         color: #5930DD;

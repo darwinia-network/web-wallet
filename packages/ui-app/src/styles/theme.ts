@@ -5,7 +5,7 @@
 import theme from 'styled-theming';
 
 export const primaryColor = theme('theme', {
-  substrate: '#DB2828',
+  substrate: '#302B3C',
   polkadot: '#E6007A'
 });
 

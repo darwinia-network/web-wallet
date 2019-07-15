@@ -88,6 +88,7 @@ const StyledWrapper = styled.div`
       .ui--IdentityIcon{
         background: #fff;
         border-radius: 50%;
+        
       }
     }
     border:1px solid rgba(237,237,237,1);

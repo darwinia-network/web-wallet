@@ -516,6 +516,7 @@ export default withMulti(
       text-transform: uppercase;
       white-space: normal;
       width: 17rem;
+      color: #302B3C;
     }
 
     .ui--AddressRow-name-input {

@@ -40,6 +40,24 @@ export const collectionStyles = `
   .ui--Collection-buttons{
     width: 100%;
   }
+  .titleRow {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: #302B3C;
+  }
+
+  .titleRow::before {
+    content: ' ';
+    display: inline-block;
+    width:3px;
+    height:18px;
+    background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
+    margin-right: 0.5rem;
+  }
 `;
 
 export default class Collection<P extends CollectionProps, S extends CollectionState> extends React.PureComponent<P, S> {
@@ -81,6 +99,9 @@ export default class Collection<P extends CollectionProps, S extends CollectionS
         {/* <h1>
           {headerText && headerText}
         </h1> */}
+        {headerText && <div className={'titleRow'}>
+          {headerText}
+        </div>}
         {buttons && (
           <div className='ui--Collection-buttons'>
             {buttons}

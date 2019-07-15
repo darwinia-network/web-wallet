@@ -264,7 +264,9 @@ const ButtonStyledWrapper = styled.div`
 
 const StyledWrapper = styled.div`
   background: #fff;
-  padding: 8px 40px;
+  padding: 8px 2rem;
+  margin:0 -2rem;
+  border-bottom:1px solid rgba(237,237,237,1);
   .ui--AccountStatus-Box{
     display: flex;
     justify-content: space-between;

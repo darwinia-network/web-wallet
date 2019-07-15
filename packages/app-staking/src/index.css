@@ -101,6 +101,9 @@
 
 .staking--accounts-info {
   text-align: right;
+  &>div{
+    margin-bottom: 10px;
+  }
 }
 
 .staking--Account-detail {
@@ -113,4 +116,5 @@
 
 .staking--accounts-info .staking--label {
   margin: 0 2.25rem -0.75rem 0;
+  color: #302B3C;
 }

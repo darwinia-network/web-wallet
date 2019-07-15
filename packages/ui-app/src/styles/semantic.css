@@ -195,10 +195,12 @@
     border-bottom: 2px solid rgba(0, 0, 0, 0);
     border: none;
     top: -1px;
-
+    font-size: 16px;
+    color: #98959F;
     &.active {
       background: none; /* #fafafa */;
-      border-bottom: 2px solid #db2828;
+      border-bottom: 5px solid #302B3C;
+      color: #302B3C;
     }
   }
 }
@@ -214,4 +216,12 @@
 
 .ui.basic.button{
   border-radius: 2px;
+}
+
+.ui--IdentityIcon {
+  margin-left: 0.5rem;
+  margin-right: 0;
+  .highlight:before{
+    box-shadow: 0 0 5px 2px #DAD1F7!important;
+  }
 }

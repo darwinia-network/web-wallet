@@ -132,7 +132,7 @@ class Overview extends React.PureComponent<Props, State> {
   private getAccountMain = (): string | undefined => {
     const AccountMain = store.get('accountMain');
     const { accounts } = this.props;
-    console.log(1111, AccountMain, accounts)
+
     if (AccountMain && accounts && accounts[AccountMain]) {
       return AccountMain
     } else if (accounts) {

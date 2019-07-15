@@ -148,6 +148,7 @@ export default styled(AddressMini)`
   .ui--AddressMini-address {
     &.withAddr {
       font-family: monospace;
+      color: #98959F;
     }
 
     &.withName {
@@ -174,10 +175,15 @@ export default styled(AddressMini)`
     display: inline-block;
     position:relative;
     vertical-align: middle;
+    
   }
 
   .ui--IdentityIcon {
     margin-left: 0.5rem;
     margin-right: 0;
+    margin-top: -12px;
+    .highlight:before{
+      box-shadow: 0 0 5px 2px #DAD1F7!important;
+    }
   }
 `;

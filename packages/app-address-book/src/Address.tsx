@@ -54,8 +54,8 @@ class Address extends React.PureComponent<Props, State> {
         type='address'
         value={address}
         withExplorer
-        withIndex
-        withTags
+        // withIndex
+        // withTags
       >
         {this.renderModals()}
         <AddressInfo

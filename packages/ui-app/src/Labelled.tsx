@@ -57,7 +57,9 @@ const Wrapper = styled.div`
     flex: 1 1;
     min-width: 0;
     color: #302B3C;
-    
+    /* margin-top: 28px; */
+    /* font-size: 40px; */
+    text-align: center;
   }
 
   ${media.DESKTOP`
@@ -80,7 +82,7 @@ const Wrapper = styled.div`
 `;
 
 export default class Labelled extends React.PureComponent<Props> {
-  render () {
+  render() {
     const { className, children, help, isSmall, isHidden, label = defaultLabel, style, withEllipsis, withLabel = true } = this.props;
 
     if (isHidden) {

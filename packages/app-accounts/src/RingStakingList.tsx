@@ -95,6 +95,8 @@ const Wrapper = styled.div`
       border-collapse: collapse;
       background: #fff;
       width: 100%;
+      border-radius:2px;
+      border:1px solid rgba(237,237,237,1);
       td{
         width: 25%;
         font-weight: bold;
