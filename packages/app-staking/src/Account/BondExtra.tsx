@@ -171,7 +171,7 @@ class BondExtra extends TxComponent<Props, State> {
         console.log(1,kton_locks)
         if (kton_locks) {
           kton_locks.forEach((item, index) => {
-            console.log(2, index,new BN(item.amount))
+            // console.log(2, index,new BN(item.amount))
             _ktonBalances_locks = _ktonBalances_locks.add(new BN(item.amount))
           })
         }

@@ -19,9 +19,9 @@ import Apps from './Apps';
 
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
-const url = process.env.WS_URL || 'ws://121.199.60.87/';
-// const url = process.env.WS_URL || 'ws://192.168.110.240:9944/';
-
+// const url = process.env.WS_URL || 'ws://121.199.60.87/';
+// const url = process.env.WS_URL || 'ws://192.168.110.239:9944/';
+const url = process.env.WS_URL || 'ws://192.168.1.241:9944/';
 // const url = process.env.WS_URL || 'wss://trilobita.darwinia.network/';
 
 // const url = process.env.WS_URL || 'ws://192.168.110.246:9944/';
@@ -34,9 +34,10 @@ const DARWINIA_TYPES = {
   "RewardBalance": "u128",
   "RewardBalanceOf": "u128",
   "IndividualDeposit": {
-    "month": "Moment",
-    "start_at": "Moment",
+    "month": "u32",
+    "start_at": "u64",
     "value": "CurrencyOf",
+    "balance": "TokenBalance",
     "claimed": "bool"
   },
   "Deposit": {

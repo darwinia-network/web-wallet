@@ -19,6 +19,7 @@ import CopyButton from './CopyButton';
 import IdentityIcon from './IdentityIcon';
 import LinkPolkascan from './LinkPolkascan';
 import translate from './translate';
+import BondedDisplay from './Bonded';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
 
 export type Props = I18nProps & {
@@ -35,7 +36,8 @@ export type Props = I18nProps & {
   withExplorer?: boolean,
   withIcon?: boolean,
   withIndex?: boolean,
-  withTags?: boolean
+  withTags?: boolean,
+  withBonded?: boolean
 };
 
 type State = {
@@ -106,6 +108,7 @@ class AddressRow extends React.PureComponent<Props, State> {
               {this.renderName()}
               {this.renderAddress()}
               {this.renderAccountIndex()}
+              {this.renderBonded()}
             </div>
             {this.renderBalances()}
             {this.renderTags()}
@@ -174,6 +177,23 @@ class AddressRow extends React.PureComponent<Props, State> {
           type='address'
         />
       </div>
+    );
+  }
+
+  private renderBonded () {
+    const { bonded, value, withBonded = false } = this.props;
+
+    if (!withBonded || !value) {
+      return null;
+    }
+
+    return (
+      <BondedDisplay
+        className="ui-bonded"
+        bonded={bonded}
+        label='My share: '
+        params={value}
+      />
     );
   }
 
@@ -442,7 +462,7 @@ export default withMulti(
     }
     .ui--AddressRow-accountId{
       span{
-        color: #98959F;
+        color: #B3B3B3;
       }
     }
     .ui--AddressRow-accountId,
@@ -562,6 +582,11 @@ export default withMulti(
 
     .ui--AddressRow-tags-input {
       margin-bottom: -1.4em;
+    }
+
+    .ui-bonded{
+      font-family: monospace;
+      color: #B3B3B3;
     }
   `,
   translate,

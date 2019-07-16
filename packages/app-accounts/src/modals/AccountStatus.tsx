@@ -155,8 +155,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
   }
   private onForget = (): void => {
     const { t, address } = this.props;
-
-
+    
     if (!address) {
       return;
     }
@@ -170,6 +169,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
       keyring.forgetAccount(address);
       status.status = 'success';
       status.message = t('account forgotten');
+      window.location.reload();
     } catch (error) {
       status.status = 'error';
       status.message = error.message;

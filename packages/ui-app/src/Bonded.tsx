@@ -36,7 +36,7 @@ export default class BondedDisplay extends React.PureComponent<Props> {
           params={params}
           style={style}
         />
-      );
+     );
   }
 
   private renderProvided () {

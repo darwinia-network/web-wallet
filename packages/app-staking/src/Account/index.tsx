@@ -141,6 +141,48 @@ const StyledWrapper = styled.div`
       cursor: pointer;
     }
   }
+
+  .ui--accounts-link{
+    display: flex;
+    &>div{
+      flex: 1;
+    }
+  }
+
+  .titleRow {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+  .titleRow::before {
+    content: ' ';
+    display: inline-block;
+    width:3px;
+    height:18px;
+    background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
+    margin-right: 0.5rem;
+  }
+
+  .ui--accounts-box{
+    border: 1px solid #EDEDED;
+  }
+
+  .staking--Account-detail{
+    background: #fff;
+    border-bottom: 1px solid #EDEDED;
+    padding: 20px;
+  }
+
+  .staking--Account-detail:last-child{
+    border-bottom: none;
+  }
+  .nominatingBox{
+    margin-left: 20px;
+  }
 `
 
 class Account extends React.PureComponent<Props, State> {
@@ -231,7 +273,7 @@ class Account extends React.PureComponent<Props, State> {
           <h1>Start a KTON staking</h1>
           <p>note: </p>
           <p>
-            1. Please make sure you have 2 available accounts. Add account.<br />
+            1. Please make sure you have 2 available accounts. <br />
             2. Please make sure that there are a few ring in the account as gas fee.<br />
             3. After the kton is bonded, you can apply to become a verifier or vote for the verifier and get earnings from it.
             </p>
@@ -239,6 +281,28 @@ class Account extends React.PureComponent<Props, State> {
             onClick={this.toggleBond}
           >Staking now</button>
         </div>}
+
+        <div className="ui--accounts-link">
+          <div>
+            <div className={'titleRow'}>
+              Linked account
+            </div>
+            <div className="ui--accounts-box">
+              {this.renderControllerId()}
+              {this.renderStashId()}
+              {this.renderSessionId()}
+            </div>
+          </div>
+          <div className="nominatingBox">
+            <div className={'titleRow'}>
+              Nominating
+            </div>
+            <div className="ui--accounts-box">
+              {this.renderNominee()}
+            </div>
+          </div>
+          
+        </div>
         {/* <AddressRow
           buttons={this.renderButtons()}
           value={accountId}
@@ -255,7 +319,6 @@ class Account extends React.PureComponent<Props, State> {
             </div>
           </AddressInfo>
         </AddressRow> */}
-
       </StyledWrapper >
     );
   }
@@ -297,7 +360,7 @@ class Account extends React.PureComponent<Props, State> {
 
   private renderSetRewardDestination () {
     const { controllerId, destination, isSetRewardDestinationOpen } = this.state;
-    console.log('destination', destination)
+
     if (!isSetRewardDestinationOpen || !controllerId) {
       return null;
     }
@@ -419,13 +482,21 @@ class Account extends React.PureComponent<Props, State> {
         <label className='staking--label'>{t('nominating')}</label>
         {
           nominators.map((nomineeId, index) => (
-            <AddressMini
+            // <AddressMini
+            //   key={index}
+            //   value={nomineeId}
+            //   offlineStatus={recentlyOffline[nomineeId.toString()]}
+            //   withBalance={false}
+            //   withBonded
+            // />
+            <AddressRow
               key={index}
               value={nomineeId}
               offlineStatus={recentlyOffline[nomineeId.toString()]}
               withBalance={false}
               withBonded
-            />
+              className="ui--AddressRow"
+            ></AddressRow>
           ))
         }
       </div>
@@ -443,10 +514,14 @@ class Account extends React.PureComponent<Props, State> {
     return (
       <div className='staking--Account-detail'>
         <label className='staking--label'>{t('controller')}</label>
-        <AddressMini
+        {/* <AddressMini
           value={controllerId}
           offlineStatus={recentlyOffline[controllerId]}
-        />
+        /> */}
+        <AddressRow
+              value={controllerId}
+              className="ui--AddressRow"
+            ></AddressRow>
       </div>
     );
   }
@@ -462,7 +537,12 @@ class Account extends React.PureComponent<Props, State> {
     return (
       <div className='staking--Account-detail'>
         <label className='staking--label'>{t('session')}</label>
-        <AddressMini value={sessionId} />
+        {/* <AddressMini value={sessionId} /> */}
+        <AddressRow
+              // buttons={this.renderButtons()}
+              value={sessionId}
+              className="ui--AddressRow"
+            ></AddressRow>
       </div>
     );
   }
@@ -478,12 +558,17 @@ class Account extends React.PureComponent<Props, State> {
     return (
       <div className='staking--Account-detail'>
         <label className='staking--label'>{t('stash')}</label>
-        <AddressMini
+        {/* <AddressMini
           value={stashId}
           offlineStatus={recentlyOffline[stashId]}
           withBalance={false}
           withBonded
-        />
+        /> */}
+        <AddressRow
+              // buttons={this.renderButtons()}
+              value={stashId}
+              className="ui--AddressRow"
+            ></AddressRow>
       </div>
     );
   }

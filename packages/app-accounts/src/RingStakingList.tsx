@@ -71,15 +71,16 @@ class Overview extends React.PureComponent<Props, State> {
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
             {kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.map((item, index) => {
+
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(item.start_at)} - ${this.formatDate(dayjs(item.start_at).add(dayjs(item.month).unix() * 30, 'day').valueOf())}`}</p>
+                  <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber()*1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber()*1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
                   <div className="stakingProcess">
-                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_at, dayjs(item.month).unix())}%` }}></div>
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber()*1000, new BN(item.month).toNumber())}%` }}></div>
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td>----</td>
+                <td>{formatBalance(item.balance)}</td>
                 <td>----</td>
               </tr>
             })}

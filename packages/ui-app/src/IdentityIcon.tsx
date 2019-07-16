@@ -35,7 +35,7 @@ class CopyIcon extends React.PureComponent<CopyProps> {
     return (
       <BaseIdentityIcon
         {...this.props}
-        onCopy={this.onCopy}
+        // onCopy={this.onCopy}
       />
     );
   }

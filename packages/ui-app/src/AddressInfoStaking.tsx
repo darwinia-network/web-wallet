@@ -101,10 +101,11 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     if(kton_locks) {
         kton_locks.forEach((item) => {
-          _ktonBalances_locks.add(new BN(item.amount))
+          console.log(9999, item.amount)
+          _ktonBalances_locks.add(item.amount)
         })
     }
-
+    console.log(111,_ktonBalances_locks)
     return (
       <div className='column'>
         <div className="ui--address-value">
