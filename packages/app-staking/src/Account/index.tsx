@@ -209,19 +209,19 @@ class Account extends React.PureComponent<Props, State> {
     stashId: null
   };
 
-  static getDerivedStateFromProps({ staking_info }: Props): State | null {
+  static getDerivedStateFromProps({ accountId, staking_info }: Props): State | null {
     if (!staking_info) {
       return null;
     }
 
-    const { accountId, controllerId, nextSessionId, nominators,rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
+    const {controllerId, nextSessionId, nominators,rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
 
     return {
       controllerId: toIdString(controllerId),
       destination: rewardDestination && rewardDestination.toNumber(),
-      isActiveController: accountId.eq(controllerId),
-      isActiveSession: accountId.eq(nextSessionId),
-      isActiveStash: accountId.eq(stashId),
+      isActiveController: accountId === toIdString(controllerId),
+      isActiveSession: accountId=== toIdString(nextSessionId),
+      isActiveStash: accountId=== toIdString(stashId),
       nominators,
       sessionId: toIdString(nextSessionId),
       stakers,
@@ -232,12 +232,15 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   render() {
+    
     const { accountId, filter, kton_freeBalance } = this.props;
-    const { controllerId, isActiveController, isActiveStash, stashId } = this.state;
+    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs } = this.state;
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
       return null;
     }
+    const isNominating = !!nominators && nominators.length;
+    const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
 
     // Each component is rendered and gets a `is[Component]Openwill` passed in a `isOpen` props.
     // These components will be loaded and return null at the first load (because is[Component]Open === false).
@@ -269,7 +272,8 @@ class Account extends React.PureComponent<Props, State> {
           />
           </div>
         </div>
-        {!isActiveStash && <div className="ui--string-now">
+
+        {!isActiveStash && !isNominating && !isValidating && !isActiveController && <div className="ui--string-now">
           <h1>Start a KTON staking</h1>
           <p>note: </p>
           <p>
@@ -301,8 +305,8 @@ class Account extends React.PureComponent<Props, State> {
               {this.renderNominee()}
             </div>
           </div>
-          
         </div>
+
         {/* <AddressRow
           buttons={this.renderButtons()}
           value={accountId}

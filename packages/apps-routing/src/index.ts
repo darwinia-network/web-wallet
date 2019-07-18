@@ -37,7 +37,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     // transfer,
     // null,
     // settings,
-    template
+    // template
   )
   : ([] as Routes).concat(
     // dashboard,
@@ -52,7 +52,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     
     // transfer,
     // null,
-    contracts,
+    // contracts,
     storage,
     extrinsics,
     // sudo,
@@ -60,7 +60,7 @@ const routes: Routes = appSettings.uiMode === 'light'
     // settings,
     // toolbox,
     // js,
-    template
+    // template
   );
 
 export default ({

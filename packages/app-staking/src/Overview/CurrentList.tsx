@@ -75,7 +75,7 @@ class CurrentList extends React.PureComponent<Props, State> {
       );
     }
 
-    return addresses.map((address) => (
+    return   addresses.map((address) => (
       <Address
         address={address}
         balances={balances}
