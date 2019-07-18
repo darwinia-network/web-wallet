@@ -65,22 +65,22 @@ class Overview extends React.PureComponent<Props, State> {
   render() {
     const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } } } = this.props;
 
-    if (!(kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.length === 0)) {
-      return (
-        <Wrapper>
-          <table className={'stakingTable'}>
-            <tbody>
-              <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-              <tr>
-                <td colSpan={4}>
-                  <p className="no-items">No items</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </Wrapper>
-      );
-    }
+    // if ((kton_depositLedger.raw.deposit_list.length === 0)) {
+    //   return (
+    //     <Wrapper>
+    //       <table className={'stakingTable'}>
+    //         <tbody>
+    //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+    //           <tr>
+    //             <td colSpan={4}>
+    //               <p className="no-items">No items</p>
+    //             </td>
+    //           </tr>
+    //         </tbody>
+    //       </table>
+    //     </Wrapper>
+    //   );
+    // }
 
     return (
       <Wrapper>
