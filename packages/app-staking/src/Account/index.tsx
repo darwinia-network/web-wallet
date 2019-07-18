@@ -183,6 +183,15 @@ const StyledWrapper = styled.div`
   .nominatingBox{
     margin-left: 20px;
   }
+  .staking--no-address{
+    background: #fff;
+
+    box-sizing: border-box;
+
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    text-align: left;
+  }
 `
 
 class Account extends React.PureComponent<Props, State> {
@@ -478,7 +487,9 @@ class Account extends React.PureComponent<Props, State> {
     const { nominators } = this.state;
 
     if (!nominators || !nominators.length) {
-      return null;
+      return (
+        <div className="staking--no-address">{t('no addresses found')}</div>
+      );
     }
 
     return (

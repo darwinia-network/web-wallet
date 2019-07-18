@@ -56,27 +56,43 @@ class Overview extends React.PureComponent<Props, State> {
     const now = dayjs().unix();
     const end = dayjs(start).add(month * 30, 'day').unix();
     if (end <= now) {
-        return 100
+      return 100
     } else {
-       return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
+      return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
     }
   }
 
   render() {
     const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } } } = this.props;
-    console.log('locks', balances_locks, account, kton_depositLedger)
+
+    if (!(kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.length === 0)) {
+      return (
+        <Wrapper>
+          <table className={'stakingTable'}>
+            <tbody>
+              <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+              <tr>
+                <td colSpan={4}>
+                  <p className="no-items">No items</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Wrapper>
+      );
+    }
+
     return (
       <Wrapper>
         <table className={'stakingTable'}>
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
             {kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.map((item, index) => {
-
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber()*1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber()*1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
+                  <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
                   <div className="stakingProcess">
-                    <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber()*1000, new BN(item.month).toNumber())}%` }}></div>
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
@@ -131,6 +147,11 @@ const Wrapper = styled.div`
         td{
           background: #FBFBFB;
         }
+      }
+      .no-items{
+        padding: 15px;
+        text-align: center;
+
       }
     }
 `

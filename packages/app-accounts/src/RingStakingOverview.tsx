@@ -68,7 +68,7 @@ class Overview extends React.PureComponent<Props, State> {
         </div>
 
         <div className={'titleRow'}>
-          Staking Ring
+          Deposit Ring
         </div>
         <RingStakingList account={AccountMain} />
         {isRingStakingOpen && <RingStaking senderId={AccountMain} onClose={this.toggleRingStaking}/>}
