@@ -70,6 +70,7 @@ class App extends React.PureComponent<Props, State> {
   }
 
   static getDerivedStateFromProps({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
+    console.log(9999999,staking_controllers)
     return {
       controllers: staking_controllers[1].filter((optId) => optId.isSome).map((accountId) =>
         accountId.unwrap().toString()

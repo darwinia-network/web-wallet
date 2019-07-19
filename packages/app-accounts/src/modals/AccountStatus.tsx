@@ -95,7 +95,6 @@ class AccountStatus extends React.PureComponent<Props, State> {
 
   private togglePass = (): void => {
     const { isPasswordOpen } = this.state;
-    console.log(11111, isPasswordOpen)
     this.setState({
       isPasswordOpen: !isPasswordOpen
     });

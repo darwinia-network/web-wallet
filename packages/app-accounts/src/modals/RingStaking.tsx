@@ -214,7 +214,7 @@ class RingStaking extends React.PureComponent<Props> {
 
           <Input
             type='number'
-            help={t('The amount of Ring Token')}
+            help={t('The deposit time of ring')}
             label={t('month')}
             onChange={this.onChangeRingMonth}
           />

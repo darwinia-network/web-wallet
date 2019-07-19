@@ -101,7 +101,6 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     if(kton_locks) {
         kton_locks.forEach((item) => {
-          console.log(9999, item.amount)
           _ktonBalances_locks.add(item.amount)
         })
     }

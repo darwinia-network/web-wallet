@@ -13,7 +13,7 @@ export default ([
       needsApi: []
     },
     i18n: {
-      defaultValue: 'Accounts'
+      defaultValue: 'Assets'
     },
     icon: 'users',
     name: 'accounts'
