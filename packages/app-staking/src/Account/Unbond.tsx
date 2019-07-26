@@ -84,6 +84,9 @@ class Unbond extends TxComponent<Props, State> {
 
     return (
       <>
+      <Modal.Header>
+          {t('Unbond funds')}
+        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'

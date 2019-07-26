@@ -26,7 +26,7 @@ class SetRewardDestination extends TxComponent<Props, State> {
     super(props);
 
     this.state = {
-      destination: 0
+      destination: 1
     };
   }
 

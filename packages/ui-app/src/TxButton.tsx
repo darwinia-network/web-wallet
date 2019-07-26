@@ -17,51 +17,52 @@ import Button from './Button';
 import { Button$Sizes } from './Button/types';
 import { QueueConsumer } from './Status/Context';
 
-type ConstructFn = () => Array<any>;
+type ConstructFn = () => any[];
 
-type InjectedProps = {
+interface InjectedProps {
   queueExtrinsic: QueueTx$ExtrinsicAdd;
-  txqueue: Array<QueueTx>;
-};
+  txqueue: QueueTx[];
+}
 
-type Props = ApiProps & {
-  accountId?: string,
-  accountNonce?: Index,
-  className?: string,
-  extrinsic?: IExtrinsic | SubmittableExtrinsic,
-  icon?: string,
-  iconSize?: Button$Sizes,
-  isBasic?: boolean,
-  isDisabled?: boolean,
-  isNegative?: boolean,
-  isPrimary?: boolean,
-  isUnsigned?: boolean,
-  label: React.ReactNode,
-  onClick?: () => any,
-  onFailed?: TxFailedCallback,
-  onStart?: () => void,
-  onSuccess?: TxCallback,
-  onUpdate?: TxCallback,
-  params?: Array<any> | ConstructFn,
-  tooltip?: string,
-  tx?: string,
-  withSpinner?: boolean
-};
+interface Props extends ApiProps {
+  accountId?: string;
+  accountNonce?: Index;
+  className?: string;
+  extrinsic?: IExtrinsic | SubmittableExtrinsic;
+  icon?: string;
+  iconSize?: Button$Sizes;
+  isBasic?: boolean;
+  isDisabled?: boolean;
+  isNegative?: boolean;
+  isPrimary?: boolean;
+  isUnsigned?: boolean;
+  label: React.ReactNode;
+  onClick?: () => any;
+  onFailed?: TxFailedCallback;
+  onStart?: () => void;
+  onSuccess?: TxCallback;
+  onUpdate?: TxCallback;
+  params?: any[] | ConstructFn;
+  tooltip?: string;
+  tx?: string;
+  withSpinner?: boolean;
+  isSecondary?: boolean;
+}
 
 type InnerProps = Props & InjectedProps;
 
-type State = {
-  extrinsic: SubmittableExtrinsic,
-  isSending: boolean
-};
+interface State {
+  extrinsic?: SubmittableExtrinsic;
+  isSending: boolean;
+}
 
 class TxButtonInner extends React.PureComponent<InnerProps> {
-  state = {
+  public state: State = {
     isSending: false
-  } as State;
+  };
 
-  render () {
-    const { accountId, className, icon, iconSize , isBasic, isDisabled, isNegative, isPrimary, isUnsigned, label, tooltip } = this.props;
+  public render (): React.ReactNode {
+    const { accountId, className, icon, iconSize, isBasic, isDisabled, isNegative, isSecondary = false,isPrimary, isUnsigned, label, tooltip } = this.props;
     const { isSending } = this.state;
     const needsAccount = isUnsigned
       ? false
@@ -77,6 +78,7 @@ class TxButtonInner extends React.PureComponent<InnerProps> {
         isLoading={isSending}
         isNegative={isNegative}
         isPrimary={isUndefined(isPrimary) ? (!isNegative && !isBasic) : isPrimary}
+        isSecondary={isSecondary}
         label={label}
         onClick={this.send}
         size={iconSize}
@@ -84,9 +86,8 @@ class TxButtonInner extends React.PureComponent<InnerProps> {
     );
   }
 
-  send = (): void => {
+  protected send = (): void => {
     const { accountId, api, extrinsic: propsExtrinsic, isUnsigned, onClick, onFailed, onStart, onSuccess, onUpdate, params = [], queueExtrinsic, tx = '', withSpinner = true } = this.props;
-    console.log('sendBtton',tx, propsExtrinsic,params)
     let extrinsic: any;
 
     if (propsExtrinsic) {
@@ -140,12 +141,12 @@ class TxButtonInner extends React.PureComponent<InnerProps> {
 }
 
 class TxButton extends React.PureComponent<Props> {
-  button: any = React.createRef();
+  protected button: any = React.createRef();
 
-  render () {
+  public render (): React.ReactNode {
     return (
       <QueueConsumer>
-        {({ queueExtrinsic, txqueue }) => (
+        {({ queueExtrinsic, txqueue }): React.ReactNode => (
           <TxButtonInner
             {...this.props}
             queueExtrinsic={queueExtrinsic}
@@ -157,7 +158,7 @@ class TxButton extends React.PureComponent<Props> {
     );
   }
 
-  send = () => {
+  protected send = (): void => {
     this.button.current.send();
   }
 }

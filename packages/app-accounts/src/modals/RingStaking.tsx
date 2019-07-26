@@ -180,7 +180,7 @@ class RingStaking extends React.PureComponent<Props> {
 
   private renderContent() {
     const { recipientId: propRecipientId, senderId: propSenderId, type, t } = this.props;
-    const { extrinsic, hasAvailable, maxBalance, recipientId, senderId } = this.state;
+    const { extrinsic, hasAvailable, maxBalance, recipientId, senderId, month } = this.state;
     const available = <span className='label'>{t('available ')}</span>;
 
     return (
@@ -205,10 +205,12 @@ class RingStaking extends React.PureComponent<Props> {
           />
           <div className='balance'><Available label={available} params={recipientId} type={type} /></div> */}
 
-          <Input
-            type='number'
+          <InputBalance
+            // type='number'
             help={t('The amount of Ring Token')}
             label={t('ring amount')}
+            maxValue={maxBalance}
+            withMax
             onChange={this.onChangeRingAmount}
           />
 
@@ -216,7 +218,18 @@ class RingStaking extends React.PureComponent<Props> {
             type='number'
             help={t('The deposit time of ring')}
             label={t('month')}
+            // maxValue={maxBalance}
+            value={month.toString()}
+            max={36}
+            min={1}
             onChange={this.onChangeRingMonth}
+          />
+
+          <Checks
+            accountId={senderId}
+            extrinsic={extrinsic}
+            isSendable
+            onChange={this.onChangeFees}
           />
 
           {/* <InputBalance
@@ -238,7 +251,7 @@ class RingStaking extends React.PureComponent<Props> {
     );
   }
 
-  private onChangeRingAmount = (ringAmount: string) => {
+  private onChangeRingAmount = (ringAmount: BN) => {
     try {
       this.nextState({ ringAmount: new BN(ringAmount || 0) });
     } catch (e) {
@@ -248,8 +261,17 @@ class RingStaking extends React.PureComponent<Props> {
 
   private onChangeRingMonth = (month: string) => {
     try {
+      if(parseInt(month) > 36){
+        month = '36'
+      }
+
+      if(parseInt(month) <=0){
+        month = '1'
+      }
+
       this.nextState({ month: new BN(month || 0) });
     } catch (e) {
+      this.nextState({ month: new BN(0) });
       console.log(e)
     }
   }
@@ -278,45 +300,46 @@ class RingStaking extends React.PureComponent<Props> {
     //   return;
     // }
 
-    let extrinsic;
-
-    extrinsic = api.tx.kton[this.getDepositFunctionName()](ringAmount, month);
-
-    this.nextState({
-      extrinsic,
-    });
-
-
-    // const { transferFee, transactionBaseFee, transactionByteFee, creationFee } = balances_fees;
-
-    // // FIXME The any casts here are irritating, but they are basically caused by the derive
-    // // not really returning an actual `class implements Codec`
-    // // (if casting to DerivedBalance it would be `as any as DerivedBalance`)
-    // const accountNonce = await api.query.system.accountNonce(senderId) as Index;
-    // const senderBalance = (await api.derive.balances.all(senderId) as any).availableBalance;
-    // const recipientBalance = (await api.derive.balances.all(recipientId) as any).availableBalance;
-
-    // let prevMax = new BN(0);
-    // let maxBalance = new BN(1);
     // let extrinsic;
 
-    // while (!prevMax.eq(maxBalance)) {
-    //   prevMax = maxBalance;
-    //   extrinsic = api.tx.balances.transfer(recipientId, prevMax);
-
-    //   const txLength = calcSignatureLength(extrinsic, accountNonce);
-    //   const fees = transactionBaseFee
-    //     .add(transactionByteFee.muln(txLength))
-    //     .add(transferFee)
-    //     .add(recipientBalance.isZero() ? creationFee : ZERO);
-
-    //   maxBalance = senderBalance.sub(fees);
-    // }
+    // extrinsic = api.tx.kton[this.getDepositFunctionName()](ringAmount, month);
 
     // this.nextState({
     //   extrinsic,
-    //   maxBalance
     // });
+
+
+    const { transferFee, transactionBaseFee, transactionByteFee, creationFee } = balances_fees;
+
+    // FIXME The any casts here are irritating, but they are basically caused by the derive
+    // not really returning an actual `class implements Codec`
+    // (if casting to DerivedBalance it would be `as any as DerivedBalance`)
+    const accountNonce = await api.query.system.accountNonce(senderId) as Index;
+    const senderBalance = (await api.derive.balances.all(senderId) as any).availableBalance;
+    const recipientBalance = (await api.derive.balances.all(recipientId) as any).availableBalance;
+
+    let prevMax = new BN(0);
+    let maxBalance = new BN(1);
+    let extrinsic;
+
+    while (!prevMax.eq(maxBalance)) {
+      prevMax = maxBalance;
+      // extrinsic = api.tx.balances.transfer(recipientId, prevMax);
+      extrinsic = api.tx.kton[this.getDepositFunctionName()](ringAmount, month);
+
+      const txLength = calcSignatureLength(extrinsic, accountNonce);
+      const fees = transactionBaseFee
+        .add(transactionByteFee.muln(txLength))
+        .add(transferFee)
+        .add(recipientBalance.isZero() ? creationFee : ZERO);
+
+      maxBalance = senderBalance.sub(fees);
+    }
+
+    this.nextState({
+      extrinsic,
+      maxBalance
+    });
   }
 }
 

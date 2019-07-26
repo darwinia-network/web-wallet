@@ -20,7 +20,7 @@ import AccountStatus from '@polkadot/app-accounts/modals/AccountStatus';
 import './index.css';
 
 import basicMd from './md/basic.md';
-import Accounts from './Accounts';
+import Accounts from './AccountsNode';
 import Overview from './Overview';
 import translate from './translate';
 
@@ -70,6 +70,7 @@ class App extends React.PureComponent<Props, State> {
   }
 
   static getDerivedStateFromProps({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
+
     return {
       controllers: staking_controllers[1].filter((optId) => optId && optId.isSome).map((accountId) =>
         accountId.unwrap().toString()
@@ -107,19 +108,17 @@ class App extends React.PureComponent<Props, State> {
 
   render() {
     const { allAccounts, basePath, onStatusChange } = this.props;
-    // const { tabs, AccountMain } = this.state;
+    const { controllers, recentlyOffline, stashes, validators, AccountMain } = this.state;
     const hidden = !allAccounts || Object.keys(allAccounts).length === 0
       ? ['actions']
       : [];
-      const { controllers, recentlyOffline, stashes, validators, AccountMain, tabs } = this.state;
-      const { balances = {} } = this.props;
+    const { balances = {} } = this.props;
+
       // @ts-ignore
     return (
       <>
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
-
-        <main className='staking--App'>
-          <Overview
+        <Accounts
           balances={balances}
           controllers={controllers}
           recentlyOffline={recentlyOffline}
@@ -127,30 +126,10 @@ class App extends React.PureComponent<Props, State> {
           validators={validators}
           // @ts-ignore
           accountMain={AccountMain}
-          />
-        </main>
+          onStatusChange={onStatusChange}
+        />
       </>
     );
-  }
-
-  private renderComponent(Component: React.ComponentType<ComponentProps>) {
-    return (): React.ReactNode => {
-      const { controllers, recentlyOffline, stashes, validators, AccountMain } = this.state;
-      const { balances = {} } = this.props;
-
-      return (
-        // @ts-ignore
-        <Component
-          balances={balances}
-          controllers={controllers}
-          recentlyOffline={recentlyOffline}
-          stashes={stashes}
-          validators={validators}
-          // @ts-ignore
-          accountMain={AccountMain}
-        />
-      );
-    };
   }
 
   private getAccountMain = (): string | undefined => {

@@ -48,9 +48,9 @@ export type CryptoActiveType = {
 
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
-  ringBalances_freeBalance?: BN,
+  balances_freeBalance?: BN,
   kton_freeBalance?: BN,
-  ringBalances_locks?: Vector<any>,
+  balances_locks?: Vector<any>,
 
   children?: React.ReactNode,
   staking_info?: DerivedStaking,
@@ -72,7 +72,7 @@ type Props = BareProps & I18nProps & {
 // <AddressInfo withBalance={{ available: true }} />
 class AddressInfoDarwinia extends React.PureComponent<Props> {
   render() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
+    const { balances_all, kton_freeBalance, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
 
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
@@ -84,7 +84,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           return null;
         }
 
-    const ringBalance = this.renderRingBalances()
+    const ringBalance = this.renderQueryRingBalances()
+  
     return (
       <div className={className}>
         <div>
@@ -96,7 +97,6 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               <h1>RING</h1>
               {/* <p className='ui--value'>{formatBalance(ringBalances_freeBalance)}</p> */}
               <p className='ui--value'>{formatBalance(balances_all.freeBalance)}</p>
-              
             </div>
           </div>
           <div className="info-bottom">
@@ -167,9 +167,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
 
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, staking_info, t, withBalance = true } = this.props;
+    const { balances_all, staking_info, t, withBalance = true } = this.props;
     // console.log('balance', balances_all)
-    console.log('2222222', ringBalances_freeBalance && ringBalances_freeBalance.toString())
+    // console.log('2222222', ringBalances_freeBalance && ringBalances_freeBalance.toString())
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -227,17 +227,14 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     if (!balanceDisplay || !balances_all) {
       return null;
     }
-    
     return [formatBalance(balances_all.availableBalance), formatBalance(balances_all.lockedBalance)]
   }
 
-  private renderRingBalances1() {
-    const { ringBalances_locks, ringBalances_freeBalance = new BN(0) } = this.props;
-
-    // const type = getTypeDef(ringBalances_locks.Type);
+  private renderQueryRingBalances() {
+    const { balances_locks, balances_freeBalance = new BN(0) } = this.props;
     
-    if(!ringBalances_locks) return [formatBalance(ringBalances_freeBalance), formatBalance(0)]
-    const values = ringBalances_locks.toArray().map((value) => ({
+    if(!balances_locks) return [formatBalance(balances_freeBalance), formatBalance(0)]
+    const values = balances_locks.toArray().map((value) => ({
       value
     }));
 
@@ -246,8 +243,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
       ringBonded = ringBonded.add(value.value.amount)
     })
 
-    if(ringBalances_freeBalance.lt(ringBonded)) return [formatBalance(0),formatBalance(ringBonded)]
-    return [formatBalance(ringBalances_freeBalance.sub(ringBonded)), formatBalance(ringBonded)]
+    if(balances_freeBalance.lt(ringBonded)) return [formatBalance(0),formatBalance(ringBonded)]
+    return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded)]
   }
 
   // either true (filtered above already) or [own, ...all extras]
@@ -454,10 +451,8 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['derive.balances.all', { paramName: 'value' }],
-    // ['query.ringBalances.freeBalance', { paramName: 'value' }],
-
-    // ['query.ringBalances.locks', { paramName: 'value' }],
-
+    ['query.balances.freeBalance', { paramName: 'value' }],
+    ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }]
   )

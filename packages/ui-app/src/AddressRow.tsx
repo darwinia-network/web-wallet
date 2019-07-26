@@ -28,6 +28,7 @@ export type Props = I18nProps & {
   buttons?: React.ReactNode,
   children?: React.ReactNode,
   defaultName?: string,
+  suffixName?: string,
   extraInfo?: React.ReactNode,
   isEditable?: boolean,
   isInline?: boolean,
@@ -49,7 +50,7 @@ type State = {
 };
 
 const DEFAULT_ADDR = '5'.padEnd(16, 'x');
-const ICON_SIZE = 48;
+const ICON_SIZE =56;
 
 class AddressRow extends React.PureComponent<Props, State> {
   state: State;
@@ -61,7 +62,8 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   static defaultProps = {
-    defaultName: '<unknown>'
+    defaultName: '<unknown>',
+    suffixName: ''
   };
 
   static getDerivedStateFromProps ({ accounts_idAndIndex = [], defaultName, value }: Props, prevState: State) {
@@ -108,7 +110,7 @@ class AddressRow extends React.PureComponent<Props, State> {
               {this.renderName()}
               {this.renderAddress()}
               {this.renderAccountIndex()}
-              {this.renderBonded()}
+              {/* {this.renderBonded()} */}
             </div>
             {this.renderBalances()}
             {this.renderTags()}
@@ -198,7 +200,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   protected renderName () {
-    const { isEditable } = this.props;
+    const { isEditable, suffixName } = this.props;
     const { isEditingName, name } = this.state;
 
     return isEditingName
@@ -218,7 +220,7 @@ class AddressRow extends React.PureComponent<Props, State> {
           className={classes('ui--AddressRow-name', isEditable && 'editable')}
           onClick={isEditable ? this.toggleNameEditor : undefined}
         >
-          {name}
+          {`${name} ${suffixName}`}
           {isEditable && this.renderEditIcon()}
         </div>
       );
@@ -542,9 +544,10 @@ export default withMulti(
       padding: 0;
       overflow: hidden;
       text-overflow: ellipsis;
-      text-transform: uppercase;
+      /* text-transform: uppercase; */
       white-space: normal;
-      width: 17rem;
+      /* width: 17rem; */
+      width: 26rem;
       font-size: 18px;
       color: #302B3C;
     }

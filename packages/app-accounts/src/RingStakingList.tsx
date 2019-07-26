@@ -11,7 +11,7 @@ import React from 'react';
 import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid } from '@polkadot/ui-app';
+import { Button, CardGrid, ColorButton} from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
 import { formatBalance, formatNumber } from '@polkadot/util';
@@ -22,7 +22,8 @@ type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   balances_locks: Array<{ amount: BN }>,
   account: string,
-  kton_depositLedger: { raw: { deposit_list: Array<any> } }
+  kton_depositLedger: { raw: { deposit_list: Array<any> } },
+  onStakingNow: () => void
 };
 
 type State = {
@@ -63,24 +64,24 @@ class Overview extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } } } = this.props;
-
-    // if ((kton_depositLedger.raw.deposit_list.length === 0)) {
-    //   return (
-    //     <Wrapper>
-    //       <table className={'stakingTable'}>
-    //         <tbody>
-    //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-    //           <tr>
-    //             <td colSpan={4}>
-    //               <p className="no-items">No items</p>
-    //             </td>
-    //           </tr>
-    //         </tbody>
-    //       </table>
-    //     </Wrapper>
-    //   );
-    // }
+    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } }, onStakingNow } = this.props;
+    if (!kton_depositLedger || !kton_depositLedger.raw || !kton_depositLedger.raw.deposit_list || (kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.length === 0)) {
+      return (
+        <Wrapper>
+          <table className={'stakingTable stakingTableEmpty'}>
+            <tbody>
+              <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+              <tr>
+                <td colSpan={4} className="emptyTd">
+                  <p className="no-items">No items</p>
+                  <ColorButton onClick={onStakingNow}>{t('Deposit Now')}</ColorButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Wrapper>
+      );
+    }
 
     return (
       <Wrapper>
@@ -96,7 +97,7 @@ class Overview extends React.PureComponent<Props, State> {
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td>{formatBalance(item.balance)}</td>
+                <td className="textGradient">{formatBalance(item.balance)}</td>
                 <td>----</td>
               </tr>
             })}
@@ -108,6 +109,7 @@ class Overview extends React.PureComponent<Props, State> {
 }
 
 const Wrapper = styled.div`
+    padding-bottom: 30px;
     .stakingTable{
       border-collapse: collapse;
       background: #fff;
@@ -148,12 +150,27 @@ const Wrapper = styled.div`
           background: #FBFBFB;
         }
       }
+      
+    }
+
+    .stakingTableEmpty{
       .no-items{
         padding: 15px;
         text-align: center;
-
+        color: #B4B6BC;
+        margin-bottom: 0;
+      }
+      .emptyTd{
+        padding: 100px 0!important;
+        background: #fff!important;
       }
     }
+
+    /* .textGradient{
+      background: linear-gradient(to right, red, blue);
+        -webkit-background-clip: text;
+        color: transparent;
+    } */
 `
 
 export default withMulti(

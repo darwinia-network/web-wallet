@@ -110,7 +110,9 @@
     border-top: none;
     text-align: right;
   }
-
+  > .header{
+    border-bottom: none;
+  }
   > .header:not(.ui) {
     background: #f5f5f5;
     font-size: 1.25rem !important;
@@ -124,8 +126,8 @@
   }
 
   > :first-child:not(.icon) {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    /* border-top-left-radius: 0;
+    border-top-right-radius: 0; */
   }
 
   > .modal-header{

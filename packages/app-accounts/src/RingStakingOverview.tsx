@@ -23,7 +23,7 @@ import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 import RingStaking from './modals/RingStaking'
 import ringStakingBtn from './img/stakingBtn.svg';
 import RingStakingList from './RingStakingList';
-const ringStakingBanner = require('./img/ringStakingBanner.png');
+const ringStakingBanner = require('./img/ringStakingBanner.jpg');
 
 type Props = ComponentProps & I18nProps & {
   allAccounts?: SubjectInfo[],
@@ -64,13 +64,13 @@ class Overview extends React.PureComponent<Props, State> {
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
         <div className='bannerBox'>
           <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton" />
-          <div className='stakingBtn' onClick={this.toggleRingStaking}><p>Staking now</p></div>
+          <div className='stakingBtn' onClick={this.toggleRingStaking}><p>Deposit now</p></div>
         </div>
 
         <div className={'titleRow'}>
           Deposit Ring
         </div>
-        <RingStakingList account={AccountMain} />
+        <RingStakingList account={AccountMain} onStakingNow={this.toggleRingStaking}/>
         {isRingStakingOpen && <RingStaking senderId={AccountMain} onClose={this.toggleRingStaking}/>}
       </Wrapper>
     );
@@ -120,8 +120,9 @@ const Wrapper = styled.div`
       justify-content: flex-start;
       align-items: center;
       margin-top: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-size: 16px;
+      text-transform: uppercase;
     }
 
     .titleRow::before {
@@ -131,6 +132,7 @@ const Wrapper = styled.div`
       height:18px;
       background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
       margin-right: 0.5rem;
+      margin-top: -1px;
     }
 
     .ringStakingBanner{

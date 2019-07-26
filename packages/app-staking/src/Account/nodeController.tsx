@@ -75,10 +75,10 @@ function toIdString(id?: AccountId | null): string | null {
 }
 
 const StyledWrapper = styled.div`
-  width: 100%;
+  /* width: 100%; */
   position: relative;
   border-radius:2px;
-  padding-bottom: 30px;
+  /* padding-bottom: 30px; */
   .ui--address-box{
     display: flex;
     padding-right: 20px;
@@ -248,8 +248,6 @@ class Account extends React.PureComponent<Props, State> {
   };
 
   static getDerivedStateFromProps({ accountId, staking_info }: Props): Pick<State, never> | null {
-    console.log(11111111111, staking_info)
-
     if (!staking_info) {
       return null;
     }
@@ -258,7 +256,7 @@ class Account extends React.PureComponent<Props, State> {
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
 
-    // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
+    console.log('getDerivedStateFromProps', accountId,toIdString(stashId))
     return {
       controllerId: toIdString(controllerId),
       destination: rewardDestination && rewardDestination.toNumber(),
@@ -280,8 +278,8 @@ class Account extends React.PureComponent<Props, State> {
   render() {
 
     const { accountId, filter, kton_freeBalance } = this.props;
-    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, sessionId } = this.state;
-    // console.log('render', accountId, controllerId, nominators)
+    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs } = this.state;
+    console.log('render', accountId, controllerId, nominators)
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
       return null;
@@ -289,30 +287,16 @@ class Account extends React.PureComponent<Props, State> {
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
 
-    if((controllerId !== stashId) || (sessionId)){
-        return (
-          <StyledWrapper>
-            <div className={'titleRow'}>
-              Note
-            </div>
-            <div className="ui--string-now">
-              <h1>Sorry！</h1>
-              <p>You are in the status of a nominators and cannot be a node for now.</p>
-              <p>We will develop the upgrade to be a node function in future.</p>
-            </div>
-         </StyledWrapper>
-        );
-    }
-
     // Each component is rendered and gets a `is[Component]Openwill` passed in a `isOpen` props.
     // These components will be loaded and return null at the first load (because is[Component]Open === false).
     // This is deliberate in order to display the Component modals in a performant matter later on
     // because their state will already be loaded.
     return (
       <StyledWrapper>
-        <div className={'titleRow'}>
-          My Nomination
-        </div>
+        {this.renderButtons()}
+        {/* <div className={'titleRow'}>
+          My Node
+        </div> */}
         <div>
           {this.renderBond()}
           {this.renderBondExtra()}
@@ -325,7 +309,8 @@ class Account extends React.PureComponent<Props, State> {
           {this.renderSetControllerAccount()}
           {this.renderSetRewardDestination()}
           {this.renderSetSessionAccount()}
-          <div className="ui--address-box">
+           {/* {this.renderNominateButtons()} */}
+          {/* <div className="ui--address-box">
             <AddressRow
               // buttons={this.renderNominateButtons()}
               value={accountId}
@@ -340,10 +325,10 @@ class Account extends React.PureComponent<Props, State> {
             value={accountId}
             withBalance={true}
             buttons={this.renderBondButtons()}
-          />
+          /> */}
         </div>
 
-        {!isActiveStash && !isNominating && !isValidating && <div>
+        {/* {!isActiveStash && !isNominating && !isValidating && <div>
           <div className={'titleRow'}>Start a KTON staking</div>
           <div className="ui--string-now">
             <h1>Start a KTON staking</h1>
@@ -356,17 +341,29 @@ class Account extends React.PureComponent<Props, State> {
               onClick={this.toggleBond}
             >Staking now</button>
           </div>
-        </div>}
+        </div>} */}
 
 
-        {isActiveStash && <><div className={'titleRow'}>
+        {/* {isActiveStash && <><div className={'titleRow'}>
           My Nomination
         </div>
           <div className="ui--accounts-box">
             {this.renderNominee()}
           </div>
         </>
-        }
+        } */}
+
+        {/* <>
+          <div className={'titleRow'}>
+            Account
+          </div>
+          <div className="ui--accounts-box">
+            {this.renderStashId()}
+            {this.renderControllerId()}
+            {this.renderSessionId()}
+            {this.renderLinkedAccountEmpty()}
+          </div>
+        </> */}
 
         {/* <div className="ui--accounts-link">
           <div>
@@ -489,8 +486,7 @@ class Account extends React.PureComponent<Props, State> {
         controllerId={controllerId}
         isOpen={isBondOpen}
         onClose={this.toggleBond}
-        disableController={true}
-        easyMode={true}
+        checkSameController={true}
       />
     );
   }
@@ -667,7 +663,7 @@ class Account extends React.PureComponent<Props, State> {
     const { recentlyOffline, t } = this.props;
     const { isActiveStash, stashId } = this.state;
 
-    if (!stashId || isActiveStash) {
+    if (!stashId) {
       return null;
     }
 
@@ -704,7 +700,7 @@ class Account extends React.PureComponent<Props, State> {
         onClose={this.toggleNominate}
         stashId={stashId}
         stashOptions={stashOptions}
-        easyMode={true}
+
       />
     );
   }
@@ -712,19 +708,19 @@ class Account extends React.PureComponent<Props, State> {
   private renderNominateButtons() {
     const { accountId, balances_all, t } = this.props;
     const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen } = this.state;
-    const buttons = [];
+    let buttons = [];
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-
+    console.log('renderNominateButtons', isActiveStash, sessionId,isValidating , isNominating)
+    
     if (isActiveStash) {
       // if we are validating/nominating show stop
       if (isValidating || isNominating) {
+        console.log(111111111110)
         buttons.push(
           <TxButton
             accountId={accountId}
             // isNegative
-            isBasic
-            isSecondary
             label={
               isNominating
                 ? t('Stop Nominating')
@@ -734,18 +730,30 @@ class Account extends React.PureComponent<Props, State> {
             tx='staking.chill'
           />
         );
+        buttons.push(
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            key='validatorPre'
+            onClick={this.toggleValidate}
+            label={t('Set Validator Preferences')}
+          />
+        );
       } else {
+        console.log(111111111111)
         if (!sessionId) {
-          // buttons.push(
-          //   <Button
-          //     isBasic={true}
-          //     isSecondary={true}
-          //     key='session'
-          //     onClick={this.toggleSessionKey}
-          //     label={t('Set Session Key')}
-          //   />
-          // );
+          console.log(111111111112)
+          buttons.push(
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              key='session'
+              onClick={this.toggleSessionKey}
+              label={t('Set Session Key')}
+            />
+          );
         } else {
+          console.log(111111111113)
           buttons.push(
             <Button
               isBasic={true}
@@ -756,18 +764,18 @@ class Account extends React.PureComponent<Props, State> {
             />
           );
         }
-        buttons.push(
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            key='nominate1'
-            onClick={this.toggleNominate}
-            label={t('Nominate')}
-          />
-        );
+        // buttons.push(
+        //   <Button
+        //     isBasic={true}
+        //     isSecondary={true}
+        //     key='nominate1'
+        //     onClick={this.toggleNominate}
+        //     label={t('Nominate')}
+        //   />
+        // );
       }
     }
-
+    console.log('buttons', buttons)
     return (
       <Button.Group>
         {buttons}
@@ -894,6 +902,15 @@ class Account extends React.PureComponent<Props, State> {
             tx='staking.chill'
           />
         );
+        buttons.push(
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            key='validatorPre'
+            onClick={this.toggleValidate}
+            label={t('Set Validator Preferences')}
+          />
+        );
       } else {
         if (!sessionId) {
           buttons.push(
@@ -916,15 +933,15 @@ class Account extends React.PureComponent<Props, State> {
             />
           );
         }
-        buttons.push(
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            key='nominate'
-            onClick={this.toggleNominate}
-            label={t('Nominate')}
-          />
-        );
+        // buttons.push(
+        //   <Button
+        //     isBasic={true}
+        //     isSecondary={true}
+        //     key='nominate'
+        //     onClick={this.toggleNominate}
+        //     label={t('Nominate')}
+        //   />
+        // );
       }
     } else {
       // we have nothing here, show the bond to get started

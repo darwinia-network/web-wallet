@@ -106,12 +106,13 @@ class SideBar extends React.PureComponent<Props, State> {
               <Menu.Divider hidden />
               {/* {this.renderGithub()}
               {this.renderWiki()} */}
-              <Menu.Divider hidden />
-              {
+              {/* <Menu.Divider hidden /> */}
+             
+              {/* {
                 isCollapsed
                   ? undefined
                   : <NodeInfo />
-              }
+              } */}
             </div>
             {/* {this.renderCollapse()} */}
           </Menu>
@@ -178,8 +179,9 @@ class SideBar extends React.PureComponent<Props, State> {
   private renderRoutes() {
     const { handleResize, isCollapsed } = this.props;
 
-    return routing.routes.map((route, index) => (
-      route
+    return routing.routes.map((route, index) => {
+      
+      return route
         ? (
           <Item
             isCollapsed={isCollapsed}
@@ -193,12 +195,13 @@ class SideBar extends React.PureComponent<Props, State> {
           />
         )
         : (
-          <Menu.Divider
-            hidden
-            key={index}
-          />
+          // <Menu.Divider
+          //   hidden
+          //   key={index}
+          // />
+          <div className="apps-SideBar-Split"></div>
         )
-    ));
+        });
   }
 
   private renderGithub() {

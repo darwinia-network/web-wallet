@@ -20,7 +20,9 @@ import ImportModal from '../modals/Import';
 import Account from '../Account';
 import AccountDarwinia from '../AccountDarwinia';
 import translate from '../translate';
-
+import Forgetting from './Forgetting';
+import Backup from './Backup';
+import ChangePass from './ChangePass';
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[]

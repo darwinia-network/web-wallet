@@ -4,18 +4,23 @@
 
 import { Routes } from './types';
 
-import Accounts from '@polkadot/app-accounts';
+import Transfer from '@polkadot/app-transfer';
+import DevModal from '@polkadot/app-settings/modals/Setting';
 
 export default ([
   {
-    Component: Accounts,
+    Component: Transfer,
+    Modal: DevModal,
     display: {
-      needsApi: []
+      isHidden: false,
+      needsApi: [
+        'tx.balances.transfer'
+      ]
     },
     i18n: {
-      defaultValue: 'Assets'
+      defaultValue: 'Setting'
     },
-    icon: 'briefcase',
-    name: 'accounts'
+    icon: 'setting',
+    name: 'dev'
   }
 ] as Routes);

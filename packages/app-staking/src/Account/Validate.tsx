@@ -58,7 +58,7 @@ class Validate extends TxComponent<Props, State> {
   }
 
   render () {
-    const { isOpen } = this.props;
+    const { isOpen, onClose } = this.props;
 
     if (!isOpen) {
       return null;
@@ -69,6 +69,7 @@ class Validate extends TxComponent<Props, State> {
         className='staking--Staking'
         dimmer='inverted'
         open
+        onClose={onClose}
         size='small'
       >
         {this.renderContent()}
@@ -85,12 +86,6 @@ class Validate extends TxComponent<Props, State> {
     return (
       <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
           <TxButton
             accountId={controllerId}
             isDisabled={!!unstakeThresholdError}
@@ -103,6 +98,12 @@ class Validate extends TxComponent<Props, State> {
             }]}
             tx='staking.validate'
             ref={this.button}
+          />
+          <Button
+            isBasic
+            isSecondary
+            label={t('Cancel')}
+            onClick={onClose}
           />
         </Button.Group>
       </Modal.Actions>

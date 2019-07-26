@@ -21,9 +21,12 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
   controllerId?: string | null,
   isOpen: boolean,
+  disableController?: boolean,
   onClose: () => void,
   kton_locks: Array<any>,
-  kton_freeBalance: BN
+  kton_freeBalance: BN,
+  easyMode: boolean,
+  checkSameController?: boolean
 };
 
 type State = {
@@ -54,7 +57,7 @@ class Bond extends TxComponent<Props, State> {
     this.state = {
       controllerError: null,
       controllerId: controllerId ? controllerId.toString() : accountId,
-      destination: 0,
+      destination: 1,
       extrinsic: null
     };
   }
@@ -117,12 +120,15 @@ class Bond extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, t } = this.props;
+    const { accountId, t, disableController = false, easyMode = false, checkSameController = false } = this.props;
     const { controllerId, controllerError, bondValue, destination, maxBalance } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0);
 
     return (
       <>
+        <Modal.Header>
+          {t('Bond funds')}
+        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'
@@ -130,20 +136,25 @@ class Bond extends TxComponent<Props, State> {
             isDisabled
             label={t('stash account')}
           />
-          <InputAddress
+
+          {!easyMode && <InputAddress
             className='medium'
             help={t('The controller is the account that will be used to control any nominating or validating actions. Should not match another stash or controller.')}
             isError={!!controllerError}
             label={t('controller account')}
             onChange={this.onChangeController}
+            isDisabled={disableController}
             type='account'
             value={controllerId}
-          />
+          />}
+
           <ValidateController
             accountId={accountId}
             controllerId={controllerId}
             onError={this.onControllerError}
+            checkSameController={checkSameController}
           />
+
           <InputBalance
             autoFocus
             className='medium'
@@ -155,15 +166,15 @@ class Bond extends TxComponent<Props, State> {
             onEnter={this.sendTx}
             withMax
           />
-          <Dropdown
+          {!easyMode && <Dropdown
             className='medium'
-            defaultValue={0}
+            defaultValue={1}
             help={t('The destination account for any payments as either a nominator or validator')}
             label={t('payment destination')}
             onChange={this.onChangeDestination}
             options={stashOptions}
             value={destination}
-          />
+          />}
         </Modal.Content>
       </>
     );

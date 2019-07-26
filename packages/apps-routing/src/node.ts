@@ -4,19 +4,24 @@
 
 import { Routes } from './types';
 
-import {RingStaking} from '@polkadot/app-accounts';
+import Staking from '@polkadot/app-staking/StakingKtonNode';
 
 export default ([
   {
-    Component: RingStaking,
+    Component: Staking,
     display: {
       needsAccounts: true,
-      needsApi: [] 
+      needsApi: [
+        [
+          'tx.staking.bond' // current bonding API
+          // 'tx.staking.stake' // previous staking API
+        ]
+      ]
     },
     i18n: {
-      defaultValue: 'Deposit Ring'
+      defaultValue: 'Node'
     },
-    icon: 'users',
-    name: 'ringstaking'
+    icon: 'hubspot',
+    name: 'node'
   }
 ] as Routes);

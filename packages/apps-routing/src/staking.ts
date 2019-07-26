@@ -4,12 +4,13 @@
 
 import { Routes } from './types';
 
-import Staking from '@polkadot/app-staking';
+import Staking from '@polkadot/app-staking/StakingKton';
 
 export default ([
   {
     Component: Staking,
     display: {
+      needsAccounts: true,
       needsApi: [
         [
           'tx.staking.bond' // current bonding API
@@ -18,7 +19,7 @@ export default ([
       ]
     },
     i18n: {
-      defaultValue: 'Staking Kton'
+      defaultValue: 'Nomination'
     },
     icon: 'certificate',
     name: 'staking'

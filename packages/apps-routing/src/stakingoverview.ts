@@ -4,18 +4,23 @@
 
 import { Routes } from './types';
 
-import Accounts from '@polkadot/app-accounts';
+import Staking from '@polkadot/app-staking';
 
 export default ([
   {
-    Component: Accounts,
+    Component: Staking,
     display: {
-      needsApi: []
+      needsApi: [
+        [
+          'tx.staking.bond' // current bonding API
+          // 'tx.staking.stake' // previous staking API
+        ]
+      ]
     },
     i18n: {
-      defaultValue: 'Assets'
+      defaultValue: 'Staking Scan'
     },
-    icon: 'briefcase',
-    name: 'accounts'
+    icon: 'bullseye',
+    name: 'stakingoverview'
   }
 ] as Routes);

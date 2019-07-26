@@ -24,6 +24,8 @@ import { noop } from 'rxjs';
 import store from 'store';
 
 
+import buttonCurrent from './Public/button-current.svg'
+
 export type Props = I18nProps & {
   accounts_idAndIndex?: [AccountId?, AccountIndex?],
   bonded?: BN | Array<BN>,
@@ -170,10 +172,12 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
     const { address } = this.state;
     return isChecked ? <Button
       isPrimary
-      label={t('Current')}
+      label={t('')}
       isSecondary={true}
       onClick={noop}
-    /> :
+    >
+      <img src={buttonCurrent}/>
+    </Button>:
       <Button
         isBasic={true}
         isSecondary={true}

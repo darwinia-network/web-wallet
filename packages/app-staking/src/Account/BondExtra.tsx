@@ -101,6 +101,9 @@ class BondExtra extends TxComponent<Props, State> {
 
     return (
       <>
+        <Modal.Header>
+          {t('Bond funds')}
+        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'

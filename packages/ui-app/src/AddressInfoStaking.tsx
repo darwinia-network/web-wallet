@@ -49,6 +49,7 @@ export type CryptoActiveType = {
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
   children?: React.ReactNode,
+  buttons?: React.ReactNode,
   staking_info?: DerivedStaking,
   value: string,
   withBalance?: boolean | BalanceActiveType,
@@ -85,7 +86,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks } = this.props;
+    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons } = this.props;
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -97,40 +98,41 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     }
 
     let _ktonBalances_locks = new BN(0)
-    console.log('kton_locks', kton_locks, kton_freeBalance)
+
 
     if(kton_locks) {
         kton_locks.forEach((item) => {
           _ktonBalances_locks.add(item.amount)
         })
     }
-    console.log(111,_ktonBalances_locks)
+
     return (
       <div className='column'>
         <div className="ui--address-value">
-          <div>
+          <div className="flex-box">
             <p>total</p>
             <h1>{formatBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')} KTON</h1>
           </div>
-          <div>
+          <div className="flex-box">
             <p>available</p>
             <h1>{formatBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')} KTON</h1>
           </div>
-          <div>
+          <div className="flex-box">
             <p>bonded</p>
             <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)} KTON</h1>
           </div>
-          <div>
+          <div className="flex-box">
             <p>unbonding</p>
             <h1>{this.renderUnlocking()}</h1>
           </div>
           {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
-            <div>
+            <div className="flex-box">
               <p>{t('redeemable')}</p>
               <h1>{formatBalance(staking_info.redeemable)}
                 {this.renderRedeemButton()}</h1>
             </div>
           )}
+          {buttons}
         </div>
       </div>
     );
@@ -241,12 +243,15 @@ export default withMulti(
     display: flex;
     flex: 1;
     justify-content: center;
-
+    background: #fff;
+    border: 1px solid #EDEDED;
     .column {
       flex: 1;
       display: grid;
       opacity: 1;
-
+      h1{
+        text-transform: none;
+      }
       label {
         grid-column:  1;
         padding-right: 0.5rem;

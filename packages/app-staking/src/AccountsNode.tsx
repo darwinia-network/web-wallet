@@ -12,12 +12,13 @@ import keyring from '@polkadot/ui-keyring';
 import createOption from '@polkadot/ui-keyring/options/item';
 import styled from 'styled-components';
 
-import Account from './Account';
+import Account from './Account/node';
 import translate from './translate';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 type Props = I18nProps & ComponentProps &{
-  accountMain: 'string'
+  accountMain: 'string',
+  onStatusChange: () => void
 };
 
 type State = {
@@ -45,17 +46,16 @@ class Accounts extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { balances, recentlyOffline, t, validators , accountMain} = this.props;
+    const { balances, recentlyOffline, t, validators , accountMain, onStatusChange} = this.props;
 
     const { filter, filterOptions } = this.state;
     const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
 
-
     return (
       <StyledWrapper>
         {/* 
-  // @ts-ignore */}
+        // @ts-ignore */}
         <Account
           accountId={accountMain}
           balances={balances}
@@ -64,24 +64,8 @@ class Accounts extends React.PureComponent<Props, State> {
           key={accountMain}
           recentlyOffline={recentlyOffline}
           stashOptions={stashOptions}
+          onStatusChange={onStatusChange}
         />
-
-          {/* {accounts.map((account) => {
-            const address = account.address();
-
-            return (
-              <Account
-                accountId={address}
-                balances={balances}
-                filter={filter}
-                isValidator={validators.includes(address)}
-                key={address}
-                recentlyOffline={recentlyOffline}
-                stashOptions={stashOptions}
-              />
-            );
-          })} */}
-     
       </StyledWrapper>
     );
   }

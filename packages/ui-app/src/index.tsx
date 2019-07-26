@@ -17,6 +17,7 @@ export { default as Balance } from './Balance';
 export { default as Bonded } from './Bonded';
 export { default as Bubble } from './Bubble';
 export { default as Button } from './Button';
+export { default as ColorButton } from './ColorButton/Button';
 export { default as Call } from './Call';
 export { default as Card } from './Card';
 export { default as CardGrid } from './CardGrid';
