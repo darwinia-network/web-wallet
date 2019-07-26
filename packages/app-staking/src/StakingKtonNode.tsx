@@ -29,7 +29,8 @@ type Props = AppProps & ApiProps & I18nProps & {
   balances?: DerivedBalancesMap,
   session_validators?: Array<AccountId>,
   staking_controllers?: [Array<AccountId>, Array<Option<AccountId>>],
-  staking_recentlyOffline?: RecentlyOffline
+  staking_recentlyOffline?: RecentlyOffline,
+  onStatusChange?: () => void
 };
 
 type State = {

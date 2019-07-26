@@ -28,7 +28,7 @@ import uiSettings from '@polkadot/ui-settings';
 
 
 type Props = ApiProps & I18nProps & {
-
+  onClose: () => void
 };
 
 type State = {
