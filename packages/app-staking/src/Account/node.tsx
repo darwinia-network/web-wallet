@@ -47,7 +47,8 @@ type Props = ApiProps & I18nProps & {
   kton_freeBalance: BN,
   session_validators?: Array<AccountId>,
   staking_controllers?: [Array<AccountId>, Array<Option<AccountId>>],
-  onStatusChange: () => void
+  onStatusChange: () => void,
+  staking_validators: any 
 };
 
 type State = {
@@ -115,18 +116,16 @@ const StyledWrapper = styled.div`
       flex: 1;
     }
     .validatingBox {
-
       border-radius:13px;
       border:1px solid #5930DD;
-
       p{
         font-size:12px;
         font-weight:600;
         color: #5930DD;
         padding: 5px 26px;
-        
       }
     }
+
     .ui--AddressRow{
       flex: 1;
       background: #fff;
@@ -136,6 +135,7 @@ const StyledWrapper = styled.div`
         border-radius: 50%;
       }
     }
+
     .ui--Button-Group{
       margin-top: 0.25rem;
     }
@@ -311,8 +311,8 @@ class Account extends React.PureComponent<Props, State> {
     isCreateOpen: false,
   };
 
-  static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [] }: Props): Pick<State, never> | null {
-
+  static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
+    
     if (!staking_info) {
       return null;
     }
@@ -321,6 +321,8 @@ class Account extends React.PureComponent<Props, State> {
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
     
+   
+
     // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
     return {
       controllerId: toIdString(controllerId),
@@ -350,8 +352,9 @@ class Account extends React.PureComponent<Props, State> {
   render() {
     // @ts-ignore
     const { accountId, filter, kton_freeBalance, session_validators, onStatusChange } = this.props;
-    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen } = this.state;
+    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId } = this.state;
 
+    console.log(990001, controllerId, nominators, validatorPrefs)
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
       return null;
     }
@@ -418,7 +421,7 @@ class Account extends React.PureComponent<Props, State> {
           />
         </div>
 
-        {!isActiveStash && !isNominating && !isValidating && <div>
+        {!isActiveStash && !isNominating && !isValidating && !sessionId && <div>
           <div className={'titleRow'}>Start a KTON staking</div>
           <div className="ui--string-now">
             <h1>Start a KTON staking</h1>
@@ -1308,6 +1311,7 @@ export default withMulti(
   withCalls<Props>(
     ['derive.staking.info', { paramName: 'accountId' }],
     'derive.staking.controllers',
+    ['query.staking.validators', { paramName: 'accountId' }],
     'query.session.validators',
     // 'query.staking.recentlyOffline',
     ['derive.balances.all', { paramName: 'accountId' }],

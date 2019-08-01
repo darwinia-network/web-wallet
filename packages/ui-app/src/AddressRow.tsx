@@ -163,7 +163,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     if (!isShare || other.length === 0) {
       return null;
     }
-    console.log(111, other)
+
     return (
       <div className="myshare">My share: {formatKtonBalance(other[0] ? other[0].value : 0)}</div>
     );

@@ -237,7 +237,7 @@ class Bond extends TxComponent<Props, State> {
         .add(transactionByteFee.muln(txLength));
 
 
-        debugger
+
       let _ktonBalances_locks = new BN(0)
 
       if (kton_locks) {

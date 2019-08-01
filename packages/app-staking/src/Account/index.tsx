@@ -38,7 +38,8 @@ type Props = ApiProps & I18nProps & {
   balances_all?: DerivedBalances,
   staking_info?: DerivedStaking,
   stashOptions: Array<KeyringSectionOption>,
-  kton_freeBalance: BN
+  kton_freeBalance: BN,
+  staking_nominators: any
 };
 
 type State = {
@@ -249,13 +250,28 @@ class Account extends React.PureComponent<Props, State> {
     stashId: null
   };
 
-  static getDerivedStateFromProps({ accountId, staking_info }: Props): Pick<State, never> | null {
-
+  static getDerivedStateFromProps({ accountId, staking_info, staking_nominators }: Props): Pick<State, never> | null {
+   
+    
+    debugger
     if (!staking_info) {
       return null;
     }
 
-    const { controllerId, nextSessionId, nominators, rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
+    const { controllerId, nextSessionId, stakers, rewardDestination, stakingLedger, stashId, validatorPrefs } = staking_info;
+    
+    let nominatorIndex = -1;
+    let nominators = [];
+    if(staking_nominators) {
+      staking_nominators[0].forEach((element, index) => {
+          if(toIdString(element) === toIdString(stashId)) {
+            nominatorIndex = index;
+          }
+      });
+      
+      nominators = staking_nominators[1][nominatorIndex];
+    }
+    
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
 
@@ -576,7 +592,7 @@ class Account extends React.PureComponent<Props, State> {
   private renderNominee() {
     const { recentlyOffline, t, staking_info } = this.props;
     const { nominators, isActiveStash, controllerId } = this.state;
-    console.log(99005, staking_info)
+
     if (!nominators || !nominators.length) {
       return (
         <div className="staking--no-address-nominate">
@@ -1130,6 +1146,7 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['derive.staking.info', { paramName: 'accountId' }],
+    ['query.staking.nominators', { paramName: 'accountId' }],
     // 'query.staking.recentlyOffline',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.kton.freeBalance', { paramName: 'accountId' }],
