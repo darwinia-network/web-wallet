@@ -13,9 +13,7 @@ export default ([
     Modal: DevModal,
     display: {
       isHidden: false,
-      needsApi: [
-        'tx.balances.transfer'
-      ]
+      needsAccounts: false
     },
     i18n: {
       defaultValue: 'Setting'

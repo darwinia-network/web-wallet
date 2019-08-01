@@ -33,15 +33,11 @@ const routes: Routes = appSettings.uiMode === 'full'
     
     // democracy,
     // null,
-
-
     accounts,
     staking,
     RingStaking,
     stakingKton,
     stakingKtonNode,
-
-
     // addressbook,
     // transfer,
     null,
@@ -75,11 +71,12 @@ const routes: Routes = appSettings.uiMode === 'full'
     // contracts,
     storage,
     extrinsics,
+    settings,
     null,
-    dev
+    dev,
     // sudo,
     // null,
-    // settings,
+
     // toolbox,
     // js,
     // template
