@@ -1,0 +1,22 @@
+{
+  "name": "@polkadot/ui-settings",
+  "version": "0.42.0-beta.2",
+  "description": "Manages app settings",
+  "main": "index.js",
+  "author": "Jaco Greeff <jacogr@gmail.com>",
+  "maintainers": [
+    "Jaco Greeff <jacogr@gmail.com>"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@babel/runtime": "^7.4.5",
+    "@types/store": "^2.0.2",
+    "store": "^2.0.12"
+  },
+  "devDependencies": {
+    "@polkadot/util": "^0.94.0-beta.4"
+  },
+  "peerDependencies": {
+    "@polkadot/util": "*"
+  }
+}
