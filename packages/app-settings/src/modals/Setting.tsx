@@ -125,7 +125,6 @@ class Setting extends React.PureComponent<Props, State> {
     );
   }
 
-
   private renderContent() {
     const {settings} = this.state;
     return (

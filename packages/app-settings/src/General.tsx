@@ -20,7 +20,7 @@ type Props = AppProps & I18nProps & {
 type State = {
   isCustomNode: boolean,
   isUrlValid: boolean,
-  settings: SettingsStruct
+  settings: SettingsStruct,
 };
 
 const Wrapper = styled.div`
@@ -40,11 +40,14 @@ const Wrapper = styled.div`
   }
 `;
 
+
 class General extends React.PureComponent<Props, State> {
   constructor (props: Props) {
     super(props);
 
     const settings = uiSettings.get();
+
+    // const initApiUrl = 'ws://trilobita.darwinia.network/';
     const isCustomNode = uiSettings.availableNodes.reduce((isCustomNode, { value }) => {
       return isCustomNode && value !== settings.apiUrl;
     }, true);
@@ -63,7 +66,7 @@ class General extends React.PureComponent<Props, State> {
     return (
       <Wrapper>
         {this.renderEndpoint()}
-        <div className='ui--row'>
+        {/* <div className='ui--row'>
           <div className='medium'>
             <Dropdown
               defaultValue={uiTheme}
@@ -82,8 +85,8 @@ class General extends React.PureComponent<Props, State> {
               options={uiSettings.availableUIModes}
             />
           </div>
-        </div>
-        <div className='ui--row'>
+        </div> */}
+        {/* <div className='ui--row'>
           <div className='full'>
             <Dropdown
               defaultValue={i18nLang}
@@ -92,7 +95,7 @@ class General extends React.PureComponent<Props, State> {
               options={uiSettings.availableLanguages}
             />
           </div>
-        </div>
+        </div> */}
         <Button.Group>
           <Button
             isDisabled={!isUrlValid}
@@ -108,7 +111,7 @@ class General extends React.PureComponent<Props, State> {
   private renderEndpoint = () => {
     const { t } = this.props;
     const { isCustomNode, isUrlValid, settings: { apiUrl } } = this.state;
-
+    console.log(uiSettings.availableNodes)
     return (
       <>
         <Button.Group isBasic>
@@ -211,7 +214,7 @@ class General extends React.PureComponent<Props, State> {
 
     // HACK This is terribe, but since the API needs to re-connect, but since
     // the API does not yet handle re-connections properly, it is what it is
-    // window.location.reload();
+    window.location.reload();
   }
 }
 
