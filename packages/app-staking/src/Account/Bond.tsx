@@ -16,6 +16,7 @@ import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 
 import translate from '../translate';
 import ValidateController from './ValidateController';
+import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
@@ -23,10 +24,12 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   isOpen: boolean,
   disableController?: boolean,
   onClose: () => void,
+  onSuccess?:(status: SubmittableResult) => void,
   kton_locks: Array<any>,
   kton_freeBalance: BN,
   easyMode: boolean,
-  checkSameController?: boolean
+  checkSameController?: boolean,
+  withStep?: boolean
 };
 
 type State = {
@@ -45,6 +48,7 @@ const stashOptions = [
 ];
 
 const ZERO = new BN(0);
+const noop = function(){};
 
 class Bond extends TxComponent<Props, State> {
   state: State;
@@ -78,7 +82,7 @@ class Bond extends TxComponent<Props, State> {
   }
 
   render() {
-    const { accountId, isOpen, onClose, t } = this.props;
+    const { accountId, isOpen, onClose,onSuccess, t } = this.props;
     const { bondValue, controllerError, controllerId, extrinsic, maxBalance } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0) && (!maxBalance || bondValue.lte(maxBalance));
     const canSubmit = hasValue && !controllerError && !!controllerId;
@@ -103,7 +107,9 @@ class Bond extends TxComponent<Props, State> {
               isDisabled={!canSubmit}
               isPrimary
               label={t('Bond')}
-              onClick={onClose}
+              onClick={onSuccess ? noop : onClose}
+              onSuccess= {onSuccess}
+              withSpinner={true}
               extrinsic={extrinsic}
               ref={this.button}
             />
@@ -120,14 +126,21 @@ class Bond extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, t, disableController = false, easyMode = false, checkSameController = false } = this.props;
+    const { accountId, t, disableController = false, easyMode = false, checkSameController = false, withStep } = this.props;
     const { controllerId, controllerError, bondValue, destination, maxBalance } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0);
 
     return (
       <>
-        <Modal.Header>
+        <Modal.Header className="ui-step-header">
           {t('Bond funds')}
+          {withStep && <div>
+            <span className="">STEP1</span>
+            <i className="step"></i>
+            <span className="step">STEP2</span>
+            <i className="step"></i>
+            <span className="step">STEP3</span>
+          </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
@@ -161,6 +174,7 @@ class Bond extends TxComponent<Props, State> {
             help={t('The total amount of the stash balance that will be at stake in any forthcoming rounds (should be less than the total amount available)')}
             isError={!hasValue}
             label={t('value bonded')}
+            siValue={'kton'}
             maxValue={maxBalance}
             onChange={this.onChangeValue}
             onEnter={this.sendTx}
@@ -223,6 +237,7 @@ class Bond extends TxComponent<Props, State> {
         .add(transactionByteFee.muln(txLength));
 
 
+        debugger
       let _ktonBalances_locks = new BN(0)
 
       if (kton_locks) {

@@ -29,6 +29,7 @@ const Wrapper = styled.div`
     cursor: pointer;
   }
 `
+
 export default class Modal extends React.PureComponent<Props> {
   static Actions = SUIModal.Actions;
   static Content = SUIModal.Content;

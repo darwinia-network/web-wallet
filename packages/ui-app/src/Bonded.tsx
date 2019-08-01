@@ -7,7 +7,7 @@ import { BareProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import { AccountId, AccountIndex, Address } from '@polkadot/types';
-import { formatBalance } from '@polkadot/util';
+import { formatKtonBalance } from '@polkadot/util';
 import { Bonded } from '@polkadot/ui-reactive';
 
 import { classes } from './util';
@@ -41,12 +41,12 @@ export default class BondedDisplay extends React.PureComponent<Props> {
 
   private renderProvided () {
     const { bonded, className, label, style } = this.props;
-    let value = `${formatBalance(Array.isArray(bonded) ? bonded[0] : bonded)}`;
+    let value = `${formatKtonBalance(Array.isArray(bonded) ? bonded[0] : bonded)}`;
 
     if (Array.isArray(bonded)) {
       const totals = bonded.filter((value, index) => index !== 0);
       const total = totals.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${totals.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${totals.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
         : '';
 
       value = `${value}  ${total}`;

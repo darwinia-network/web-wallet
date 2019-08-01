@@ -192,6 +192,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
             label={t('amount')}
             maxValue={maxBalance}
             onChange={this.onChangeAmount}
+            siValue={type}
             withMax
           />
           {/* <Checks

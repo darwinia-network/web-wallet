@@ -8,7 +8,7 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton, Button } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 // import {DerivedRingBalances} from '../../app-darwina/types'
@@ -132,13 +132,13 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div>
               <h1>KTON</h1>
-              <p className='ui--value'>{formatBalance(kton_freeBalance)}</p>
+              <p className='ui--value'>{formatKtonBalance(kton_freeBalance)}</p>
             </div>
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
               <p>availible:</p>
-              <p className="p-amount">{formatBalance(kton_freeBalance)}</p>
+              <p className="p-amount">{formatKtonBalance(kton_freeBalance)}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -256,12 +256,12 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0])} ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active);
     }
 
     return value

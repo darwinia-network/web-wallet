@@ -5,6 +5,7 @@
 import settings from '@polkadot/ui-settings';
 import '@polkadot/ui-app/i18n';
 import '@polkadot/ui-app/styles';
+import queryString from 'query-string';
 
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom';
@@ -19,12 +20,18 @@ import Apps from './Apps';
 
 const rootId = 'root';
 const rootElement = document.getElementById(rootId);
-const url = process.env.WS_URL || 'ws://121.199.60.87/';
+
+// const url = process.env.WS_URL || 'ws://121.199.60.87/';
 // const url = process.env.WS_URL || 'ws://192.168.1.241:9944/';
+// const url = process.env.WS_URL || 'ws://192.168.110.19:9944/';
 // const url = process.env.WS_URL || 'ws://192.168.1.241:9944/';
 // const url = process.env.WS_URL || 'wss://trilobita.darwinia.network/';
 // const url = process.env.WS_URL || 'ws://192.168.110.246:9944/';
 // const url = process.env.WS_URL || 'ws://localhost:9944/';
+
+const urlOptions = queryString.parse(location.href.split('?')[1]);
+// const wsEndpoint = urlOptions.rpc || process.env.WS_URL || settings.apiUrl || undefined;
+const wsEndpoint = process.env.WS_URL || settings.apiUrl || undefined;
 
 const DARWINIA_TYPES = {
   "TokenBalance": "u128",
@@ -32,6 +39,7 @@ const DARWINIA_TYPES = {
   "CurrencyOf": "u128",
   "RewardBalance": "u128",
   "RewardBalanceOf": "u128",
+  "RingBalanceOf": "u128",
   "IndividualDeposit": {
     "month": "u32",
     "start_at": "u64",
@@ -49,7 +57,7 @@ if (!rootElement) {
   throw new Error(`Unable to find element with id '${rootId}'`);
 }
 
-console.log('Web socket url=', url);
+// console.log('Web socket url=', url);
 
 try {
   store.set('types', DARWINIA_TYPES);
@@ -73,7 +81,8 @@ ReactDOM.render(
           <Api
             queueExtrinsic={queueExtrinsic}
             queueSetTxStatus={queueSetTxStatus}
-            url={url}
+            // url={url}
+            url={wsEndpoint}
           >
             <HashRouter>
               <Apps />

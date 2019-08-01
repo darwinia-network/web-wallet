@@ -65,7 +65,8 @@ type State = {
   stakers?: Exposure,
   stakingLedger?: StakingLedger,
   stashId: string | null,
-  validatorPrefs?: ValidatorPrefs
+  validatorPrefs?: ValidatorPrefs,
+  isBondOpenWithStep: boolean
 };
 
 function toIdString(id?: AccountId | null): string | null {
@@ -231,6 +232,7 @@ class Account extends React.PureComponent<Props, State> {
     isActiveStash: true,
     controllerId: null,
     isBondOpen: false,
+    isBondOpenWithStep: false,
     isBondExtraOpen: false,
     isSessionKeyOpen: false,
     isNominateOpen: false,
@@ -248,7 +250,6 @@ class Account extends React.PureComponent<Props, State> {
   };
 
   static getDerivedStateFromProps({ accountId, staking_info }: Props): Pick<State, never> | null {
-    console.log(11111111111, staking_info)
 
     if (!staking_info) {
       return null;
@@ -353,7 +354,7 @@ class Account extends React.PureComponent<Props, State> {
               2. Please make sure that you have some rings in this account as gas fee.
             </p>
             <button
-              onClick={this.toggleBond}
+              onClick={this.toggleBondWithStep}
             >Staking now</button>
           </div>
         </div>}
@@ -481,9 +482,10 @@ class Account extends React.PureComponent<Props, State> {
 
   private renderBond() {
     const { accountId } = this.props;
-    const { controllerId, isBondOpen } = this.state;
+    const { controllerId, isBondOpen, isBondOpenWithStep } = this.state;
 
     return (
+      <>
       <Bond
         accountId={accountId}
         controllerId={controllerId}
@@ -492,6 +494,19 @@ class Account extends React.PureComponent<Props, State> {
         disableController={true}
         easyMode={true}
       />
+      <Bond
+        accountId={accountId}
+        controllerId={controllerId}
+        isOpen={isBondOpenWithStep}
+        onClose={this.toggleBondWithStep}
+        onSuccess={() => {
+          this.toggleBondWithStep();
+          this.toggleNominate();
+        }}
+        disableController={true}
+        easyMode={true}
+      />
+      </>
     );
   }
 
@@ -559,9 +574,9 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   private renderNominee() {
-    const { recentlyOffline, t } = this.props;
-    const { nominators, isActiveStash } = this.state;
-
+    const { recentlyOffline, t, staking_info } = this.props;
+    const { nominators, isActiveStash, controllerId } = this.state;
+    console.log(99005, staking_info)
     if (!nominators || !nominators.length) {
       return (
         <div className="staking--no-address-nominate">
@@ -594,6 +609,8 @@ class Account extends React.PureComponent<Props, State> {
               <AddressRow
                 // key={`${nomineeId}-nominee`}
                 value={nomineeId}
+                nominator={controllerId}
+                isShare
                 defaultName={t('validator (stash)')}
                 offlineStatus={recentlyOffline[nomineeId.toString()]}
                 withBalance={false}
@@ -733,6 +750,16 @@ class Account extends React.PureComponent<Props, State> {
             key='stop'
             tx='staking.chill'
           />
+          
+        );
+        buttons.push(
+          <Button
+            isBasic={true}
+            isSecondary={true}
+            key='nominate1'
+            onClick={this.toggleNominate}
+            label={t('Nominate')}
+          />
         );
       } else {
         if (!sessionId) {
@@ -774,7 +801,6 @@ class Account extends React.PureComponent<Props, State> {
       </Button.Group>
     );
   }
-
 
   private renderBondButtons() {
     const { accountId, balances_all, t } = this.props;
@@ -894,6 +920,27 @@ class Account extends React.PureComponent<Props, State> {
             tx='staking.chill'
           />
         );
+        if (!sessionId) {
+          buttons.push(
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              key='session'
+              onClick={this.toggleSessionKey}
+              label={t('Set Session Key')}
+            />
+          );
+        } else {
+          buttons.push(
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              key='validate'
+              onClick={this.toggleValidating}
+              label={t('Validate')}
+            />
+          );
+        }
       } else {
         if (!sessionId) {
           buttons.push(
@@ -998,6 +1045,12 @@ class Account extends React.PureComponent<Props, State> {
     }));
   }
 
+  private toggleBondWithStep = () => {
+    this.setState(({ isBondOpenWithStep }) => ({
+      isBondOpenWithStep: !isBondOpenWithStep
+    }));
+  }
+
   private toggleBondExtra = () => {
     this.setState(({ isBondExtraOpen }) => ({
       isBondExtraOpen: !isBondExtraOpen
@@ -1080,5 +1133,6 @@ export default withMulti(
     // 'query.staking.recentlyOffline',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.kton.freeBalance', { paramName: 'accountId' }],
+    'query.session.validators',
   )
 );

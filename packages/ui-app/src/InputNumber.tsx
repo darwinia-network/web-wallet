@@ -6,7 +6,7 @@ import { BareProps, BitLength, I18nProps } from './types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { formatBalance, isUndefined } from '@polkadot/util';
+import { formatBalance, isUndefined, formatKtonBalance } from '@polkadot/util';
 
 import { classes } from './util';
 import { BitLengthOption } from './constants';
@@ -23,10 +23,12 @@ type Props = BareProps & I18nProps & {
   isDisabled?: boolean,
   isError?: boolean,
   isSi?: boolean,
+  siValue?: string,
   isDecimal?: boolean,
   label?: any,
   maxLength?: number,
   maxValue?: BN,
+  minValue?: BN,
   onChange?: (value?: BN) => void,
   onEnter?: () => void,
   placeholder?: string,
@@ -53,21 +55,22 @@ class InputNumber extends React.PureComponent<Props, State> {
   constructor (props: Props) {
     super(props);
 
-    const { defaultValue, isSi, value } = this.props;
+    const { defaultValue, isSi, value, siValue } = this.props;
     let valueBN = new BN(value || 0);
-    const si = formatBalance.findSi('-');
-
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
+    const si = commonFormatBalance.findSi('-');
     this.state = {
       value: isSi
         ? new BN(defaultValue || valueBN).div(new BN(10).pow(new BN(si.power))).toString()
         : (defaultValue || valueBN).toString(),
       isPreKeyDown: false,
       isValid: !isUndefined(value),
-      siOptions: formatBalance.getOptions().map(({ power, text, value }) => ({
+      siOptions: commonFormatBalance.getOptions().map(({ power, text, value }) => ({
         value,
-        text: power === 0
-          ? InputNumber.units
-          : text
+        // text: power === 0
+        //   ? InputNumber.units
+        //   : text
+        text
       })),
       siUnit: si.value,
       valueBN
@@ -79,19 +82,20 @@ class InputNumber extends React.PureComponent<Props, State> {
     InputNumber.units = units;
   }
 
-  static getDerivedStateFromProps ({ isDisabled, isSi, defaultValue = '0' }: Props): Partial<State> | null {
+  static getDerivedStateFromProps ({ isDisabled, isSi, defaultValue = '0', siValue }: Props): Partial<State> | null {
     if (!isDisabled || !isSi) {
       return null;
     }
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
 
     return {
-      value: formatBalance(defaultValue, false),
-      siUnit: formatBalance.calcSi(defaultValue.toString(), formatBalance.getDefaults().decimals).value
+      value: commonFormatBalance(defaultValue, false),
+      siUnit: commonFormatBalance.calcSi(defaultValue.toString(), commonFormatBalance.getDefaults().decimals).value
     };
   }
 
   render () {
-    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isDisabled, isError = false, maxLength, maxValue, onEnter, style, withMax, t } = this.props;
+    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isDisabled, isError = false, maxLength, maxValue,minValue, onEnter, style, withMax, t } = this.props;
     const { isValid, value } = this.state;
     const maxValueLength = this.maxValue(bitLength).toString().length - 1;
 
@@ -104,6 +108,7 @@ class InputNumber extends React.PureComponent<Props, State> {
         isDisabled={isDisabled}
         isError={!isValid || isError}
         maxLength={maxLength || maxValueLength}
+        min={minValue}
         onChange={this.onChange}
         onEnter={onEnter}
         onKeyDown={this.onKeyDown}
@@ -300,11 +305,12 @@ class InputNumber extends React.PureComponent<Props, State> {
       }
 
       const div = new BN(value.replace(/\.\d*$/, ''));
-      const mod = new BN(value.replace(/^\d+\./, ''));
+      const modString = value.replace(/^\d+\./, '')
+      const mod = new BN(modString);
 
       return div
         .mul(TEN.pow(siPower))
-        .add(mod.mul(TEN.pow(new BN(basePower + siUnitPower - mod.toString().length))));
+        .add(mod.mul(TEN.pow(new BN(basePower + siUnitPower - modString.length))));
     } else {
       return new BN(value.replace(/[^\d]/g, ''))
         .mul(TEN.pow(siPower));
@@ -335,10 +341,11 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   private getSiPowers = (siUnit = this.state.siUnit): [BN, number, number] => {
-    const { isSi } = this.props;
+    const { isSi, siValue } = this.props;
 
-    const basePower = isSi ? formatBalance.getDefaults().decimals : 0;
-    const siUnitPower = isSi ? formatBalance.findSi(siUnit).power : 0;
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
+    const basePower = isSi ? commonFormatBalance.getDefaults().decimals : 0;
+    const siUnitPower = isSi ? commonFormatBalance.findSi(siUnit).power : 0;
 
     return [new BN(basePower + siUnitPower), basePower, siUnitPower];
   }

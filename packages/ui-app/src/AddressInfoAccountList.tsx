@@ -8,7 +8,7 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatKtonBalance, formatNumber } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 
@@ -89,13 +89,13 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
         {balanceDisplay.free && (
           <>
             <Label label={t('RING') + ':'} />
-            <div className='result'>{formatBalance(balances_all.freeBalance)}</div>
+            <div className='result'>{formatBalance(balances_all.freeBalance, false)}</div>
           </>
         )}
         {balanceDisplay.available && (
           <>
             <Label label={t('KTON') + ':'} />
-            <div className='result'>{formatBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</div>
+            <div className='result'>{formatKtonBalance((kton_freeBalance ? kton_freeBalance.toString() : '0'), false)}</div>
           </>
         )}
         {balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}
@@ -103,7 +103,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
           <>
             <Label label={t('redeemable')} />
             <div className='result'>
-              {formatBalance(staking_info.redeemable)}
+              {formatKtonBalance(staking_info.redeemable, false)}
               {this.renderRedeemButton()}
             </div>
           </>
@@ -129,18 +129,18 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded, false)).join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0], false)} ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active, false);
     }
 
     return value
       ? (
         <>
-          <Label label={t('bonded')} />
+          <Label label={t('Bonded') + ':'} />
           <div className='result'>{value}</div>
         </>
       )
@@ -206,7 +206,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       staking_info.unlocking &&
       staking_info.unlocking.map(({ remainingBlocks, value }, index) => (
         <div key={index}>
-          {formatBalance(value)}
+          {formatKtonBalance(value, false)}
           <Icon
             name='info circle'
             data-tip

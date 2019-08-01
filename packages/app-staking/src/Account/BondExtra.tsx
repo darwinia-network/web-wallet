@@ -14,6 +14,7 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
 import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
+import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 
 import translate from '../translate';
 
@@ -22,6 +23,7 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   controllerId: string,
   isOpen: boolean,
   onClose: () => void,
+  onSuccess?:(status: SubmittableResult) => void,
   staking_ledger?: Option<StakingLedger>,
   kton_freeBalance: BN, 
   kton_locks: Array<any>
@@ -55,7 +57,7 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
   render() {
-    const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, t } = this.props;
+    const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, onSuccess , t } = this.props;
     const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance } = this.state;
     const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && maxAdditional.lte(maxBalance);
 
@@ -82,6 +84,8 @@ class BondExtra extends TxComponent<Props, State> {
               onClick={onClose}
               extrinsic={extrinsic}
               ref={this.button}
+              withSpinner={true}
+              onSuccess= {onSuccess}
             />
             <Button
               isBasic={true}
@@ -102,7 +106,7 @@ class BondExtra extends TxComponent<Props, State> {
     return (
       <>
         <Modal.Header>
-          {t('Bond funds')}
+          {t('Bond additional funds')}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
@@ -116,6 +120,7 @@ class BondExtra extends TxComponent<Props, State> {
             className='medium'
             help={t('The maximum amount to increase the bonded value, this is adjusted using the available free funds on the account.')}
             label={t('max additional value')}
+            siValue={'kton'}
             maxValue={maxBalance}
             onChange={this.onChangeValue}
             onEnter={this.sendTx}

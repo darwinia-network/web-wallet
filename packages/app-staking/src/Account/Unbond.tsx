@@ -100,6 +100,7 @@ class Unbond extends TxComponent<Props, State> {
             help={t('The maximum amount to unbond, this is adjusted using the bonded funds on the account.')}
             label={t('unbond amount')}
             maxValue={maxBalance}
+            siValue='kton'
             onChange={this.onChangeValue}
             onEnter={this.sendTx}
             withMax

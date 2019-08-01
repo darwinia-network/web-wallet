@@ -227,3 +227,31 @@
     box-shadow: 0 0 5px 2px #DAD1F7!important;
   }
 }
+
+.ui.modal>.header.ui-step-header{
+  display: flex!important;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px!important;
+  i{
+    display: inline-block;
+    width:57px;
+    height:2px;
+    background:rgba(48,43,60,1);
+    margin: 0 10px;
+  }
+  &>div{
+    display: flex;
+    align-items: center;
+  }
+}
+
+.ui.modal>.header.ui-step-header{
+  span.step{
+    color: #D2D1D4;
+  
+  }
+  i.step{
+    background: #D2D1D4;
+  }
+}

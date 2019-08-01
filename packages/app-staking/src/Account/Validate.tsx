@@ -17,7 +17,8 @@ type Props = I18nProps & {
   isOpen: boolean,
   onClose: () => void,
   stashId: string,
-  validatorPrefs?: ValidatorPrefs
+  validatorPrefs?: ValidatorPrefs,
+  withStep?: boolean
 };
 
 type State = {
@@ -30,7 +31,7 @@ class Validate extends TxComponent<Props, State> {
   state: State = {
     unstakeThreshold: new BN(3),
     unstakeThresholdError: null,
-    validatorPayment: new BN(0)
+    validatorPayment: new BN(0),
   };
 
   // inject the preferences returned via RPC once into the state (from this
@@ -111,14 +112,21 @@ class Validate extends TxComponent<Props, State> {
   }
 
   private renderContent () {
-    const { controllerId, stashId, t, validatorPrefs } = this.props;
+    const { controllerId, stashId, t, validatorPrefs, withStep } = this.props;
     const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
     const defaultValue = validatorPrefs && validatorPrefs.unstakeThreshold && validatorPrefs.unstakeThreshold.toBn();
 
     return (
       <>
-        <Modal.Header>
+        <Modal.Header className="ui-step-header">
           {t('Set validator preferences')}
+          {withStep && <div>
+            <span className="">STEP1</span>
+            <i className=""></i>
+            <span className="">STEP2</span>
+            <i className=""></i>
+            <span className="">STEP3</span>
+          </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress

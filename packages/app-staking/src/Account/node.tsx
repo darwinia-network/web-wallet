@@ -57,6 +57,7 @@ type State = {
   isActiveSession: boolean,
   isActiveStash: boolean,
   isBondOpen: boolean,
+  isBondOpenWithStep: boolean,
   isSetControllerAccountOpen: boolean,
   isSetRewardDestinationOpen: boolean,
   isSetSessionAccountOpen: boolean,
@@ -66,9 +67,11 @@ type State = {
   isBondExtraOpen: boolean,
   isNominateOpen: boolean,
   isSessionKeyOpen: boolean,
+  isSessionKeyOpenWithStep: boolean,
   isValidatingOpen: boolean,
   isUnbondOpen: boolean,
   isValidateOpen: boolean,
+  isValidateOpenWithStep: boolean,
   nominators?: Array<AccountId>,
   sessionId: string | null,
   stakers?: Exposure,
@@ -286,8 +289,10 @@ class Account extends React.PureComponent<Props, State> {
     isActiveStash: true,
     controllerId: null,
     isBondOpen: false,
+    isBondOpenWithStep: false,
     isBondExtraOpen: false,
     isSessionKeyOpen: false,
+    isSessionKeyOpenWithStep: false,
     isNominateOpen: false,
     isSetControllerAccountOpen: false,
     isSettingPopupOpen: false,
@@ -296,6 +301,7 @@ class Account extends React.PureComponent<Props, State> {
     isValidatingOpen: false,
     isUnbondOpen: false,
     isValidateOpen: false,
+    isValidateOpenWithStep: false,
     isStashNominating: false,
     isStashValidating: false,
     sessionId: null,
@@ -306,7 +312,7 @@ class Account extends React.PureComponent<Props, State> {
   };
 
   static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [] }: Props): Pick<State, never> | null {
-    console.log(11111111111, staking_info, staking_controllers,session_validators)
+
     if (!staking_info) {
       return null;
     }
@@ -314,7 +320,6 @@ class Account extends React.PureComponent<Props, State> {
     const { controllerId, nextSessionId, nominators, rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
-
     
     // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
     return {
@@ -341,7 +346,7 @@ class Account extends React.PureComponent<Props, State> {
       ),
     };
   }
-
+  
   render() {
     // @ts-ignore
     const { accountId, filter, kton_freeBalance, session_validators, onStatusChange } = this.props;
@@ -353,11 +358,12 @@ class Account extends React.PureComponent<Props, State> {
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
 
+    
     // const next = controllers.filter((address) =>
     //   !validators.includes(address)
     // );
 
-    console.log('render', controllerId, stashId, isNominating)
+    // console.log('render', controllerId, stashId, isNominating)
 
     if((controllerId == stashId && controllerId != null)|| isNominating) {
       return (
@@ -423,7 +429,7 @@ class Account extends React.PureComponent<Props, State> {
               3. After the kton is bonded,  you can apply to become a verifier or vote for the verifier and get earnings from it<br/>
             </p>
             <button
-              onClick={this.toggleBond}
+              onClick={this.toggleBondWithStep}
             >Staking now</button>
           </div>
         </div>}
@@ -521,13 +527,14 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   private renderSetValidatorPrefs() {
-    const { controllerId, isValidateOpen, stashId, validatorPrefs } = this.state;
+    const { controllerId, isValidateOpen, stashId, validatorPrefs, isValidateOpenWithStep } = this.state;
 
     if (!controllerId || !validatorPrefs || !stashId) {
       return null;
     }
 
     return (
+      <>
       <Validate
         controllerId={controllerId}
         isOpen={isValidateOpen}
@@ -535,6 +542,15 @@ class Account extends React.PureComponent<Props, State> {
         stashId={stashId}
         validatorPrefs={validatorPrefs}
       />
+      <Validate
+        controllerId={controllerId}
+        isOpen={isValidateOpenWithStep}
+        onClose={this.toggleValidateWithStep}
+        withStep
+        stashId={stashId}
+        validatorPrefs={validatorPrefs}
+      />
+      </>
     );
   }
 
@@ -597,9 +613,10 @@ class Account extends React.PureComponent<Props, State> {
 
   private renderBond() {
     const { accountId } = this.props;
-    const { controllerId, isBondOpen } = this.state;
+    const { controllerId, isBondOpen, isBondOpenWithStep } = this.state;
 
     return (
+      <>
       <Bond
         accountId={accountId}
         controllerId={controllerId}
@@ -607,6 +624,19 @@ class Account extends React.PureComponent<Props, State> {
         onClose={this.toggleBond}
         checkSameController={true}
       />
+      <Bond
+        accountId={accountId}
+        controllerId={controllerId}
+        isOpen={isBondOpenWithStep}
+        onClose={this.toggleBondWithStep}
+        checkSameController={true}
+        withStep
+        onSuccess={() => {
+          this.toggleBondWithStep();
+          this.toggleSessionKeyWithStep();
+        }}
+      />
+      </>
     );
   }
 
@@ -657,19 +687,32 @@ class Account extends React.PureComponent<Props, State> {
 
   private renderSessionKey() {
     const { accountId } = this.props;
-    const { isSessionKeyOpen, stashId } = this.state;
+    const { isSessionKeyOpen, isSessionKeyOpenWithStep, stashId } = this.state;
 
     if (!stashId) {
       return null;
     }
 
     return (
+      <>
       <SessionKey
         accountId={accountId}
         isOpen={isSessionKeyOpen}
         onClose={this.toggleSessionKey}
         stashId={stashId}
       />
+      <SessionKey
+        accountId={accountId}
+        isOpen={isSessionKeyOpenWithStep}
+        onClose={this.toggleSessionKeyWithStep}
+        withStep
+        onSuccess={() => {
+          this.toggleSessionKeyWithStep();
+          this.toggleValidateWithStep();
+        }}
+        stashId={stashId}
+      />
+      </>
     );
   }
 
@@ -1168,6 +1211,12 @@ class Account extends React.PureComponent<Props, State> {
     }));
   }
 
+  private toggleBondWithStep = () => {
+    this.setState(({ isBondOpenWithStep }) => ({
+      isBondOpenWithStep: !isBondOpenWithStep
+    }));
+  }
+
   private toggleBondExtra = () => {
     this.setState(({ isBondExtraOpen }) => ({
       isBondExtraOpen: !isBondExtraOpen
@@ -1186,6 +1235,11 @@ class Account extends React.PureComponent<Props, State> {
     }));
   }
 
+  private toggleSessionKeyWithStep = () => {
+    this.setState(({ isSessionKeyOpenWithStep }) => ({
+      isSessionKeyOpenWithStep: !isSessionKeyOpenWithStep
+    }));
+  }
 
   private toggleSetControllerAccount = () => {
     this.setState(({ isSetControllerAccountOpen }) => ({
@@ -1226,6 +1280,12 @@ class Account extends React.PureComponent<Props, State> {
   private toggleValidate = () => {
     this.setState(({ isValidateOpen }) => ({
       isValidateOpen: !isValidateOpen
+    }));
+  }
+
+  private toggleValidateWithStep = () => {
+    this.setState(({ isValidateOpenWithStep }) => ({
+      isValidateOpenWithStep: !isValidateOpenWithStep
     }));
   }
 }

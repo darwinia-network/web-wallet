@@ -812,7 +812,7 @@
   dependencies:
     regenerator-runtime "^0.13.2"
 
-"@babel/runtime@^7.5.0":
+"@babel/runtime@^7.5.0", "@babel/runtime@^7.5.5":
   version "7.5.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.5.5.tgz#74fba56d35efbeca444091c7850ccd494fd2f132"
   integrity sha512-28QvEGyQyNkB0/m2B4FU7IEZGK2NUrcMtT6BZEFALTguLk+AUT6ofsHtPk5QyjAdUkpMJ+/Em+quwz4HOt30AQ==
@@ -2149,15 +2149,6 @@
     "@babel/runtime" "^7.4.5"
     rxjs-compat "^6.4.0"
 
-"@polkadot/ui-settings@^0.42.0-beta.2":
-  version "0.42.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@polkadot/ui-settings/-/ui-settings-0.42.0-beta.2.tgz#b8f8576745326ebe1e03b50c4616d5b331d8db61"
-  integrity sha512-T3cxtHzlbl0TQ0FZO3XHHwBpD6+OooB4h9jNTtgSqU8OzAXHtTY569fUCtgpWFkBq4M/hc1xUShnFrOGaRqoGg==
-  dependencies:
-    "@babel/runtime" "^7.4.5"
-    "@types/store" "^2.0.2"
-    store "^2.0.12"
-
 "@polkadot/util-crypto@0.94.0-beta.4", "@polkadot/util-crypto@^0.94.0-beta.4", "@polkadot/util-crypto@^0.94.0-beta.5":
   version "0.94.0-beta.4"
   resolved "https://registry.yarnpkg.com/@polkadot/util-crypto/-/util-crypto-0.94.0-beta.4.tgz#6dd6db4346247c7bdfae0a669e651d9a1c18295c"
@@ -2179,12 +2170,12 @@
     tweetnacl "^1.0.1"
     xxhashjs "^0.2.2"
 
-"@polkadot/util@0.94.0-beta.4", "@polkadot/util@^0.94.0-beta.4", "@polkadot/util@^0.94.0-beta.5":
-  version "0.94.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@polkadot/util/-/util-0.94.0-beta.4.tgz#f0e702bc3f2a65fc4266076dd69449a7a92f5c32"
-  integrity sha512-dla3lV/9WVxODJHSytwNXsbRbs/Jx3ewXDyovptxMqHuepAsNlL44szbRZ+umIDG63JlFoI9eycLK+LEXnVnIA==
+"@polkadot/util@^0.94.0-beta.5":
+  version "0.94.1"
+  resolved "https://registry.yarnpkg.com/@polkadot/util/-/util-0.94.1.tgz#5d1f73ffbf79b16009de45180e5184dfc2110800"
+  integrity sha512-HpKz0PDgYcvoh2xvT1e5n3H3soXce8vY5h3aq3vqmWfdSUoSo9wIfCfHrOo7Z130Z/qegqtAtJVj4+8434+Q8w==
   dependencies:
-    "@babel/runtime" "^7.4.5"
+    "@babel/runtime" "^7.5.5"
     "@types/bn.js" "^4.11.5"
     "@types/deasync" "^0.1.0"
     bn.js "^4.11.8"

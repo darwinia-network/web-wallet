@@ -26,7 +26,7 @@ type Props = ApiProps & I18nProps & {
   senderId?: string,
   system_accountNonce?: BN,
   type: 'balances' | 'kton',
-  kton_depositLedger: { raw: { total: BN } }
+  gringotts_depositLedger: { raw: { total: BN } }
 };
 
 type State = {
@@ -117,10 +117,10 @@ class RingStaking extends React.PureComponent<Props> {
   }
 
   private getDepositFunctionName() {
-    const { kton_depositLedger = { raw: { total: new BN('0') } } } = this.props;
+    const { gringotts_depositLedger = { raw: { total: new BN('0') } } } = this.props;
     let totalNum = new BN('0')
-    if(kton_depositLedger && kton_depositLedger.raw && kton_depositLedger.raw.total) {
-      totalNum = kton_depositLedger.raw.total
+    if(gringotts_depositLedger && gringotts_depositLedger.raw && gringotts_depositLedger.raw.total) {
+      totalNum = gringotts_depositLedger.raw.total
     }
 
     if (totalNum.eq(new BN('0'))) {
@@ -135,7 +135,7 @@ class RingStaking extends React.PureComponent<Props> {
       const { api } = this.props;
       const { amount = prevState.amount, recipientId = prevState.recipientId, hasAvailable = prevState.hasAvailable, maxBalance = prevState.maxBalance, senderId = prevState.senderId, ringAmount = prevState.ringAmount, month = prevState.month } = newState;
       const extrinsic = senderId
-        ? api.tx.kton[this.getDepositFunctionName()](ringAmount, month)
+        ? api.tx.gringotts[this.getDepositFunctionName()](ringAmount, month)
         : null;
 
       return {
@@ -153,15 +153,15 @@ class RingStaking extends React.PureComponent<Props> {
 
   private renderButtons() {
     const { onClose, t } = this.props;
-    const { extrinsic, hasAvailable, senderId } = this.state;
-
+    const { extrinsic, hasAvailable, senderId, ringAmount } = this.state;
+    console.log(99001, extrinsic)
     return (
       <Modal.Actions>
         <Button.Group>
           <TxButton
             accountId={senderId}
             extrinsic={extrinsic}
-            // isDisabled={!hasAvailable}
+            // isDisabled={}
             isPrimary
             label={t('Make')}
             onStart={onClose}
@@ -210,6 +210,7 @@ class RingStaking extends React.PureComponent<Props> {
             help={t('The amount of Ring Token')}
             label={t('ring amount')}
             maxValue={maxBalance}
+            // minValue={new BN(1000)}
             withMax
             onChange={this.onChangeRingAmount}
           />
@@ -251,9 +252,10 @@ class RingStaking extends React.PureComponent<Props> {
     );
   }
 
-  private onChangeRingAmount = (ringAmount: BN) => {
+  private onChangeRingAmount = (ringAmount: BN = new BN(0)) => {
+    console.log(99002, ringAmount)
     try {
-      this.nextState({ ringAmount: new BN(ringAmount || 0) });
+      this.nextState({ ringAmount });
     } catch (e) {
       console.log(e)
     }
@@ -325,7 +327,7 @@ class RingStaking extends React.PureComponent<Props> {
     while (!prevMax.eq(maxBalance)) {
       prevMax = maxBalance;
       // extrinsic = api.tx.balances.transfer(recipientId, prevMax);
-      extrinsic = api.tx.kton[this.getDepositFunctionName()](ringAmount, month);
+      extrinsic = api.tx.gringotts[this.getDepositFunctionName()](ringAmount, month);
 
       const txLength = calcSignatureLength(extrinsic, accountNonce);
       const fees = transactionBaseFee
@@ -349,6 +351,6 @@ export default withMulti(
   withApi,
   withCalls<Props>(
     'derive.balances.fees',
-    ['query.kton.depositLedger', { paramName: 'senderId' }],
+    ['query.gringotts.depositLedger', { paramName: 'senderId' }],
   )
 );

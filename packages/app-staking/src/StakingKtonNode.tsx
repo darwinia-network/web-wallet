@@ -128,6 +128,7 @@ class App extends React.PureComponent<Props, State> {
           // @ts-ignore
           accountMain={AccountMain}
           onStatusChange={onStatusChange}
+          
         />
       </>
     );

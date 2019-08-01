@@ -7,7 +7,7 @@ import { BareProps, CallProps } from '@polkadot/ui-api/types';
 import { DerivedBalances } from '@polkadot/api-derive/types';
 import BN from 'bn.js'
 import React from 'react';
-import { formatBalance } from '@polkadot/util';
+import { formatBalance, formatKtonBalance } from '@polkadot/util';
 import { withCalls } from '@polkadot/ui-api';
 
 type Props = BareProps & CallProps & {
@@ -27,8 +27,8 @@ export class AvailableDisplay extends React.PureComponent<Props> {
       <div className={className}>
         <p>{label}{balances_all ?
           formatBalance(balances_all.availableBalance) :
-          '0'} Ring</p>
-        <p>{label}{kton_freeBalance ? formatBalance(kton_freeBalance) : '0'} Kton</p>
+          '0'}</p>
+        <p>{label}{kton_freeBalance ? formatKtonBalance(kton_freeBalance) : '0'}</p>
         {children}
       </div>
     );

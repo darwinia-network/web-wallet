@@ -10,7 +10,7 @@ import { Label } from 'semantic-ui-react';
 import React from 'react';
 import styled from 'styled-components';
 import { withCalls, withMulti } from '@polkadot/ui-api';
-import { Button, Input, InputTags, AddressInfoAccountList } from '@polkadot/ui-app';
+import { Button, Input, InputTags, AddressInfoAccountList, Icon } from '@polkadot/ui-app';
 import BaseIdentityIcon from '@polkadot/ui-identicon';
 import keyring from '@polkadot/ui-keyring';
 
@@ -22,7 +22,7 @@ import translate from './translate';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
 import { noop } from 'rxjs';
 import store from 'store';
-
+import CryptoType from './CryptoType';
 
 import buttonCurrent from './Public/button-current.svg'
 
@@ -42,7 +42,13 @@ export type Props = I18nProps & {
   withIcon?: boolean,
   withIndex?: boolean,
   withTags?: boolean,
-  onChange: () => void
+  settingOpenAddress: '',
+  onStatusChange?: () => void,
+  onChange: () => void,
+  toggleBackup?: (address?: string) => void,
+  toggleForget?: (address?: string) => void,
+  togglePass?: (address?: string) => void,
+  toggleSetting?: (address?: string) => void
 };
 
 type State = {
@@ -50,7 +56,7 @@ type State = {
   isEditingName: boolean,
   isEditingTags: boolean,
   name: string,
-  tags: string[]
+  tags: string[],
 };
 
 const DEFAULT_ADDR = '5'.padEnd(16, 'x');
@@ -113,12 +119,18 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
               {this.renderName()}
               {this.renderAddress()}
               {this.renderAccountIndex()}
+              <CryptoType
+                accountId={accountId}
+                label={'crypto type: '}
+                className='result'
+              />
             </div>
             {this.renderTags()}
           </div>
           {this.renderBalances()}
           {this.renderChooseButtons()}
         </div>
+        {this.renderLinkButtons()}
         {this.renderChildren()}
         {this.renderExplorer()}
       </div>
@@ -167,17 +179,41 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
       : null;
   }
 
+  private renderLinkButtons() {
+    const { t, toggleBackup, togglePass, toggleForget, settingOpenAddress } = this.props;
+    const { address} = this.state
+
+    if(settingOpenAddress !== address) {
+      return null;
+    }
+
+    return (<div className="ui--AddressRow-Link">
+        <div className="ui-AddressRow-Link-button" onClick={() => toggleBackup(address)}>
+          <Icon name="cloud download" />
+          <p>Backup Json</p>
+        </div>
+        <div className="ui-AddressRow-Link-button" onClick={() => togglePass(address)}>
+          <Icon name="key" />
+          <p>Change Password</p>
+        </div>
+        <div className="ui-AddressRow-Link-button" onClick={() => toggleForget(address)}>
+          <Icon name="trash" />
+          <p>Delete</p>
+        </div>
+      </div>);
+  }
+
   protected renderChooseButtons() {
-    const { t, isChecked, onChange } = this.props;
+    const { t, isChecked, onChange, toggleSetting } = this.props;
     const { address } = this.state;
-    return isChecked ? <Button
+    const chooseButton = isChecked ? <Button
       isPrimary
       label={t('')}
       isSecondary={true}
       onClick={noop}
     >
-      <img src={buttonCurrent}/>
-    </Button>:
+      <img width="17px" src={buttonCurrent} />
+    </Button> :
       <Button
         isBasic={true}
         isSecondary={true}
@@ -186,7 +222,21 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
           store.set('accountMain', address)
           onChange && onChange()
         }}
-      />
+      />;
+
+    return (
+      <>
+        <Button
+          isBasic={true}
+          isSecondary={true}
+          label={t('Setting')}
+          onClick={() => {
+            toggleSetting && toggleSetting(address)
+          }}
+        />
+        {chooseButton}
+      </>
+    );
   }
 
   protected renderExplorer() {
@@ -447,6 +497,8 @@ export default withMulti(
   styled(AddressRowAccountList as any)`
     text-align: left;
 
+    
+
     &.inline {
       display: flex;
 
@@ -505,14 +557,47 @@ export default withMulti(
       }
     }
 
+    .ui--AddressRow-base:last-child{
+      /* border-bottom: 1px solid rgba(237,237,237,1); */
+    }
+
     .ui--AddressRow-base {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 15px 58px 15px 20px;
+      border-top: 1px solid rgba(237,237,237,1);
       button{
-        width: 130px;
+        width: 100px;
+        margin-left: 20px;
         padding: 8px 10px;
       }
+    }
+
+    .ui--AddressRow-Link {
+      background: #F9F9F9;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      border-top: 1px solid rgba(237,237,237,1);
+      padding-right: 62px;
+      .ui-AddressRow-Link-button{
+        background: #F9F9F9;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        padding: 15px;
+        cursor: pointer;
+        &:hover, &:active{
+          filter: brightness(90%);
+        }
+        p{
+          margin-left: 8px;
+        }
+      }
+
     }
 
     .ui--AddressRow-buttons {
@@ -520,7 +605,8 @@ export default withMulti(
       right: 0.75rem;
       top: 0.75rem;
       button{
-        width: 130px;
+        width: 100px;
+        margin-left: 20px;
       }
     }
 
@@ -602,6 +688,9 @@ export default withMulti(
 
     .ui--AddressRow-tags-input {
       margin-bottom: -1.4em;
+    }
+    .result{
+      color: #B3B3B3;
     }
   `,
   translate,

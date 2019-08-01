@@ -14,7 +14,7 @@ import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
 import { Button, CardGrid, ColorButton} from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatKtonBalance, formatNumber } from '@polkadot/util';
 import ringStakingBtn from './img/stakingBtn.svg';
 import dayjs from 'dayjs'
 
@@ -22,7 +22,7 @@ type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   balances_locks: Array<{ amount: BN }>,
   account: string,
-  kton_depositLedger: { raw: { deposit_list: Array<any> } },
+  gringotts_depositLedger: { raw: { deposit_list: Array<any> } },
   onStakingNow: () => void
 };
 
@@ -62,10 +62,12 @@ class Overview extends React.PureComponent<Props, State> {
       return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
     }
   }
+ 
 
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } }, onStakingNow } = this.props;
-    if (!kton_depositLedger || !kton_depositLedger.raw || !kton_depositLedger.raw.deposit_list || (kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.length === 0)) {
+    const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow } = this.props;
+    console.log(99003,gringotts_depositLedger)
+    if (!gringotts_depositLedger || !gringotts_depositLedger.raw || !gringotts_depositLedger.raw.deposit_list || (gringotts_depositLedger && gringotts_depositLedger.raw.deposit_list && gringotts_depositLedger.raw.deposit_list.length === 0)) {
       return (
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
@@ -88,7 +90,8 @@ class Overview extends React.PureComponent<Props, State> {
         <table className={'stakingTable'}>
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-            {kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.map((item, index) => {
+            {gringotts_depositLedger && gringotts_depositLedger.raw.deposit_list && gringotts_depositLedger.raw.deposit_list.map((item, index) => {
+
               return <tr key={index}>
                 <td>
                   <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
@@ -97,7 +100,7 @@ class Overview extends React.PureComponent<Props, State> {
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td className="textGradient">{formatBalance(item.balance)}</td>
+                <td className="textGradient">{formatKtonBalance(item.balance)}</td>
                 <td>----</td>
               </tr>
             })}
@@ -178,7 +181,7 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['query.balances.locks', { paramName: 'account' }],
-    ['query.kton.depositLedger', { paramName: 'account' }],
+    ['query.gringotts.depositLedger', { paramName: 'account' }],
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

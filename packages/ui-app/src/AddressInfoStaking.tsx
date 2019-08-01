@@ -8,7 +8,7 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 
@@ -111,15 +111,15 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
         <div className="ui--address-value">
           <div className="flex-box">
             <p>total</p>
-            <h1>{formatBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')} KTON</h1>
+            <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
           </div>
           <div className="flex-box">
             <p>available</p>
-            <h1>{formatBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')} KTON</h1>
+            <h1>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')}</h1>
           </div>
           <div className="flex-box">
             <p>bonded</p>
-            <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)} KTON</h1>
+            <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}</h1>
           </div>
           <div className="flex-box">
             <p>unbonding</p>
@@ -128,7 +128,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
           {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
             <div className="flex-box">
               <p>{t('redeemable')}</p>
-              <h1>{formatBalance(staking_info.redeemable)}
+              <h1>{formatKtonBalance(staking_info.redeemable)}
                 {this.renderRedeemButton()}</h1>
             </div>
           )}
@@ -147,12 +147,12 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0])} ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active);
     }
 
     return value || '0';
@@ -221,7 +221,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       staking_info.unlocking &&
       staking_info.unlocking.map(({ remainingBlocks, value }, index) => (
         <div key={index}>
-          {formatBalance(value)} KTON
+          {formatKtonBalance(value)}
           <Icon
             name='info circle'
             data-tip

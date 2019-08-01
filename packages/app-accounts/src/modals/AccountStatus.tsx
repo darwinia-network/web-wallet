@@ -295,6 +295,7 @@ const StyledWrapper = styled.div`
   }
   .switchBtn{
     margin-left: 16px;
+    cursor: pointer;
   }
 `
 
@@ -310,4 +311,3 @@ export default withMulti(
   translate,
   withObservable(accountObservable.subject, { propName: 'accounts' })
 );
-

@@ -9,12 +9,18 @@ import { Button, InputAddress, Modal, TxButton } from '@polkadot/ui-app';
 
 import ValidateSession from './ValidateSession';
 import translate from '../translate';
+import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
+
+const noop = function(){};
+
 
 type Props = I18nProps & {
   accountId: string,
   isOpen: boolean,
   onClose: () => void,
-  stashId: string
+  onSuccess?:(status: SubmittableResult) => void,
+  stashId: string,
+  withStep?: boolean
 };
 
 type State = {
@@ -35,7 +41,7 @@ class Key extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { accountId, isOpen, onClose, t } = this.props;
+    const { accountId, isOpen, onClose,onSuccess, t } = this.props;
     const { sessionError, sessionId } = this.state;
 
     if (!isOpen) {
@@ -58,9 +64,11 @@ class Key extends React.PureComponent<Props, State> {
             isDisabled={!sessionId || !!sessionError}
             isPrimary
             label={t('Set Session Key')}
-            onClick={onClose}
+            onClick={onSuccess ? noop : onClose}
+            onSuccess= {onSuccess}
             params={[[sessionId, sessionId],'0x']}
             tx='session.setKeys'
+            withSpinner
           />
           <Button
             isBasic={true}
@@ -75,13 +83,20 @@ class Key extends React.PureComponent<Props, State> {
   }
 
   private renderContent () {
-    const { accountId, stashId, t } = this.props;
+    const { accountId, stashId, t, withStep } = this.props;
     const { sessionId } = this.state;
 
     return (
       <>
-        <Modal.Header>
+        <Modal.Header className="ui-step-header">
           {t('Session Key')}
+          {withStep && <div>
+            <span className="">STEP1</span>
+            <i className=""></i>
+            <span className="">STEP2</span>
+            <i className="step"></i>
+            <span className="step">STEP3</span>
+          </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress

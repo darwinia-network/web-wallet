@@ -44,7 +44,11 @@
       "@polkadot/ui-reactive": [ "packages/ui-reactive/src" ],
       "@polkadot/ui-reactive/*": [ "packages/ui-reactive/src/*" ],
       "@polkadot/ui-signer": [ "packages/ui-signer/src" ],
-      "@polkadot/ui-signer/*": [ "packages/ui-signer/src/*" ]
+      "@polkadot/ui-signer/*": [ "packages/ui-signer/src/*" ],
+      "@polkadot/ui-settings": [ "packages/ui-settings/src" ],
+      "@polkadot/ui-settings/*": [ "packages/ui-settings/src/*" ],
+      "@polkadot/util": [ "packages/util/src" ],
+      "@polkadot/util/*": [ "packages/util/src/*" ]
     },
     "typeRoots": [
       "./node_modules/@polkadot/ts",
