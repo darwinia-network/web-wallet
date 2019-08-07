@@ -662,8 +662,8 @@ class Account extends React.PureComponent<Props, State> {
 
     return (
       <Unbond
-        controllerId={stashId || controllerId}
-        isOpen={isUnbondOpen}
+        controllerId={controllerId}
+        isOpen={isUnbondOpen || stashId}
         onClose={this.toggleUnbond}
       />
     );
