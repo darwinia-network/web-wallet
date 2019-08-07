@@ -76,8 +76,9 @@ class AccountStatus extends React.PureComponent<Props, State> {
           // withTags
           >
           </AddressRowReverse>
-          {PopupExampleFlowing(this.renderButtons(), address)}
+          {/* {PopupExampleFlowing(this.renderButtons(), address)} */}
 
+          <div><img onClick={this.toggleAccount} className="switchBtn" src={SwitchIcon}/></div>
           {this.renderModals()}
         </div>
       </StyledWrapper>

@@ -32,7 +32,7 @@ let defaultUnit = DEFAULT_UNIT;
 // Formats a string/number with <prefix>.<postfix><type> notation
 function _formatBalance (input?: number | string | BN, withSi: boolean = true, decimals: number = defaultDecimals): string {
   let text = (input || '').toString();
-  debugger
+
   if (text.length === 0 || text === '0') {
     return '0';
   }

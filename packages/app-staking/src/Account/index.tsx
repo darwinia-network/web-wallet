@@ -251,9 +251,6 @@ class Account extends React.PureComponent<Props, State> {
   };
 
   static getDerivedStateFromProps({ accountId, staking_info, staking_nominators }: Props): Pick<State, never> | null {
-   
-    
-    debugger
     if (!staking_info) {
       return null;
     }

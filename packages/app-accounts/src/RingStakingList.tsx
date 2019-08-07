@@ -66,7 +66,7 @@ class Overview extends React.PureComponent<Props, State> {
 
   render() {
     const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow } = this.props;
-    console.log(99003,gringotts_depositLedger)
+
     if (!gringotts_depositLedger || !gringotts_depositLedger.raw || !gringotts_depositLedger.raw.deposit_list || (gringotts_depositLedger && gringotts_depositLedger.raw.deposit_list && gringotts_depositLedger.raw.deposit_list.length === 0)) {
       return (
         <Wrapper>

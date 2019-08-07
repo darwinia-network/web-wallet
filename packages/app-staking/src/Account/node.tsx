@@ -354,7 +354,7 @@ class Account extends React.PureComponent<Props, State> {
     const { accountId, filter, kton_freeBalance, session_validators, onStatusChange } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId } = this.state;
 
-    console.log(990001, controllerId, nominators, validatorPrefs)
+
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
       return null;
     }

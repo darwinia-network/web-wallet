@@ -154,7 +154,7 @@ class RingStaking extends React.PureComponent<Props> {
   private renderButtons() {
     const { onClose, t } = this.props;
     const { extrinsic, hasAvailable, senderId, ringAmount } = this.state;
-    console.log(99001, extrinsic)
+
     return (
       <Modal.Actions>
         <Button.Group>
@@ -253,7 +253,7 @@ class RingStaking extends React.PureComponent<Props> {
   }
 
   private onChangeRingAmount = (ringAmount: BN = new BN(0)) => {
-    console.log(99002, ringAmount)
+
     try {
       this.nextState({ ringAmount });
     } catch (e) {
