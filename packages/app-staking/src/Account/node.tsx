@@ -411,7 +411,7 @@ class Account extends React.PureComponent<Props, State> {
       ], (re) => {
         // console.log(222,(re as VectorAny<Option<any>>))
         const [account, ledger] = (re as VectorAny<Option<any>>)
-        const ledgerWrap = ledger.isSome && ledger.unwrap() || null
+        const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null
   
         console.log('ledgerWrap', ledgerWrap)
         stashId = ledgerWrap ? ledgerWrap.stash : "";
