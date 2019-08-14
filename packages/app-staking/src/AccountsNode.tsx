@@ -84,7 +84,7 @@ class Accounts extends React.PureComponent<Props, State> {
 }
 
 const StyledWrapper = styled.div`
-  margin-top: 30px;
+  margin-top: 10px;
 `
 
 export default translate(Accounts);

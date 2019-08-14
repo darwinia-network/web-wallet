@@ -15,7 +15,10 @@ import { withCalls, withMulti } from '@polkadot/ui-api';
 import translate from './translate';
 import CryptoType from './CryptoType';
 import Label from './Label';
-import { StructAny } from '@polkadot/types';
+import { StructAny, Option, Struct, Compact } from '@polkadot/types';
+import powerbg from './styles/icon/power-bg.svg'
+import ringIcon from './styles/icon/ring.svg'
+import ktonIcon from './styles/icon/kton.svg'
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
@@ -29,7 +32,10 @@ export interface DerivedKtonBalances extends StructAny {
 
 export interface DerivedLockBalances extends StructAny {
   amount: BN;
+}
 
+export interface DerivedStakingLedger extends Compact {
+  amount: BN;
 }
 
 // true to display, or (for bonded) provided values [own, ...all extras]
@@ -46,6 +52,19 @@ export type CryptoActiveType = {
   nonce?: boolean
 };
 
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
+
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
   children?: React.ReactNode,
@@ -56,7 +75,9 @@ type Props = BareProps & I18nProps & {
   withExtended?: boolean | CryptoActiveType,
   ringBalances_freeBalance?: BN,
   kton_freeBalance?: BN,
-  kton_locks: Array<any>
+  kton_locks: Array<any>,
+  isReadyStaking: boolean,
+  staking_ledger: stakingLedgerType
 };
 
 // <AddressInfo
@@ -74,6 +95,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     return (
       <div className={className}>
+        {this.renderPower()}
         {this.renderBalances()}
         {this.renderExtended()}
         {children && (
@@ -85,30 +107,94 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     );
   }
 
+  private renderPower() {
+    const {staking_ledger, value} = this.props
+    console.log('AddressInfo', value, staking_ledger)
+    if(!staking_ledger) {
+      return null;
+    }
+
+    const power = formatBalance(staking_ledger.raw.total_power, false)
+    return (
+      <div className="power-box">
+        <h3>Power</h3>
+        <p>{power}</p>
+      </div>
+    );
+  }
+
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons } = this.props;
+    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons, isReadyStaking = false, staking_ledger } = this.props;
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
         ? withBalance
         : undefined;
-
+    // console.log('renderBalances',balanceDisplay,balances_all)
     if (!balanceDisplay || !balances_all) {
       return null;
     }
 
     let _ktonBalances_locks = new BN(0)
 
-
-    if(kton_locks) {
-        kton_locks.forEach((item) => {
-          _ktonBalances_locks.add(item.amount)
-        })
+    if (kton_locks) {
+      kton_locks.forEach((item) => {
+        _ktonBalances_locks.add(item.amount)
+      })
     }
 
+    if(!isReadyStaking) {
+      return (
+        <div className='column'>
+        <div className="ui--address-value">
+          <div className="balance-box">
+            <p>KTON</p>
+            <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
+          </div>
+          <div className="balance-box">
+            <p>RING</p>
+            <h1>{formatBalance(balances_all.freeBalance)}</h1>
+          </div>
+        </div>
+      </div>
+      );
+    }
+
+    if(!staking_ledger || staking_ledger.isNone) {
+      return null;
+    }
+    
     return (
       <div className='column'>
         <div className="ui--address-value">
+          <div className="flex-box">
+            <div className="nominate-balance-box">
+              <div className="box-left">
+                <img src={ringIcon}/>
+                <p>{t('ring')}</p>
+              </div>
+              <div className="box-right">
+                <p><label>Available</label><span>{formatBalance(balances_all.freeBalance, false)}</span></p>
+                <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-box">
+            <div className="nominate-balance-box">
+              <div className="box-left">
+                <img src={ktonIcon}/>
+                <p>{t('kton')}</p>
+              </div>
+              <div className="box-right">
+                <p><label>Available</label><span>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0', false)}</span></p>
+                <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
+              </div>
+            </div>
+          </div>
+{/*           
           <div className="flex-box">
             <p>total</p>
             <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
@@ -131,11 +217,42 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               <h1>{formatKtonBalance(staking_info.redeemable)}
                 {this.renderRedeemButton()}</h1>
             </div>
-          )}
+          )} */}
           {buttons}
         </div>
       </div>
-    );
+    )
+
+    // return (
+    //   <div className='column'>
+    //     <div className="ui--address-value">
+    //       <div className="flex-box">
+    //         <p>total</p>
+    //         <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
+    //       </div>
+    //       <div className="flex-box">
+    //         <p>available</p>
+    //         <h1>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')}</h1>
+    //       </div>
+    //       <div className="flex-box">
+    //         <p>bonded</p>
+    //         <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}</h1>
+    //       </div>
+    //       <div className="flex-box">
+    //         <p>unbonding</p>
+    //         <h1>{this.renderUnlocking()}</h1>
+    //       </div>
+    //       {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
+    //         <div className="flex-box">
+    //           <p>{t('redeemable')}</p>
+    //           <h1>{formatKtonBalance(staking_info.redeemable)}
+    //             {this.renderRedeemButton()}</h1>
+    //         </div>
+    //       )}
+    //       {buttons}
+    //     </div>
+    //   </div>
+    // );
   }
 
   // either true (filtered above already) or [own, ...all extras]
@@ -245,10 +362,100 @@ export default withMulti(
     justify-content: center;
     background: #fff;
     border: 1px solid #EDEDED;
+    align-items: center;
+    .power-box{
+      display: flex;
+      background: url(${powerbg}) no-repeat;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 175px;
+      height: 102px;
+      justify-content: center;
+      margin: 15px;
+      padding-left: 15px;
+      color: #fff;
+      h3,p{
+        color:#fff;
+        font-weight: bold;
+      }
+      h3{
+        font-size: 14px;
+      }
+      p{
+        font-size: 24px;
+      }
+    }
+
     .column {
       flex: 1;
       display: grid;
       opacity: 1;
+      .flex-box{
+        
+      }
+      .balance-box{
+        flex-basis: 205px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        h1{
+          font-size: 18px;
+          font-weight: bold;
+          margin-top: 0;
+          color: #302B3C;
+        }
+        p{
+          font-size: 14px;
+          font-weight: bold;
+          color: #302B3C;
+        }
+      }
+      .nominate-balance-box {
+        margin: 0 5px;
+        flex-basis: 332px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 30px;
+        background: #FBFBFB;
+        .box-left{
+          text-align: center;
+          margin-top: 5px;
+          
+          img{
+            width: 40px;
+          }
+          p{
+            text-transform: uppercase;
+            font-weight: bold;
+          }
+        }
+        .box-right{
+          flex: 1;
+          margin-left: 30px;
+          p {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 0.9rem;
+            label{
+              color: #98959F;
+              font-size: 12px;
+              flex-basis: 88px;
+              text-align: left;
+            }
+            span{
+              color: #5930DD;
+              font-size: 16px;
+              font-weight: bold;
+            }
+          }
+          p:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
       h1{
         text-transform: none;
       }
@@ -277,6 +484,7 @@ export default withMulti(
   `,
   translate,
   withCalls<Props>(
+    ['query.staking.ledger', { paramName: 'value' }],
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
     ['query.kton.locks', { paramName: 'value' }],

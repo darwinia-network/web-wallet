@@ -29,25 +29,26 @@ type State = {
 
 class Validate extends TxComponent<Props, State> {
   state: State = {
-    unstakeThreshold: new BN(3),
+    // unstakeThreshold: new BN(3),
     unstakeThresholdError: null,
-    validatorPayment: new BN(0),
+    // validatorPayment: new BN(0),
   };
 
   // inject the preferences returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
-  static getDerivedStateFromProps (props: Props, state: State): State | null {
+  static getDerivedStateFromProps(props: Props, state: State): State | null {
     if (state.unstakeThreshold && state.validatorPayment) {
       return null;
     }
-
+    console.log('990011')
     if (props.validatorPrefs) {
-      const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
+      // @ts-ignore
+      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
 
       return {
-        unstakeThreshold: unstakeThreshold.toBn(),
+        unstakeThreshold: unstake_threshold.toBn(),
         unstakeThresholdError: null,
-        validatorPayment: validatorPayment.toBn()
+        validatorPayment: validator_payment_ratio.toBn()
       };
     }
 
@@ -58,7 +59,7 @@ class Validate extends TxComponent<Props, State> {
     };
   }
 
-  render () {
+  render() {
     const { isOpen, onClose } = this.props;
 
     if (!isOpen) {
@@ -79,7 +80,7 @@ class Validate extends TxComponent<Props, State> {
     );
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { controllerId, onClose, t, validatorPrefs } = this.props;
     const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
     const isChangingPrefs = validatorPrefs && !!validatorPrefs.unstakeThreshold;
@@ -93,10 +94,7 @@ class Validate extends TxComponent<Props, State> {
             isPrimary
             label={isChangingPrefs ? t('Set validator preferences') : t('Validate')}
             onClick={onClose}
-            params={[{
-              unstakeThreshold,
-              validatorPayment
-            }]}
+            params={['e6b58be8af95e5ad97e7aca6e4b8b2', unstakeThreshold, validatorPayment]}
             tx='staking.validate'
             ref={this.button}
           />
@@ -111,7 +109,7 @@ class Validate extends TxComponent<Props, State> {
     );
   }
 
-  private renderContent () {
+  private renderContent() {
     const { controllerId, stashId, t, validatorPrefs, withStep } = this.props;
     const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
     const defaultValue = validatorPrefs && validatorPrefs.unstakeThreshold && validatorPrefs.unstakeThreshold.toBn();
@@ -141,6 +139,20 @@ class Validate extends TxComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
+
+          <InputNumber
+            className='medium'
+            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
+            help={t('Amount taken up-front from the reward by the validator before spliting the remainder between themselves and the nominators')}
+            label={t('reward commission')}
+            onChange={this.onChangePayment}
+            onEnter={this.sendTx}
+            value={
+              validatorPayment
+                ? validatorPayment.toString()
+                : '0'
+            }
+          />
           <InputNumber
             autoFocus
             bitLength={32}
@@ -160,19 +172,6 @@ class Validate extends TxComponent<Props, State> {
           <InputValidationUnstakeThreshold
             onError={this.onUnstakeThresholdError}
             unstakeThreshold={unstakeThreshold}
-          />
-          <InputBalance
-            className='medium'
-            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
-            help={t('Amount taken up-front from the reward by the validator before spliting the remainder between themselves and the nominators')}
-            label={t('reward commission')}
-            onChange={this.onChangePayment}
-            onEnter={this.sendTx}
-            value={
-              validatorPayment
-                ? validatorPayment.toString()
-                : '0'
-            }
           />
         </Modal.Content>
       </>

@@ -26,23 +26,43 @@ type State = {
 
 class Staking extends TxComponent<Props, State> {
   state: State = {
-    unstakeThreshold: new BN(3),
+    // unstakeThreshold: new BN(3),
     validatorPayment: new BN(0)
   };
 
   // inject the preferences are returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
   static getDerivedStateFromProps(props: Props, state: State): State | null {
+    console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+
     if (state.unstakeThreshold) {
       return null;
     }
+    
+    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+    // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+    // return {
+    //   unstakeThreshold: unstake_threshold.toBn(),
+    //   validatorPayment: validator_payment_ratio.toBn()
+    // }
 
-    const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
+
+    if (props.validatorPrefs) {
+      // @ts-ignore
+      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+      console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+
+      return {
+        unstakeThreshold: unstake_threshold.toBn(),
+        validatorPayment: validator_payment_ratio.toBn()
+      };
+    }
 
     return {
-      unstakeThreshold: unstakeThreshold.toBn(),
-      validatorPayment: validatorPayment.toBn()
+      unstakeThreshold: new BN(3),
+      validatorPayment: undefined
     };
+
   }
 
   render() {
@@ -78,10 +98,11 @@ class Staking extends TxComponent<Props, State> {
             isPrimary
             label={t('Validate')}
             onClick={onClose}
-            params={[{
-              unstakeThreshold,
-              validatorPayment
-            }]}
+            params={[
+              '0xe6b58be8af95e5ad97e7aca6e4b8b2',
+              validatorPayment,
+              unstakeThreshold
+            ]}
             tx='staking.validate'
             ref={this.button}
           />
@@ -119,6 +140,19 @@ class Staking extends TxComponent<Props, State> {
             isDisabled
             label={t('stash account')}
           />
+          
+          <InputNumber
+            className='medium'
+            help={t('Reward that validator takes up-front, the remainder is split between themselves and nominators')}
+            label={t('payment preferences')}
+            onChange={this.onChangePayment}
+            onEnter={this.sendTx}
+            value={
+              validatorPayment
+                ? validatorPayment.toString()
+                : '0'
+            }
+          />
           <InputNumber
             autoFocus
             bitLength={32}
@@ -131,18 +165,6 @@ class Staking extends TxComponent<Props, State> {
               unstakeThreshold
                 ? unstakeThreshold.toString()
                 : '3'
-            }
-          />
-          <InputBalance
-            className='medium'
-            help={t('Reward that validator takes up-front, the remainder is split between themselves and nominators')}
-            label={t('payment preferences')}
-            onChange={this.onChangePayment}
-            onEnter={this.sendTx}
-            value={
-              validatorPayment
-                ? validatorPayment.toString()
-                : '0'
             }
           />
         </Modal.Content>

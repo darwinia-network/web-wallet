@@ -116,7 +116,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               <p><Button
                 isBasic={true}
                 isSecondary={true}
-                label={t('Deposit')}
+                label={t('Staking')}
                 onClick={() => {
                   history.push('ringstaking');
                 }}
