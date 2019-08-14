@@ -61,6 +61,7 @@
     "html-webpack-plugin": "",
     "webpack-plugin-serve":"",
     "webpack": "",
-    "thread-loader": ""
+    "thread-loader": "",
+    "bignumber.js": ""
   }
 }
