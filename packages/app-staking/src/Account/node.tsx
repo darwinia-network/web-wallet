@@ -675,9 +675,14 @@ class Account extends React.PureComponent<Props, State> {
     const { controllerId, validators, controllers } = this.state;
     const { staking_info } = this.props;
 
+    if(!validators) {
+      return null;
+    }
+
     const next = controllers.filter((address) =>
       !validators.includes(address)
     );
+    
     if (!staking_info || !validators.includes(controllerId) && !next.includes(controllerId)) {
       return null;
     }
