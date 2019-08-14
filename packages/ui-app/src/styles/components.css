@@ -78,10 +78,22 @@ button.ui.icon.iconButton {
     }
   }
 
+  .ui--TypeDropdown {
+    background: #fff!important;
+    color: #000!important;
+    position: absolute;
+    width: 6rem;
+    right: 0;
+    border: 1px solid #302B3C!important;
+    border-radius: 2px!important;
+  }
+
   .ui--SiDropdown {
     width: 6rem;
     text-align: center;
   }
+
+
 
   .ui--MaxButton {
     position: absolute;
