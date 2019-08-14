@@ -23,7 +23,8 @@ type Props = ComponentProps & I18nProps & {
   balances_locks: Array<{ amount: BN }>,
   account: string,
   gringotts_depositLedger: { raw: { deposit_list: Array<any> } },
-  onStakingNow: () => void
+  onStakingNow: () => void,
+  staking_ledger: any
 };
 
 type State = {
@@ -41,7 +42,6 @@ class Overview extends React.PureComponent<Props, State> {
     isImportOpen: false,
     isAccountsListOpen: false,
     AccountMain: '',
-
   };
 
   componentDidMount() {
@@ -65,14 +65,22 @@ class Overview extends React.PureComponent<Props, State> {
  
 
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow } = this.props;
+    const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow, staking_ledger } = this.props;
+    // if(!staking_ledger){
+    //   return null;
+    // }
+    let ledger = staking_ledger && staking_ledger.unwrapOr(null)
+    
 
-    if (!gringotts_depositLedger || !gringotts_depositLedger.raw || !gringotts_depositLedger.raw.deposit_list || (gringotts_depositLedger && gringotts_depositLedger.raw.deposit_list && gringotts_depositLedger.raw.deposit_list.length === 0)) {
+    console.log('staking_ledger', staking_ledger, ledger)
+    if ( !ledger || !ledger.regular_items || (ledger.regular_items.length === 0)) {
       return (
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
             <tbody>
-              <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+              <tr className='stakingTh'><td>Expire Date</td><td>Deposit</td>
+              {/* <td>Reward</td> */}
+              <td>Setting</td></tr>
               <tr>
                 <td colSpan={4} className="emptyTd">
                   <p className="no-items">No items</p>
@@ -84,23 +92,27 @@ class Overview extends React.PureComponent<Props, State> {
         </Wrapper>
       );
     }
-
+    
+    let regularList = ledger.regular_items
     return (
       <Wrapper>
         <table className={'stakingTable'}>
           <tbody>
-            <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-            {gringotts_depositLedger && gringotts_depositLedger.raw.deposit_list && gringotts_depositLedger.raw.deposit_list.map((item, index) => {
+            <tr className='stakingTh'><td>Date</td><td>Deposit</td>
+            {/* <td>Reward</td> */}
+            <td>Setting</td></tr>
+            {regularList.map((item, index) => {
+              console.log('item', item, item.expire_time)
 
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
-                  <div className="stakingProcess">
+                  <p className="stakingRange">{`${this.formatDate(item.expire_time.raw)}`}</p>
+                  {/* <div className="stakingProcess">
                     <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
-                  </div>
+                  </div> */}
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td className="textGradient">{formatKtonBalance(item.balance)}</td>
+                {/* <td className="textGradient">{formatKtonBalance(0)}</td> */}
                 <td>----</td>
               </tr>
             })}
@@ -109,6 +121,30 @@ class Overview extends React.PureComponent<Props, State> {
       </Wrapper>
     );
   }
+
+  //   return (
+  //     <Wrapper>
+  //       <table className={'stakingTable'}>
+  //         <tbody>
+  //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+  //           {regularList.map((item, index) => {
+  //             item.start_at = '1565758536'
+  //             return <tr key={index}>
+  //               <td>
+  //                 <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
+  //                 <div className="stakingProcess">
+  //                   <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
+  //                 </div>
+  //               </td>
+  //               <td>{formatBalance(item.value)}</td>
+  //               <td className="textGradient">{formatKtonBalance(0)}</td>
+  //               <td>----</td>
+  //             </tr>
+  //           })}
+  //         </tbody>
+  //       </table>
+  //     </Wrapper>
+  //   );
 }
 
 const Wrapper = styled.div`
@@ -181,7 +217,7 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['query.balances.locks', { paramName: 'account' }],
-    ['query.gringotts.depositLedger', { paramName: 'account' }],
+    ['query.staking.ledger', { paramName: 'account' }],
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );
