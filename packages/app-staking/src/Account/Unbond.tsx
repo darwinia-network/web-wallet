@@ -8,7 +8,7 @@ import { ApiProps } from '@polkadot/ui-api/types';
 import BN from 'bn.js';
 import React from 'react';
 import { AccountId, Option, StakingLedger } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 
 import translate from '../translate';
@@ -22,11 +22,14 @@ type Props = I18nProps & ApiProps & {
 
 type State = {
   maxBalance?: BN
-  maxUnbond?: BN
+  maxUnbond?: BN,
+  type: string,
 };
 
 class Unbond extends TxComponent<Props, State> {
-  state: State = {};
+  state: State = {
+    type: 'ring',
+  };
 
   componentDidUpdate (prevProps: Props) {
     const { staking_ledger } = this.props;
@@ -38,8 +41,9 @@ class Unbond extends TxComponent<Props, State> {
 
   render () {
     const { controllerId, isOpen, onClose, t } = this.props;
-    const { maxUnbond } = this.state;
+    const { maxUnbond, type } = this.state;
     const canSubmit = !!maxUnbond && maxUnbond.gtn(0);
+    const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
     if (!isOpen) {
       return null;
@@ -62,7 +66,7 @@ class Unbond extends TxComponent<Props, State> {
               isPrimary
               label={t('Unbond')}
               onClick={onClose}
-              params={[maxUnbond]}
+              params={[{[typeKey]: maxUnbond && maxUnbond.mul(new BN(1000000000))}, false]}
               tx='staking.unbond'
               ref={this.button}
             />
@@ -94,29 +98,36 @@ class Unbond extends TxComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
-          <InputBalance
+          <InputNumber
             autoFocus
             className='medium'
             help={t('The maximum amount to unbond, this is adjusted using the bonded funds on the account.')}
             label={t('unbond amount')}
-            maxValue={maxBalance}
+            // maxValue={maxBalance}
             siValue='kton'
             onChange={this.onChangeValue}
+            onChangeType={this.onChangeType}
             onEnter={this.sendTx}
-            withMax
+            // withMax
+            isType
           />
         </Modal.Content>
       </>
     );
   }
 
+  private onChangeType = (type?: string) => {
+    this.nextState({ type });
+  }
+
   private nextState (newState: Partial<State>): void {
     this.setState((prevState: State): State => {
-      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance } = newState;
+      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance, type= prevState.type } = newState;
 
       return {
         maxUnbond,
-        maxBalance
+        maxBalance,
+        type
       };
     });
   }
