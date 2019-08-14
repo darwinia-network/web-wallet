@@ -482,6 +482,8 @@ class Account extends React.PureComponent<Props, State> {
     //   return id === toIdString(stashId)
     // }))
     // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
+    console.log('nextSessionId', nextSessionId)
+    const nextSessionIdUnwrap  =  nextSessionId && nextSessionId.isSome && nextSessionId.unwrapOr({})
     return {
       controllerId: toIdString(controllerId),
       destination: rewardDestination && rewardDestination.toNumber(),
@@ -492,7 +494,7 @@ class Account extends React.PureComponent<Props, State> {
       isStashNominating,
       isStashValidating,
       nominators,
-      sessionId: toIdString(nextSessionId),
+      sessionId: toIdString(nextSessionIdUnwrap && nextSessionIdUnwrap.grandpaKey),
       // stakers,
       stakingLedger,
       stashId: toIdString(stashId),
@@ -682,7 +684,7 @@ class Account extends React.PureComponent<Props, State> {
     const next = controllers.filter((address) =>
       !validators.includes(address)
     );
-    
+
     if (!staking_info || !validators.includes(controllerId) && !next.includes(controllerId)) {
       return null;
     }
@@ -1018,7 +1020,7 @@ class Account extends React.PureComponent<Props, State> {
   private renderSessionId() {
     const { t } = this.props;
     const { isActiveSession, sessionId } = this.state;
-
+    console.log('renderSessionId', sessionId)
     if (!sessionId || isActiveSession) {
       return (
         <div className='staking--Account-detail'>
