@@ -34,23 +34,52 @@ const urlOptions = queryString.parse(location.href.split('?')[1]);
 const wsEndpoint = process.env.WS_URL || settings.apiUrl || undefined;
 
 const DARWINIA_TYPES = {
-  "TokenBalance": "u128",
-  "Currency": "u128",
-  "CurrencyOf": "u128",
-  "RewardBalance": "u128",
-  "RewardBalanceOf": "u128",
+  "EpochDuration": "u64",
+  "EraIndex": "u32",
   "RingBalanceOf": "u128",
-  "IndividualDeposit": {
-    "month": "u32",
-    "start_at": "u64",
-    "value": "CurrencyOf",
-    "balance": "TokenBalance",
-    "claimed": "bool"
+  "KtonBalanceOf": "u128",
+  "ExtendedBalance": "u128",
+  "IndividualExpo": {
+    "who": "AccountId",
+    "value": "ExtendedBalance"
   },
-  "Deposit": {
-    "total": "CurrencyOf",
-    "deposit_list": "Vec<IndividualDeposit>"
+  "ValidatorPrefs": {
+    "unstake_threshold": "Compact<u32>",
+    "validator_payment_ratio": "Compact<RingBalanceOf>"
+  },
+  "StakingBalance": {
+    "_enum": {
+      "Ring": "RingBalanceOf",
+      "Kton": "KtonBalanceOf"
+    }
+  },
+  "RegularItem": {
+    "value": "Compact<RingBalanceOf>",
+    "expire_time": "Compact<Moment>"
+  },
+  "UnlockChunk": {
+    "value": "StakingBalance",
+    "era": "Compact<EraIndex>",
+    "dt_power": "ExtendedBalance"
+  },
+  "StakingLedgers": {
+    "stash": "AccountId",
+    "total_power": "Compact<ExtendedBalance>",
+    "active_power": "Compact<ExtendedBalance>",
+    "total_ring": "Compact<RingBalanceOf>",
+    "regular_ring": "Compact<RingBalanceOf>",
+    "active_ring": "Compact<RingBalanceOf>",
+    "total_kton": "Compact<KtonBalanceOf>",
+    "active_kton": "Compact<KtonBalanceOf>",
+    "regular_items": "Vec<RegularItem>",
+    "unlocking": "Vec<UnlockChunk>"
+  },
+  "Exposures": {
+    "total": "ExtendedBalance",
+    "own": "ExtendedBalance",
+    "others": "Vec<IndividualExpo>"
   }
+  
 }
 
 if (!rootElement) {
@@ -66,7 +95,9 @@ try {
   const names = Object.keys(types);
 
   if (names.length) {
+    console.log(getTypeRegistry(),1)
     getTypeRegistry().register(types);
+    console.log(getTypeRegistry(),1)
     console.log('Type registration:', names.join(', '));
   }
 } catch (error) {
