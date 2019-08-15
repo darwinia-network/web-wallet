@@ -21,6 +21,8 @@ const CRYPTOS: Options = [
 const ENDPOINTS: Options = [
   { text: 'Trilobita (Darwinia, hosted by Itering)', value: WSS_POLKADOT },
   // { text: 'Emberic Elm (Substrate, hosted by Parity)', value: WSS_SUBSTRATE },
+  { text: 'Alpha Node (35.194.207.170:9944)', value: 'ws://35.194.207.170:9944/' },
+  { text: 'Local Node (192.168.1.241:9944)', value: 'ws://192.168.1.241:9944/' },
   { text: 'Local Node (127.0.0.1:9944)', value: 'ws://127.0.0.1:9944/' }
 ];
 
