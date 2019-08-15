@@ -10,6 +10,8 @@ import React from 'react';
 import { AccountId, Option, StakingLedger } from '@polkadot/types';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
+import styled from 'styled-components'
+import { withRouter } from 'react-router-dom';
 
 import translate from '../translate';
 
@@ -17,7 +19,8 @@ type Props = I18nProps & ApiProps & {
   controllerId?: AccountId | null,
   isOpen: boolean,
   onClose: () => void,
-  staking_ledger?: Option<StakingLedger>
+  staking_ledger?: Option<StakingLedger>,
+  history: any
 };
 
 type State = {
@@ -25,6 +28,21 @@ type State = {
   maxUnbond?: BN,
   type: string,
 };
+
+const StyleWrapper = styled.div`
+  margin: 0 0 1em;
+  line-height: 1.4285em;
+  position: absolute;
+  bottom: -41px;
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  a{
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 10px;
+  }
+`
 
 class Unbond extends TxComponent<Props, State> {
   state: State = {
@@ -39,6 +57,11 @@ class Unbond extends TxComponent<Props, State> {
     }
   }
 
+  goDepositRing = () => {
+    const {history} = this.props
+    history.push('ringstaking');
+  }
+
   render () {
     const { controllerId, isOpen, onClose, t } = this.props;
     const { maxUnbond, type } = this.state;
@@ -50,6 +73,7 @@ class Unbond extends TxComponent<Props, State> {
     }
 
     return (
+      <>
       <Modal
         className='staking--Unbond'
         dimmer='inverted'
@@ -78,7 +102,9 @@ class Unbond extends TxComponent<Props, State> {
             />
           </Button.Group>
         </Modal.Actions>
+        <StyleWrapper>If you want to unlock the ring that set the lock limit <a href="javascript:void(0)" onClick={this.goDepositRing}>[ click here]</a></StyleWrapper>
       </Modal>
+      </>
     );
   }
 
@@ -157,5 +183,6 @@ export default withMulti(
   withApi,
   withCalls<Props>(
     ['query.staking.ledger', { paramName: 'controllerId' }]
-  )
+  ),
+  withRouter
 );
