@@ -11,7 +11,7 @@ import React from 'react';
 import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid, ColorButton} from '@polkadot/ui-app';
+import { Button, CardGrid, ColorButton, TxButton} from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
 import { formatBalance, formatKtonBalance, formatNumber } from '@polkadot/util';
@@ -92,7 +92,7 @@ class Overview extends React.PureComponent<Props, State> {
         </Wrapper>
       );
     }
-    
+
     let regularList = ledger.regular_items
     return (
       <Wrapper>
@@ -103,7 +103,6 @@ class Overview extends React.PureComponent<Props, State> {
             <td>Setting</td></tr>
             {regularList.map((item, index) => {
               console.log('item', item, item.expire_time)
-
               return <tr key={index}>
                 <td>
                   <p className="stakingRange">{`${this.formatDate(item.expire_time.raw)}`}</p>
@@ -113,7 +112,23 @@ class Overview extends React.PureComponent<Props, State> {
                 </td>
                 <td>{formatBalance(item.value)}</td>
                 {/* <td className="textGradient">{formatKtonBalance(0)}</td> */}
-                <td>----</td>
+                <td>
+                <TxButton
+                  accountId={account}
+                  className={'colorButton'}
+                  // isNegative
+                  params={[
+                    item.value.toString(),
+                    item.expire_time.raw
+                  ]}
+                  label={
+                    t('Redeem')
+                  }
+                  key='Redeem'
+                  tx='staking.unbondWithPunish'
+                />
+                  {/* <ColorButton onClick={onStakingNow}>{t('Redeem')}</ColorButton> */}
+                </td>
               </tr>
             })}
           </tbody>
