@@ -19,7 +19,6 @@ import { StructAny, Option, Struct, Compact } from '@polkadot/types';
 import powerbg from './styles/icon/power-bg.svg'
 import ringIcon from './styles/icon/ring.svg'
 import ktonIcon from './styles/icon/kton.svg'
-import { ZERO_BALANCE } from 'build/ui-signer/src/Checks/constants';
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
