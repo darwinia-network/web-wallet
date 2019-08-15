@@ -66,7 +66,7 @@ class Unbond extends TxComponent<Props, State> {
               isPrimary
               label={t('Unbond')}
               onClick={onClose}
-              params={[{[typeKey]: maxUnbond && maxUnbond.mul(new BN(1000000000))}, false]}
+              params={[{[typeKey]: maxUnbond && maxUnbond.mul(new BN(1000000000))}]}
               tx='staking.unbond'
               ref={this.button}
             />
