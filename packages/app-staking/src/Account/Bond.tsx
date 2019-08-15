@@ -99,7 +99,7 @@ const GetPowerStyledWrapper = styled.div`
     color: #302B3C;
     margin-bottom: 10px;
   }
-  
+
   p:last-child{
     margin-top: 0;
     margin-bottom: 0;
