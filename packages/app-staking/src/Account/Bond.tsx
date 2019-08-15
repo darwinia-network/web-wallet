@@ -15,11 +15,12 @@ import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
 import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 import { Checkbox } from 'semantic-ui-react'
 import styled from 'styled-components'
+import { formatBalance, formatNumber } from '@polkadot/util';
 
 import translate from '../translate';
 import ValidateController from './ValidateController';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
-import BigNumber from 'bignumber.js'
+import { ringToKton, assetToPower } from '@polkadot/util'
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
@@ -54,7 +55,7 @@ const stashOptions = [
 ];
 
 const ockLimitOptionsMaker = (): Array<object> => {
-  const month = [0,3,6,12,18,24,30,36]
+  const month = [0, 3, 6, 12, 18, 24, 30, 36]
   let options = []
   month.map((i) => {
     options.push({
@@ -62,7 +63,7 @@ const ockLimitOptionsMaker = (): Array<object> => {
       value: i
     })
   })
-  
+
   return options
 }
 
@@ -91,17 +92,19 @@ const StyledWrapper = styled.div`
 
 const GetPowerStyledWrapper = styled.div`
   font-size: 0;
+  margin-top: 20px;
   p{
     text-align: right;
     font-size: 16px;
     color: #302B3C;
-    margin-top: 20px;
     margin-bottom: 10px;
   }
+  
   p:last-child{
     margin-top: 0;
     margin-bottom: 0;
   }
+
   span{
     color: #5930DD;
     font-weight: bold;
@@ -142,41 +145,31 @@ class Bond extends TxComponent<Props, State> {
     }
   }
 
-  // getKtonAmount = () => {
-  //   const {type, bondValue = ZERO, lockLimit} = this.state
-  //   let kton = ZERO;
-  //   let parsedBondValue = bondValue.mul(new BN(1000000000))
-  //   // console.log(parsedBondValue.toString(),111)
-  //   debugger
-  //   if(type === 'ring' && lockLimit != 0) {
-  //     kton = kton.add(new BN(parsedBondValue.mul(new BigNumber(67/66)).pow(lockLimit).div(new BN(1970))));
-  //     return kton.div(new BN(1000000000))
-  //   }
-  //   return ZERO
-  // }
+  getKtonAmount = () => {
+    const {type, bondValue = ZERO, lockLimit} = this.state
+    let kton = null;
+    let parsedBondValue = bondValue.mul(new BN(1000000000))
+    console.log(parsedBondValue.toString(),111)
+    if(type === 'ring' && lockLimit != 0) {
+      return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
+    }
+    return '0'
+  }
 
-  // getPowerAmount = () => {
-  //   const {type, bondValue = ZERO} = this.state
-  //   let power = ZERO;
-  //   let parsedBondValue = bondValue.mul(new BN(1000000000))
-  //   if(type === 'ring') {
-  //     power = power.add(new BN(parsedBondValue.div(new BN(10000))));
-  //   }
-
-  //   if(type === 'kton') {
-  //     power = power.add(parsedBondValue)
-  //   }
-
-  //   return power.div(new BN(1000000000))
-  // }
+  getPowerAmount = () => {
+    const { type, bondValue = ZERO } = this.state
+    let power = ZERO;
+    power = assetToPower(bondValue.mul(new BN(1000000000)), type)
+    return formatBalance(power, false)
+  }
 
   render() {
     const { accountId, isOpen, onClose, onSuccess, t } = this.props;
-    const { bondValue, controllerError, controllerId, extrinsic, maxBalance ,lockLimit,accept, type } = this.state;
+    const { bondValue, controllerError, controllerId, extrinsic, maxBalance, lockLimit, accept, type } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0) && (!maxBalance || bondValue.lte(maxBalance));
 
     const canSubmit = hasValue && !controllerError && !!controllerId && (lockLimit && type === 'ring' ? accept : true);
-    console.log('canSubmit', hasValue ,controllerError ,controllerId ,lockLimit ,type , accept)
+    console.log('canSubmit', hasValue, controllerError, controllerId, lockLimit, type, accept)
     if (!isOpen) {
       return null;
     }
@@ -289,7 +282,7 @@ class Bond extends TxComponent<Props, State> {
             label={t('lock limit')}
             onChange={this.onChangeLockLimit}
             options={lockLimitOptions}
-            // value={lockLimit}
+          // value={lockLimit}
           /> : null}
           {lockLimit ? <StyledWrapper>
             <label></label>
@@ -299,11 +292,10 @@ class Bond extends TxComponent<Props, State> {
             </div>
           </StyledWrapper> : null}
 
-          {lockLimit ? <GetPowerStyledWrapper>
-            <p>You will get: <span>0 POWER</span></p>
-            <p><span>0 KTON</span></p>
-          </GetPowerStyledWrapper> : null}
-
+          <GetPowerStyledWrapper>
+            <p>You will get: <span>{this.getPowerAmount()} POWER</span></p>
+            {lockLimit ? <p><span>{this.getKtonAmount()} KTON</span></p> : null}
+          </GetPowerStyledWrapper>
         </Modal.Content>
       </>
     );
@@ -315,7 +307,7 @@ class Bond extends TxComponent<Props, State> {
       const { bondValue = prevState.bondValue, controllerError = prevState.controllerError, controllerId = prevState.controllerId, destination = prevState.destination, maxBalance = prevState.maxBalance, lockLimit = prevState.lockLimit, type = prevState.type, accept = prevState.accept } = newState;
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
       const extrinsic = (bondValue && controllerId)
-        ? api.tx.staking.bond(controllerId ,{[typeKey]:bondValue.mul(new BN(1000000000))}, destination,lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: bondValue.mul(new BN(1000000000)) }, destination, lockLimit)
         : null;
 
       return {
@@ -334,7 +326,7 @@ class Bond extends TxComponent<Props, State> {
 
   private setRingMaxBalance = () => {
     const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, kton_locks, kton_freeBalance = ZERO } = this.props;
-    const { controllerId, destination, type,lockLimit } = this.state;
+    const { controllerId, destination, type, lockLimit } = this.state;
 
     const { transactionBaseFee, transactionByteFee } = balances_fees;
     const { freeBalance } = balances_all;
@@ -348,7 +340,7 @@ class Bond extends TxComponent<Props, State> {
 
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
       extrinsic = controllerId && destination
-        ? api.tx.staking.bond(controllerId ,{[typeKey]:maxBalance.mul(new BN(1000000000))}, destination,lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance.mul(new BN(1000000000)) }, destination, lockLimit)
         : null;
 
       const txLength = calcSignatureLength(extrinsic, system_accountNonce);
@@ -390,7 +382,7 @@ class Bond extends TxComponent<Props, State> {
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
       extrinsic = controllerId && destination
-        ? api.tx.staking.bond(controllerId ,{[typeKey]:maxBalance.mul(new BN(1000000000))}, destination,lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance.mul(new BN(1000000000)) }, destination, lockLimit)
         : null;
 
       const txLength = calcSignatureLength(extrinsic, system_accountNonce);
@@ -423,7 +415,7 @@ class Bond extends TxComponent<Props, State> {
   }
 
   private toggleAccept = () => {
-    const {accept} = this.state;
+    const { accept } = this.state;
     this.nextState({ accept: !accept });
   }
 

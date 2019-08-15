@@ -17,7 +17,8 @@ import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 import styled from 'styled-components'
 import { Checkbox } from 'semantic-ui-react'
-
+import { formatBalance, formatNumber } from '@polkadot/util';
+import { ringToKton, assetToPower } from '@polkadot/util'
 import translate from '../translate';
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
@@ -80,11 +81,11 @@ const StyledWrapper = styled.div`
 
 const GetPowerStyledWrapper = styled.div`
   font-size: 0;
+  margin-top: 20px;
   p{
     text-align: right;
     font-size: 16px;
     color: #302B3C;
-    margin-top: 20px;
     margin-bottom: 10px;
   }
   p:last-child{
@@ -119,14 +120,31 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
 
+  getKtonAmount = () => {
+    const { type, maxAdditional = ZERO, lockLimit } = this.state
+    let kton = null;
+    let parsedBondValue = maxAdditional.mul(new BN(1000000000))
+    console.log(parsedBondValue.toString(), 111)
+    if (type === 'ring' && lockLimit != 0) {
+      return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
+    }
+    return '0'
+  }
+
+  getPowerAmount = () => {
+    const { type, maxAdditional = ZERO } = this.state
+    let power = ZERO;
+    power = assetToPower(maxAdditional.mul(new BN(1000000000)), type)
+    return formatBalance(power, false)
+  }
 
 
   render() {
     const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, onSuccess, t } = this.props;
-    const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance, lockLimit,accept, type } = this.state;
+    const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance, lockLimit, accept, type } = this.state;
     // const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && maxAdditional.lte(maxBalance)
     const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && (lockLimit && type === 'ring' ? accept : true);
-   
+
     if (!isOpen) {
       return null;
     }
@@ -227,11 +245,10 @@ class BondExtra extends TxComponent<Props, State> {
             </div>
           </StyledWrapper> : null}
 
-          {(lockLimit && type === 'ring') ? <GetPowerStyledWrapper>
-            <p>You will get: <span>0 POWER</span></p>
-            <p><span>0 KTON</span></p>
-          </GetPowerStyledWrapper> : null}
-
+          <GetPowerStyledWrapper>
+            <p>You will get: <span>{this.getPowerAmount()} POWER</span></p>
+            {(lockLimit && type === 'ring') ? <p><span>{this.getKtonAmount()} KTON</span></p> : null}
+          </GetPowerStyledWrapper>
         </Modal.Content>
       </>
     );
@@ -263,7 +280,7 @@ class BondExtra extends TxComponent<Props, State> {
 
   private setMaxBalance = () => {
     const { api, system_accountNonce = ZERO, balances_fees = ZERO_FEES, balances_all = ZERO_BALANCE, staking_ledger, kton_freeBalance = ZERO, kton_locks } = this.props;
-    const { maxAdditional,lockLimit, type } = this.state;
+    const { maxAdditional, lockLimit, type } = this.state;
 
     const { transactionBaseFee, transactionByteFee } = balances_fees;
     const { freeBalance } = balances_all;
