@@ -283,27 +283,24 @@ class Account extends React.PureComponent<Props, State> {
     ], (re) => {
       // console.log(222,(re as VectorAny<Option<any>>))
       const [account, ledger] = (re as VectorAny<Option<any>>)
-      const ledgerWrap = ledger.isSome && ledger.unwrap() || null
+      const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null
       console.log(222, account, ledgerWrap)
-      controllerId = (account && account.isNone) ? "" : account;
       stashId = ledgerWrap ? ledgerWrap.stash : "";
 
+      if (stashId) {
+        controllerId = accountId
+      } else {
+        controllerId = (account && account.isNone) ? "" : account;
+      }
+
       api.queryMulti([
-        [api.query.session.nextKeyFor, controllerId || accountId],
-        [api.query.staking.nominators, stashId],
-        [api.query.staking.payee, stashId],
-        [api.query.staking.stakers, stashId],
-        [api.query.staking.validators, stashId]
+        [api.query.staking.ledger, toIdString(controllerId) || accountId],
       ], (re) => {
-        console.log(222111, re)
+        const [ledger] = (re as VectorAny<Option<any>>)
+        const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null;
+        stashId = ledgerWrap ? ledgerWrap.stash : "";
       })
     })
-
-
-    // return
-    // if (!staking_info) {
-    //   return null;
-    // }
 
     let nominatorIndex = -1;
     let nominators = [];
@@ -351,12 +348,12 @@ class Account extends React.PureComponent<Props, State> {
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
     console.log(1111, controllerId, stashId, controllerId != stashId, sessionId)
-    if (!(controllerId && stashId ) && ((controllerId != stashId) || (sessionId))) {
+    if ((controllerId != stashId) || (sessionId)) {
       return (
         <StyledWrapper>
           <div className={'titleRow'}>
             Note
-            </div>
+          </div>
           <div className="ui--string-now">
             <h1>Sorry！</h1>
             <p>You are in the status of a nominators and cannot be a node for now.</p>
@@ -432,45 +429,6 @@ class Account extends React.PureComponent<Props, State> {
           </div>
         </>
         }
-
-        {/* <div className="ui--accounts-link">
-          <div>
-            <div className={'titleRow'}>
-              Linked account
-            </div>
-            <div className="ui--accounts-box">
-              {this.renderControllerId()}
-              {this.renderStashId()}
-              {this.renderSessionId()}
-              {this.renderLinkedAccountEmpty()}
-            </div>
-          </div>
-          <div className="nominatingBox">
-            <div className={'titleRow'}>
-              Nominating
-            </div>
-            <div className="ui--accounts-box">
-              {this.renderNominee()}
-            </div>
-          </div>
-        </div> */}
-
-        {/* <AddressRow
-          buttons={this.renderButtons()}
-          value={accountId}
-        >
-          <AddressInfo
-            withBalance
-            value={accountId}
-          >
-            <div className='staking--Account-links'>
-              {this.renderControllerId()}
-              {this.renderStashId()}
-              {this.renderSessionId()}
-              {this.renderNominee()}
-            </div>
-          </AddressInfo>
-        </AddressRow> */}
       </StyledWrapper >
     );
   }
@@ -659,16 +617,8 @@ class Account extends React.PureComponent<Props, State> {
 
     return (
       <div className='staking--Account-detail'>
-        {/* <label className='staking--label'>{t('nominating')}</label> */}
         {
           nominators.map((nomineeId, index) => (
-            // <AddressMini
-            //   key={index}
-            //   value={nomineeId}
-            //   offlineStatus={recentlyOffline[nomineeId.toString()]}
-            //   withBalance={false}
-            //   withBonded
-            // />
             <div className="staking--box" key={index}>
               <AddressRow
                 // key={`${nomineeId}-nominee`}

@@ -510,6 +510,10 @@ class Account extends React.PureComponent<Props, State> {
     }
   }
 
+  componentDidUpdate(){
+    
+  }
+
   render() {
     // @ts-ignore
     const { accountId, filter, kton_freeBalance, session_validators, onStatusChange } = this.props;

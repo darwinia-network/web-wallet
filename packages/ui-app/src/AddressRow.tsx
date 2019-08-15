@@ -21,7 +21,7 @@ import LinkPolkascan from './LinkPolkascan';
 import translate from './translate';
 import BondedDisplay from './Bonded';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
-import { formatKtonBalance, formatNumber } from '@polkadot/util';
+import { formatKtonBalance, formatNumber, formatBalance } from '@polkadot/util';
 
 export type Props = I18nProps & {
   accounts_idAndIndex?: [AccountId?, AccountIndex?],
@@ -97,10 +97,11 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts_idAndIndex = [], className, isInline, style, staking_stakers, nominator, isShare } = this.props;
+    const { accounts_idAndIndex = [], className, isInline, style, staking_stakers, nominator, isShare, value } = this.props;
     const [accountId, accountIndex] = accounts_idAndIndex;
     const isValid = accountId || accountIndex;
 
+    console.log('my shares:', value, staking_stakers)
 
     let other = [];
     if (staking_stakers) {
@@ -165,7 +166,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     }
 
     return (
-      <div className="myshare">My share: {formatKtonBalance(other[0] ? other[0].value : 0)}</div>
+      <div className="myshare">My share: {formatBalance((other[0] ? other[0].value : 0), false)} Power</div>
     );
   }
 

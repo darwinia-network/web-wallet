@@ -19,6 +19,7 @@ import { StructAny, Option, Struct, Compact } from '@polkadot/types';
 import powerbg from './styles/icon/power-bg.svg'
 import ringIcon from './styles/icon/ring.svg'
 import ktonIcon from './styles/icon/kton.svg'
+import { ZERO_BALANCE } from 'build/ui-signer/src/Checks/constants';
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
@@ -77,7 +78,8 @@ type Props = BareProps & I18nProps & {
   kton_freeBalance?: BN,
   kton_locks: Array<any>,
   isReadyStaking: boolean,
-  staking_ledger: stakingLedgerType
+  staking_ledger: stakingLedgerType,
+  balances_freeBalance?: BN
 };
 
 // <AddressInfo
@@ -108,9 +110,9 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderPower() {
-    const {staking_ledger, value} = this.props
-    console.log('AddressInfo', value, staking_ledger)
-    if(!staking_ledger) {
+    const { staking_ledger, value } = this.props
+
+    if (!staking_ledger) {
       return null;
     }
 
@@ -124,13 +126,13 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons, isReadyStaking = false, staking_ledger } = this.props;
+    const { balances_all, ringBalances_freeBalance, balances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons, isReadyStaking = false, staking_ledger, value } = this.props;
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
         ? withBalance
         : undefined;
-    // console.log('renderBalances',balanceDisplay,balances_all)
+
     if (!balanceDisplay || !balances_all) {
       return null;
     }
@@ -143,38 +145,38 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       })
     }
 
-    if(!isReadyStaking) {
+    if (!isReadyStaking) {
       return (
         <div className='column'>
-        <div className="ui--address-value">
-          <div className="balance-box">
-            <p>KTON</p>
-            <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
-          </div>
-          <div className="balance-box">
-            <p>RING</p>
-            <h1>{formatBalance(balances_all.freeBalance)}</h1>
+          <div className="ui--address-value">
+            <div className="balance-box">
+              <p>KTON</p>
+              <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
+            </div>
+            <div className="balance-box">
+              <p>RING</p>
+              <h1>{formatBalance(balances_all.freeBalance)}</h1>
+            </div>
           </div>
         </div>
-      </div>
       );
     }
 
-    if(!staking_ledger || staking_ledger.isNone) {
+    if (!staking_ledger || staking_ledger.isNone) {
       return null;
     }
-    
+
     return (
       <div className='column'>
         <div className="ui--address-value">
           <div className="flex-box">
             <div className="nominate-balance-box">
               <div className="box-left">
-                <img src={ringIcon}/>
+                <img src={ringIcon} />
                 <p>{t('ring')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatBalance(balances_all.freeBalance, false)}</span></p>
+                <p><label>Available</label><span>{formatBalance(balances_freeBalance || 0, false)}</span></p>
                 <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
                 <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
               </div>
@@ -184,7 +186,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
           <div className="flex-box">
             <div className="nominate-balance-box">
               <div className="box-left">
-                <img src={ktonIcon}/>
+                <img src={ktonIcon} />
                 <p>{t('kton')}</p>
               </div>
               <div className="box-right">
@@ -194,7 +196,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               </div>
             </div>
           </div>
-{/*           
+          {/*           
           <div className="flex-box">
             <p>total</p>
             <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
@@ -488,6 +490,7 @@ export default withMulti(
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
     ['query.kton.locks', { paramName: 'value' }],
-    ['query.kton.freeBalance', { paramName: 'value' }]
+    ['query.kton.freeBalance', { paramName: 'value' }],
+    ['query.balances.freeBalance', { paramName: 'value' }]
   )
 );

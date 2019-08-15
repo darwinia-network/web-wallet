@@ -60,15 +60,17 @@ const DARWINIA_TYPES = {
   "UnlockChunk": {
     "value": "StakingBalance",
     "era": "Compact<EraIndex>",
-    "dt_power": "ExtendedBalance"
+    "dt_power": "ExtendedBalance",
+    "is_regular": "bool"
   },
   "StakingLedgers": {
     "stash": "AccountId",
     "total_power": "Compact<ExtendedBalance>",
     "active_power": "Compact<ExtendedBalance>",
     "total_ring": "Compact<RingBalanceOf>",
-    "regular_ring": "Compact<RingBalanceOf>",
+    "total_regular_ring": "Compact<RingBalanceOf>",
     "active_ring": "Compact<RingBalanceOf>",
+    "active_regular_ring": "Compact<RingBalanceOf>",
     "total_kton": "Compact<KtonBalanceOf>",
     "active_kton": "Compact<KtonBalanceOf>",
     "regular_items": "Vec<RegularItem>",
@@ -79,7 +81,6 @@ const DARWINIA_TYPES = {
     "own": "ExtendedBalance",
     "others": "Vec<IndividualExpo>"
   }
-  
 }
 
 if (!rootElement) {
