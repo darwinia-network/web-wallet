@@ -41,12 +41,12 @@ export default class BondedDisplay extends React.PureComponent<Props> {
 
   private renderProvided () {
     const { bonded, className, label, style } = this.props;
-    let value = `${formatKtonBalance(Array.isArray(bonded) ? bonded[0] : bonded)}`;
+    let value = `${formatKtonBalance(Array.isArray(bonded) ? bonded[0] : bonded, false)} Power`;
 
     if (Array.isArray(bonded)) {
       const totals = bonded.filter((value, index) => index !== 0);
       const total = totals.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${totals.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
+        ? `(+${totals.map((bonded) => formatKtonBalance(bonded, false) + 'Power').join(', ')})`
         : '';
 
       value = `${value}  ${total}`;
