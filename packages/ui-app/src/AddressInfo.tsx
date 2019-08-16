@@ -122,12 +122,12 @@ class AddressInfo extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded, false) + ' Power').join(', ')})`
         : '';
 
-      value = `${formatKtonBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0], false)} Power ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatKtonBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active, false) + 'Power';
     }
 
     return value
