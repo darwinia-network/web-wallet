@@ -166,7 +166,7 @@ class Bond extends TxComponent<Props, State> {
   render() {
     const { accountId, isOpen, onClose, onSuccess, t } = this.props;
     const { bondValue, controllerError, controllerId, extrinsic, maxBalance, lockLimit, accept, type } = this.state;
-    const hasValue = !!bondValue && bondValue.gtn(0) && (!maxBalance || bondValue.lte(maxBalance));
+    const hasValue = !!bondValue && bondValue.gtn(0);
 
     const canSubmit = hasValue && !controllerError && !!controllerId && (lockLimit && type === 'ring' ? accept : true);
     console.log('canSubmit', hasValue, controllerError, controllerId, lockLimit, type, accept)
@@ -191,6 +191,7 @@ class Bond extends TxComponent<Props, State> {
               isPrimary
               label={t('Bond')}
               onClick={onSuccess ? noop : onClose}
+              onClose={onClose}
               onSuccess={onSuccess}
               withSpinner={true}
               extrinsic={extrinsic}
