@@ -7,10 +7,12 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import BN from 'bn.js';
 import React from 'react';
 import { ValidatorPrefs } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
 
 import InputValidationUnstakeThreshold from './InputValidationUnstakeThreshold';
 import translate from '../translate';
+
+import {u8aToU8a, u8aToString, u8aToHex} from '@polkadot/util'
 
 type Props = I18nProps & {
   controllerId: string,
@@ -24,7 +26,8 @@ type Props = I18nProps & {
 type State = {
   unstakeThreshold?: BN,
   unstakeThresholdError: string | null,
-  validatorPayment?: BN
+  validatorPayment?: BN,
+  nodeName?: string
 };
 
 class Validate extends TxComponent<Props, State> {
@@ -40,7 +43,8 @@ class Validate extends TxComponent<Props, State> {
     if (state.unstakeThreshold && state.validatorPayment) {
       return null;
     }
-    console.log('990011')
+    console.log('validatorPrefs', props.validatorPrefs)
+    
     if (props.validatorPrefs) {
       // @ts-ignore
       const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
@@ -57,6 +61,11 @@ class Validate extends TxComponent<Props, State> {
       unstakeThresholdError: null,
       validatorPayment: undefined
     };
+  }
+
+  componentDidMount() {
+    console.log('u8aToString', u8aToString(u8aToU8a('0xe6b58be8af95e5ad97e7aca6e4b8b2')));
+    console.log('u8aToString', u8aToHex(u8aToU8a('测试字符串')));
   }
 
   render() {
@@ -82,7 +91,7 @@ class Validate extends TxComponent<Props, State> {
 
   private renderButtons() {
     const { controllerId, onClose, t, validatorPrefs } = this.props;
-    const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
+    const { unstakeThreshold, unstakeThresholdError, validatorPayment, nodeName } = this.state;
     const isChangingPrefs = validatorPrefs && !!validatorPrefs.unstakeThreshold;
 
     return (
@@ -94,7 +103,8 @@ class Validate extends TxComponent<Props, State> {
             isPrimary
             label={isChangingPrefs ? t('Set validator preferences') : t('Validate')}
             onClick={onClose}
-            params={['e6b58be8af95e5ad97e7aca6e4b8b2', unstakeThreshold, validatorPayment]}
+            onClose={onClose}
+            params={[u8aToHex(u8aToU8a(nodeName)), unstakeThreshold, validatorPayment]}
             tx='staking.validate'
             ref={this.button}
           />
@@ -111,7 +121,7 @@ class Validate extends TxComponent<Props, State> {
 
   private renderContent() {
     const { controllerId, stashId, t, validatorPrefs, withStep } = this.props;
-    const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
+    const { unstakeThreshold, unstakeThresholdError, validatorPayment, nodeName } = this.state;
     const defaultValue = validatorPrefs && validatorPrefs.unstakeThreshold && validatorPrefs.unstakeThreshold.toBn();
 
     return (
@@ -139,7 +149,18 @@ class Validate extends TxComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
-
+          <Input
+            className='medium'
+            help={t('node name')}
+            label={t('node name')}
+            onChange={this.onChangeNodeName}
+            onEnter={this.sendTx}
+            value={
+              nodeName
+                ? nodeName.toString()
+                : ''
+            }
+          />
           <InputNumber
             className='medium'
             defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
@@ -189,10 +210,15 @@ class Validate extends TxComponent<Props, State> {
       this.setState({ unstakeThreshold });
     }
   }
+  
+  private onChangeNodeName = (nodeName: string) => {
+      this.setState({ nodeName });
+  }
 
   private onUnstakeThresholdError = (unstakeThresholdError: string | null) => {
     this.setState({ unstakeThresholdError });
   }
+
 }
 
 export default translate(Validate);

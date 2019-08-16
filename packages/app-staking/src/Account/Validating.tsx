@@ -7,9 +7,10 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import BN from 'bn.js';
 import React from 'react';
 import { ValidatorPrefs } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input} from '@polkadot/ui-app';
 
 import translate from '../translate';
+import {u8aToU8a, u8aToString, u8aToHex} from '@polkadot/util'
 
 type Props = I18nProps & {
   accountId: string,
@@ -21,7 +22,8 @@ type Props = I18nProps & {
 
 type State = {
   unstakeThreshold?: BN,
-  validatorPayment?: BN
+  validatorPayment?: BN,
+  nodeName?: string
 };
 
 class Staking extends TxComponent<Props, State> {
@@ -88,7 +90,7 @@ class Staking extends TxComponent<Props, State> {
 
   private renderButtons() {
     const { accountId, onClose, t } = this.props;
-    const { unstakeThreshold, validatorPayment } = this.state;
+    const { unstakeThreshold, validatorPayment, nodeName } = this.state;
 
     return (
       <Modal.Actions>
@@ -99,7 +101,7 @@ class Staking extends TxComponent<Props, State> {
             label={t('Validate')}
             onClick={onClose}
             params={[
-              '0xe6b58be8af95e5ad97e7aca6e4b8b2',
+              u8aToHex(u8aToU8a(nodeName)),
               validatorPayment,
               unstakeThreshold
             ]}
@@ -120,7 +122,7 @@ class Staking extends TxComponent<Props, State> {
 
   private renderContent() {
     const { accountId, stashId, t } = this.props;
-    const { unstakeThreshold, validatorPayment } = this.state;
+    const { unstakeThreshold, validatorPayment, nodeName } = this.state;
 
     return (
       <>
@@ -140,7 +142,18 @@ class Staking extends TxComponent<Props, State> {
             isDisabled
             label={t('stash account')}
           />
-          
+          <Input
+            className='medium'
+            help={t('node name')}
+            label={t('node name')}
+            onChange={this.onChangeNodeName}
+            onEnter={this.sendTx}
+            value={
+              nodeName
+                ? nodeName.toString()
+                : ''
+            }
+          />
           <InputNumber
             className='medium'
             help={t('Reward that validator takes up-front, the remainder is split between themselves and nominators')}
@@ -182,6 +195,10 @@ class Staking extends TxComponent<Props, State> {
     if (unstakeThreshold) {
       this.setState({ unstakeThreshold });
     }
+  }
+
+  private onChangeNodeName = (nodeName: string) => {
+    this.setState({ nodeName });
   }
 }
 
