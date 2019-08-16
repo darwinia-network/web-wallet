@@ -3,7 +3,7 @@
 /* of the Apache-2.0 license. See the LICENSE file for details. */
 
 @import './_colors-polkadot.css';
-
+/* 
 .theme--polkadot {
   .ui.primary.button,
   .ui.buttons .primary.button,
@@ -117,4 +117,4 @@
   .ui.menu.tabular .item.active {
     border-bottom: 5px solid #302B3C;
   }
-}
+} */
