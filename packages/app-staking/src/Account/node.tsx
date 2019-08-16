@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountFilter, RecentlyOfflineMap } from '../types';
-import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact } from '@polkadot/types';
+import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact, Bytes } from '@polkadot/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 import { DerivedBalances, DerivedBalancesMap, DerivedStaking } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
@@ -100,6 +100,7 @@ type State = {
   isCreateOpen: boolean,
   staking_ledger: stakingLedgerType,
   isValidator: boolean,
+  staking_nodeName: Bytes
 };
 
 function toIdString(id?: AccountId | null): string | null {
@@ -330,6 +331,7 @@ class Account extends React.PureComponent<Props, State> {
     isCreateOpen: false,
     staking_ledger: null,
     isValidator: false,
+    staking_nodeName: null
   };
 
   // static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
@@ -372,6 +374,7 @@ class Account extends React.PureComponent<Props, State> {
 
   static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
     console.log('getDerivedStateFromProps', staking_info, accountId);
+    console.log('staking_validators', staking_validators)
     // const { nextSessionId, stakingLedger, validatorPrefs } = staking_info;
     if (!accountId) {
       return null;
@@ -401,6 +404,7 @@ class Account extends React.PureComponent<Props, State> {
     let stakingLedger = null
     let validatorPrefs = null
     let staking_ledger = null
+    let staking_nodeName = null
     // let staking_validators = null
 
 
@@ -421,7 +425,7 @@ class Account extends React.PureComponent<Props, State> {
         controllerId = (account && account.isNone) ? "" : account;
       }
 
-      console.log(222, controllerId, toIdString(controllerId), ledgerWrap)
+      console.log('controllerId', controllerId, toIdString(controllerId), ledgerWrap)
 
       if (!controllerId) {
         // resolve(0)
@@ -429,22 +433,25 @@ class Account extends React.PureComponent<Props, State> {
       }
 
       api.queryMulti([
-        [api.query.session.nextKeyFor, toIdString(stashId || accountId)],
+        [api.query.session.nextKeyFor, toIdString(controllerId)],
         // [api.query.staking.nominators, stashId],
         // [api.query.staking.payee, stashId],
         // [api.query.staking.stakers, stashId],
         [api.query.staking.validators, toIdString(controllerId)],
         [api.query.staking.ledger, toIdString(controllerId) || accountId],
+        [api.query.staking.nodeName, toIdString(controllerId) || accountId],
       ], (re) => {
-        console.log(222111, re)
-        const [nextKeyFor, vp, ledger] = (re as VectorAny<Option<any>>)
+        console.log('result', re)
+        const [nextKeyFor, vp, ledger, nodeName] = (re as VectorAny<Option<any>>)
         // const [nextKeyFor, ledger] = re;
         const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null;
         stashId = ledgerWrap ? ledgerWrap.stash : "";
         validatorPrefs = filterValidatorPrefs(staking_validators, stashId);
         console.log('ledger', nextKeyFor, toIdString(nextKeyFor.unwrapOr(null)), staking_validators, validatorPrefs, ledger, toIdString(stashId))
+        console.log('nodeName', nodeName)
         staking_ledger = ledger
         nextSessionId = nextKeyFor
+        staking_nodeName = nodeName
         // resolve(1)
         // staking_validators = stakingValidators
       })
@@ -509,7 +516,8 @@ class Account extends React.PureComponent<Props, State> {
       staking_ledger: staking_ledger,
       isValidator: validators && validators.some((id) => {
         return id === toIdString(stashId)
-      })
+      }),
+      staking_nodeName
     }
   }
 
@@ -1583,5 +1591,5 @@ export default withMulti(
     ['query.kton.freeBalance', { paramName: 'accountId' }],
 
   ),
-  withObservable(accountObservable.subject, { propName: 'accounts' })
+  // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

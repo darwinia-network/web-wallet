@@ -76,6 +76,7 @@ type Props = BareProps & I18nProps & {
   ringBalances_freeBalance?: BN,
   kton_freeBalance?: BN,
   kton_locks: Array<any>,
+  balances_locks: Array<any>,
   isReadyStaking: boolean,
   staking_ledger: stakingLedgerType,
   balances_freeBalance?: BN
@@ -125,7 +126,8 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, balances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, buttons, isReadyStaking = false, staking_ledger, value } = this.props;
+    const { balances_all, ringBalances_freeBalance, balances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value } = this.props;
+
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -135,12 +137,18 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     if (!balanceDisplay || !balances_all) {
       return null;
     }
-
+    console.log('renderBalance', value, formatBalance(balances_all.availableBalance || 0, false))
+    let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
-
+    
+    if (balances_locks) {
+      balances_locks.forEach((item) => {
+        _balances_locks = _balances_locks.add(item.amount)
+      })
+    }
     if (kton_locks) {
       kton_locks.forEach((item) => {
-        _ktonBalances_locks.add(item.amount)
+        _ktonBalances_locks = _ktonBalances_locks.add(item.amount)
       })
     }
 
@@ -175,7 +183,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
                 <p>{t('ring')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatBalance(balances_freeBalance || 0, false)}</span></p>
+                <p><label>Available</label><span>{formatBalance((balances_freeBalance && balances_locks) ? balances_freeBalance.sub(_balances_locks).toString() : '0', false)}</span></p>
                 <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
                 <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
               </div>
@@ -189,7 +197,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
                 <p>{t('kton')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0', false)}</span></p>
+                <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
                 <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
                 <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
               </div>
@@ -489,7 +497,8 @@ export default withMulti(
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
     ['query.kton.locks', { paramName: 'value' }],
+    ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
-    ['query.balances.freeBalance', { paramName: 'value' }]
+    ['query.balances.freeBalance', { paramName: 'value' }],
   )
 );
