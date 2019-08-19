@@ -147,7 +147,7 @@ class Bond extends TxComponent<Props, State> {
   getKtonAmount = () => {
     const {type, bondValue = ZERO, lockLimit} = this.state
     let kton = null;
-    let parsedBondValue = bondValue.mul(new BN(1000000000))
+    let parsedBondValue = bondValue
     console.log(parsedBondValue.toString(),111)
     if(type === 'ring' && lockLimit != 0) {
       return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
@@ -158,7 +158,7 @@ class Bond extends TxComponent<Props, State> {
   getPowerAmount = () => {
     const { type, bondValue = ZERO } = this.state
     let power = ZERO;
-    power = assetToPower(bondValue.mul(new BN(1000000000)), type)
+    power = assetToPower(bondValue, type)
     return formatBalance(power, false)
   }
 
@@ -307,7 +307,7 @@ class Bond extends TxComponent<Props, State> {
       const { bondValue = prevState.bondValue, controllerError = prevState.controllerError, controllerId = prevState.controllerId, destination = prevState.destination, maxBalance = prevState.maxBalance, lockLimit = prevState.lockLimit, type = prevState.type, accept = prevState.accept } = newState;
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
       const extrinsic = (bondValue && controllerId)
-        ? api.tx.staking.bond(controllerId, { [typeKey]: bondValue.mul(new BN(1000000000)) }, destination, lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: bondValue }, destination, lockLimit)
         : null;
 
       return {
@@ -340,7 +340,7 @@ class Bond extends TxComponent<Props, State> {
 
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
       extrinsic = controllerId && destination
-        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance.mul(new BN(1000000000)) }, destination, lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance }, destination, lockLimit)
         : null;
 
       const txLength = calcSignatureLength(extrinsic, system_accountNonce);
@@ -382,7 +382,7 @@ class Bond extends TxComponent<Props, State> {
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
       extrinsic = controllerId && destination
-        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance.mul(new BN(1000000000)) }, destination, lockLimit)
+        ? api.tx.staking.bond(controllerId, { [typeKey]: maxBalance }, destination, lockLimit)
         : null;
 
       const txLength = calcSignatureLength(extrinsic, system_accountNonce);
