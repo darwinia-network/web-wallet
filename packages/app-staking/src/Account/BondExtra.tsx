@@ -124,7 +124,6 @@ class BondExtra extends TxComponent<Props, State> {
     const { type, maxAdditional = ZERO, lockLimit } = this.state
     let kton = null;
     let parsedBondValue = maxAdditional
-    console.log(parsedBondValue.toString(), 111)
     if (type === 'ring' && lockLimit != 0) {
       return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
     }
@@ -143,7 +142,6 @@ class BondExtra extends TxComponent<Props, State> {
     const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, onSuccess, t } = this.props;
     const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance, lockLimit, accept, type } = this.state;
     // const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && maxAdditional.lte(maxBalance)
-    console.log('maxAdditional', maxAdditional)
     const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && (lockLimit && type === 'ring' ? accept : true);
 
     if (!isOpen) {
@@ -313,10 +311,8 @@ class BondExtra extends TxComponent<Props, State> {
         .add(transactionByteFee.muln(txLength));
 
       let _ktonBalances_locks = ZERO
-      // console.log(1, kton_locks)
       if (kton_locks) {
         kton_locks.forEach((item, index) => {
-          // console.log(2, index,new BN(item.amount))
           _ktonBalances_locks = _ktonBalances_locks.add(new BN(item.amount))
         })
       }
