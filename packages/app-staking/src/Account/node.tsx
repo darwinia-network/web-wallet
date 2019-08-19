@@ -594,6 +594,7 @@ class Account extends React.PureComponent<Props, State> {
           <AddressInfoStaking
             // value={stashId || accountId}
             value={controllerId || accountId}
+            stashId={stashId || accountId}
             withBalance={true}
             buttons={this.renderBondButtons()}
             isReadyStaking={controllerId}
@@ -1589,7 +1590,6 @@ export default withMulti(
     // 'query.staking.recentlyOffline',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.kton.freeBalance', { paramName: 'accountId' }],
-
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

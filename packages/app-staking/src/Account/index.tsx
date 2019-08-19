@@ -398,6 +398,7 @@ class Account extends React.PureComponent<Props, State> {
           </div>
           <AddressInfoStaking
             value={accountId}
+            stashId={stashId || accountId}
             withBalance={true}
             buttons={this.renderBondButtons()}
             isReadyStaking={isActiveStash}

@@ -116,7 +116,7 @@ export default class Api extends React.PureComponent<Props, State> {
 
     console.log('api: found chain', chain, JSON.stringify(properties));
     
-    const DECIMALS = 9;
+    const DECIMALS = 0;
 
     // first setup the UI helpers
     formatBalance.setDefaults({

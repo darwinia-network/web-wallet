@@ -71,6 +71,7 @@ type Props = BareProps & I18nProps & {
   buttons?: React.ReactNode,
   staking_info?: DerivedStaking,
   value: string,
+  stashId?: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
   ringBalances_freeBalance?: BN,
@@ -496,9 +497,9 @@ export default withMulti(
     ['query.staking.ledger', { paramName: 'value' }],
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
-    ['query.kton.locks', { paramName: 'value' }],
-    ['query.balances.locks', { paramName: 'value' }],
-    ['query.kton.freeBalance', { paramName: 'value' }],
-    ['query.balances.freeBalance', { paramName: 'value' }],
+    ['query.kton.locks', { paramName: 'stashId' }],
+    ['query.balances.locks', { paramName: 'stashId' }],
+    ['query.kton.freeBalance', { paramName: 'stashId' }],
+    ['query.balances.freeBalance', { paramName: 'stashId' }],
   )
 );
