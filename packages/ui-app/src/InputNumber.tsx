@@ -209,7 +209,7 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   private regex = (): RegExp => {
-    const { isDecimal, isSi } = this.props;
+    const { isDecimal = true, isSi } = this.props;
     return new RegExp(
       (isSi || isDecimal) ?
         `^(0|[1-9]\\d*)(\\${KEYS.DECIMAL}\\d*)?$` :
@@ -378,7 +378,7 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   private getSiPowers = (siUnit = this.state.siUnit): [BN, number, number] => {
-    const { isSi, siValue } = this.props;
+    const { isSi = true, siValue } = this.props;
 
     const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
     const basePower = isSi ? commonFormatBalance.getDefaults().decimals : 0;
