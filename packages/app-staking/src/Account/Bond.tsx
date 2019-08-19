@@ -15,12 +15,11 @@ import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
 import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 import { Checkbox } from 'semantic-ui-react'
 import styled from 'styled-components'
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, ringToKton, assetToPower } from '@polkadot/util';
 
 import translate from '../translate';
 import ValidateController from './ValidateController';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
-import { ringToKton, assetToPower } from '@polkadot/util'
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
