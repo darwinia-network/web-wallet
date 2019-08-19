@@ -51,7 +51,7 @@ type Props = BareProps & I18nProps & {
   balances_freeBalance?: BN,
   kton_freeBalance?: BN,
   balances_locks?: Vector<any>,
-
+  kton_locks?: Vector<any>,
   children?: React.ReactNode,
   staking_info?: DerivedStaking,
   value: string,
@@ -85,7 +85,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
         }
 
     const ringBalance = this.renderQueryRingBalances()
-  
+    const ktonBalance = this.renderQueryKtonBalances()
     return (
       <div className={className}>
         <div>
@@ -138,7 +138,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           <div className="info-bottom">
             <div className="ui--value-box">
               <p>availible:</p>
-              <p className="p-amount">{formatKtonBalance(kton_freeBalance)}</p>
+              <p className="p-amount">{ktonBalance[0]}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -148,7 +148,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div className="ui--value-box">
               <p>bonded:</p>
-              <p className="p-amount">{balanceDisplay.bonded ? this.renderBonded(balanceDisplay.bonded) : '0'}</p>
+              <p className="p-amount">{ktonBalance[1]}</p>
               <p><Button
                 isBasic={true}
                 isSecondary={true}
@@ -246,6 +246,24 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     if(balances_freeBalance.lt(ringBonded)) return [formatBalance(0),formatBalance(ringBonded)]
     return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded)]
   }
+
+  private renderQueryKtonBalances() {
+    const { kton_locks, kton_freeBalance = new BN(0) } = this.props;
+    
+    if(!kton_locks) return [formatKtonBalance(kton_freeBalance), formatKtonBalance(0)]
+    const values = kton_locks.toArray().map((value) => ({
+      value
+    }));
+
+    let ktonBonded = new BN(0);
+    values.forEach((value: { value: {amount:BN} }, _: number) => {
+      ktonBonded = ktonBonded.add(value.value.amount)
+    })
+
+    if(kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0),formatKtonBalance(ktonBonded)]
+    return [formatKtonBalance(kton_freeBalance.sub(ktonBonded)), formatKtonBalance(ktonBonded)]
+  }
+
 
   // either true (filtered above already) or [own, ...all extras]
   private renderBonded(bonded: true | Array<BN>) {
@@ -454,6 +472,7 @@ export default withMulti(
     ['query.balances.freeBalance', { paramName: 'value' }],
     ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
+    ['query.kton.locks', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }]
   )
 );
