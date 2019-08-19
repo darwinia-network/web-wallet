@@ -123,7 +123,7 @@ class BondExtra extends TxComponent<Props, State> {
   getKtonAmount = () => {
     const { type, maxAdditional = ZERO, lockLimit } = this.state
     let kton = null;
-    let parsedBondValue = maxAdditional.mul(new BN(1000000000))
+    let parsedBondValue = maxAdditional
     console.log(parsedBondValue.toString(), 111)
     if (type === 'ring' && lockLimit != 0) {
       return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
@@ -134,7 +134,7 @@ class BondExtra extends TxComponent<Props, State> {
   getPowerAmount = () => {
     const { type, maxAdditional = ZERO } = this.state
     let power = ZERO;
-    power = assetToPower(maxAdditional.mul(new BN(1000000000)), type)
+    power = assetToPower(maxAdditional, type)
     return formatBalance(power, false)
   }
 
@@ -143,6 +143,7 @@ class BondExtra extends TxComponent<Props, State> {
     const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, onSuccess, t } = this.props;
     const { extrinsic, maxAdditional, maxBalance = balances_all.availableBalance, lockLimit, accept, type } = this.state;
     // const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && maxAdditional.lte(maxBalance)
+    console.log('maxAdditional', maxAdditional)
     const canSubmit = !!maxAdditional && maxAdditional.gtn(0) && (lockLimit && type === 'ring' ? accept : true);
 
     if (!isOpen) {
@@ -264,7 +265,7 @@ class BondExtra extends TxComponent<Props, State> {
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
       const extrinsic = (maxAdditional && maxAdditional.gte(ZERO))
-        ? api.tx.staking.bondExtra({ [typeKey]: maxAdditional.mul(new BN(1000000000)) }, lockLimit)
+        ? api.tx.staking.bondExtra({ [typeKey]: maxAdditional }, lockLimit)
         : null;
 
       return {
@@ -303,7 +304,7 @@ class BondExtra extends TxComponent<Props, State> {
       const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
       extrinsic = (maxAdditional && maxAdditional.gte(ZERO))
-        ? api.tx.staking.bondExtra({ [typeKey]: maxAdditional.mul(new BN(1000000000)) }, lockLimit)
+        ? api.tx.staking.bondExtra({ [typeKey]: maxAdditional }, lockLimit)
         : null;
 
       const txLength = calcSignatureLength(extrinsic, system_accountNonce);
