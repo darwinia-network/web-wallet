@@ -19,7 +19,7 @@ export const SI: Array<SiDef> = [
   // { power: -9, value: 'n', text: 'nano' },
   // { power: -6, value: 'µ', text: 'micro' },
   // { power: -3, value: 'm', text: 'milli' },
-  { power: 0, value: '-', text: 'RING' }, // position 8
+  { power: 9, value: '-', text: 'RING' }, // position 8
   // { power: 3, value: 'k', text: 'Kilo' },
   // { power: 6, value: 'M', text: 'Mega' },
   // { power: 9, value: 'G', text: 'Giga' },
