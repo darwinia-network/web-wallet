@@ -6,24 +6,25 @@ import { I18nProps } from '@polkadot/ui-app/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { ValidatorPrefs } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input} from '@polkadot/ui-app';
+import { ValidatorPrefs, Bytes } from '@polkadot/types';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
 
 import translate from '../translate';
-import {u8aToU8a, u8aToString, u8aToHex} from '@polkadot/util'
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
 type Props = I18nProps & {
   accountId: string,
   isOpen: boolean,
   onClose: () => void,
   stashId: string,
-  validatorPrefs: ValidatorPrefs
+  validatorPrefs: ValidatorPrefs,
+  nodeName?: Bytes
 };
 
 type State = {
   unstakeThreshold?: BN,
   validatorPayment?: BN,
-  nodeName?: string
+  nodeName?: string,
 };
 
 class Staking extends TxComponent<Props, State> {
@@ -40,14 +41,13 @@ class Staking extends TxComponent<Props, State> {
     if (state.unstakeThreshold) {
       return null;
     }
-    
+    const {nodeName = new Bytes()}  = props
     // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
     // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
     // return {
     //   unstakeThreshold: unstake_threshold.toBn(),
     //   validatorPayment: validator_payment_ratio.toBn()
     // }
-
 
     if (props.validatorPrefs) {
       // @ts-ignore
@@ -56,13 +56,15 @@ class Staking extends TxComponent<Props, State> {
 
       return {
         unstakeThreshold: unstake_threshold.toBn(),
-        validatorPayment: validator_payment_ratio.toBn()
+        validatorPayment: validator_payment_ratio.toBn(),
+        nodeName: u8aToString(nodeName.toU8a(true))
       };
     }
 
     return {
       unstakeThreshold: new BN(3),
-      validatorPayment: undefined
+      validatorPayment: undefined,
+      nodeName: u8aToString(nodeName.toU8a(true))
     };
 
   }
@@ -150,7 +152,7 @@ class Staking extends TxComponent<Props, State> {
             onEnter={this.sendTx}
             value={
               nodeName
-                ? nodeName.toString()
+                ? nodeName
                 : ''
             }
           />
@@ -160,6 +162,7 @@ class Staking extends TxComponent<Props, State> {
             label={t('payment preferences')}
             onChange={this.onChangePayment}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               validatorPayment
                 ? validatorPayment.toString()
@@ -174,6 +177,7 @@ class Staking extends TxComponent<Props, State> {
             label={t('unstake threshold')}
             onChange={this.onChangeThreshold}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               unstakeThreshold
                 ? unstakeThreshold.toString()

@@ -6,13 +6,13 @@ import { I18nProps } from '@polkadot/ui-app/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { ValidatorPrefs } from '@polkadot/types';
+import { ValidatorPrefs, Bytes } from '@polkadot/types';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
 
 import InputValidationUnstakeThreshold from './InputValidationUnstakeThreshold';
 import translate from '../translate';
 
-import {u8aToU8a, u8aToString, u8aToHex} from '@polkadot/util'
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
 type Props = I18nProps & {
   controllerId: string,
@@ -21,51 +21,60 @@ type Props = I18nProps & {
   stashId: string,
   validatorPrefs?: ValidatorPrefs,
   withStep?: boolean
+  nodeName?: Bytes
 };
 
 type State = {
   unstakeThreshold?: BN,
   unstakeThresholdError: string | null,
   validatorPayment?: BN,
-  nodeName?: string
+  nodeName?: Bytes
 };
 
 class Validate extends TxComponent<Props, State> {
   state: State = {
-    // unstakeThreshold: new BN(3),
+    unstakeThreshold: new BN(3),
     unstakeThresholdError: null,
-    // validatorPayment: new BN(0),
+    validatorPayment: undefined,
+    nodeName: undefined
   };
 
   // inject the preferences returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
-  static getDerivedStateFromProps(props: Props, state: State): State | null {
-    if (state.unstakeThreshold && state.validatorPayment) {
-      return null;
-    }
-    console.log('validatorPrefs', props.validatorPrefs)
-    
-    if (props.validatorPrefs) {
-      // @ts-ignore
-      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+  // static getDerivedStateFromProps(props: Props, state: State): State | null {
+    // console.log('validatorPrefs valiidate',state.unstakeThreshold ,state.validatorPayment )
+    // if (state.unstakeThreshold && state.validatorPayment && state.nodeName) {
+    //   return null;
+    // }
 
-      return {
-        unstakeThreshold: unstake_threshold.toBn(),
-        unstakeThresholdError: null,
-        validatorPayment: validator_payment_ratio.toBn()
-      };
-    }
+    // const { nodeName = new Bytes() } = props
+    // console.log('validatorPrefs valiidate1', props.validatorPrefs, nodeName)
 
-    return {
-      unstakeThreshold: undefined,
-      unstakeThresholdError: null,
-      validatorPayment: undefined
-    };
-  }
+    // // if (props.validatorPrefs) {
+    // //   // @ts-ignore
+    // //   const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+    // //   console.log('validatorPrefs valiidate2', unstake_threshold.toBn(), validator_payment_ratio.toBn())
+    // //   return {
+    // //     unstakeThreshold: unstake_threshold.toBn(),
+    // //     unstakeThresholdError: null,
+    // //     validatorPayment: validator_payment_ratio.toBn(),
+    // //     nodeName: u8aToString(nodeName.toU8a(true))
+    // //   };
+    // // }
+
+    // // @ts-ignore
+    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+
+    // return {
+    //   unstakeThreshold: props.validatorPrefs ? unstake_threshold.toBn() : undefined,
+    //   unstakeThresholdError: null,
+    //   validatorPayment: props.validatorPrefs ? validator_payment_ratio.toBn() : undefined,
+    //   nodeName: nodeName
+    // };
+  // }
 
   componentDidMount() {
-    console.log('u8aToString', u8aToString(u8aToU8a('0xe6b58be8af95e5ad97e7aca6e4b8b2')));
-    console.log('u8aToString', u8aToHex(u8aToU8a('测试字符串')));
+
   }
 
   render() {
@@ -151,13 +160,13 @@ class Validate extends TxComponent<Props, State> {
           />
           <Input
             className='medium'
+            defaultValue={nodeName}
             help={t('node name')}
             label={t('node name')}
             onChange={this.onChangeNodeName}
-            onEnter={this.sendTx}
             value={
               nodeName
-                ? nodeName.toString()
+                ? u8aToString(nodeName.toU8a(true))
                 : ''
             }
           />
@@ -168,6 +177,7 @@ class Validate extends TxComponent<Props, State> {
             label={t('reward commission')}
             onChange={this.onChangePayment}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               validatorPayment
                 ? validatorPayment.toString()
@@ -184,6 +194,7 @@ class Validate extends TxComponent<Props, State> {
             label={t('automatic unstake threshold')}
             onChange={this.onChangeThreshold}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               unstakeThreshold
                 ? unstakeThreshold.toString()
@@ -210,9 +221,10 @@ class Validate extends TxComponent<Props, State> {
       this.setState({ unstakeThreshold });
     }
   }
-  
+
   private onChangeNodeName = (nodeName: string) => {
-      this.setState({ nodeName });
+    console.log('nodeName1', new Bytes(nodeName))
+    this.setState({ nodeName: new Bytes(nodeName) });
   }
 
   private onUnstakeThresholdError = (unstakeThresholdError: string | null) => {
