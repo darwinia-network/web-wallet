@@ -6,7 +6,6 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { AccountFilter, ComponentProps } from './types';
 
 import React from 'react';
-import { CardGrid, Dropdown, FilterOverlay } from '@polkadot/ui-app';
 import { getAddressName } from '@polkadot/ui-app/util';
 import keyring from '@polkadot/ui-keyring';
 import createOption from '@polkadot/ui-keyring/options/item';
@@ -15,15 +14,20 @@ import styled from 'styled-components';
 import Account from './Account/node';
 import translate from './translate';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
+import { Bytes } from '@polkadot/types';
 
 type Props = I18nProps & ComponentProps &{
-  accountMain: 'string',
-  onStatusChange: () => void
+  accountMain: string,
+  stashId?: string,
+  controllerId?: string
+  onStatusChange: () => void,
+  sessionKey?: string,
+  ledger?: any,
+  nodeName?: Bytes
 };
 
 type State = {
-  filter: AccountFilter,
-  filterOptions: Array<{ text: React.ReactNode, value: AccountFilter }>
+  filter: AccountFilter
 };
 
 class Accounts extends React.PureComponent<Props, State> {
@@ -35,20 +39,14 @@ class Accounts extends React.PureComponent<Props, State> {
     const { t } = props;
 
     this.state = {
-      filter: 'all',
-      filterOptions: [
-        { text: t('Show all accounts'), value: 'all' },
-        { text: t('Show all unbonded'), value: 'unbonded' },
-        { text: t('Show only stashes'), value: 'stash' },
-        { text: t('Show only controllers'), value: 'controller' }
-      ]
+      filter: 'all'
     };
   }
 
   render() {
-    const { balances, recentlyOffline, t, validators , accountMain, onStatusChange} = this.props;
+    const { balances, recentlyOffline, t, validators , accountMain, onStatusChange,stashId, controllerId, ledger, sessionKey, nodeName} = this.props;
 
-    const { filter, filterOptions } = this.state;
+    const { filter } = this.state;
     const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
 
@@ -58,6 +56,8 @@ class Accounts extends React.PureComponent<Props, State> {
         // @ts-ignore */}
         <Account
           accountId={accountMain}
+          stashId={stashId}
+          controllerId={controllerId}
           balances={balances}
           filter={filter}
           isValidator={validators.includes(accountMain)}
@@ -65,6 +65,9 @@ class Accounts extends React.PureComponent<Props, State> {
           recentlyOffline={recentlyOffline}
           stashOptions={stashOptions}
           onStatusChange={onStatusChange}
+          ledger={ledger}
+          sessionKey={sessionKey}
+          nodeName={nodeName}
         />
       </StyledWrapper>
     );
@@ -76,10 +79,6 @@ class Accounts extends React.PureComponent<Props, State> {
     return stashes.map((stashId) =>
       createOption(stashId, getAddressName(stashId))
     );
-  }
-
-  private onChangeFilter = (filter: AccountFilter): void => {
-    this.setState({ filter });
   }
 }
 

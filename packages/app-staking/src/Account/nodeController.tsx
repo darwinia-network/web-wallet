@@ -105,7 +105,7 @@ const StyledWrapper = styled.div`
 
   .ui--address-value{
     display: flex;
-    padding: 35px 20px 35px 5px;
+    padding: 15px 20px 15px 5px;
     .flex-box{
       flex: 1;
       text-align: center;
@@ -260,10 +260,6 @@ class Account extends React.PureComponent<Props, State> {
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
 
-    // console.log(990002, staking_info,staking_validators,  staking_validators && staking_validators[0].some((id) => {
-    //   return toIdString(id) === toIdString(stashId)
-    // }))
-
     console.log('getDerivedStateFromProps', accountId,toIdString(stashId))
     return {
       controllerId: toIdString(controllerId),
@@ -290,7 +286,6 @@ class Account extends React.PureComponent<Props, State> {
 
     const { accountId, filter, kton_freeBalance } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs } = this.state;
-    // console.log('render', accountId, controllerId, nominators)
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
       return null;
@@ -305,9 +300,6 @@ class Account extends React.PureComponent<Props, State> {
     return (
       <StyledWrapper>
         {this.renderButtons()}
-        {/* <div className={'titleRow'}>
-          My Node
-        </div> */}
         <div>
           {this.renderBond()}
           {this.renderBondExtra()}

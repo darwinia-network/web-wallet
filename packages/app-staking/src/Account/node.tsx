@@ -34,6 +34,7 @@ import CreateModal from '@polkadot/app-accounts/modals/Create';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { ignoreElements } from 'rxjs/operators';
 import { api } from '@polkadot/ui-api'
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
 
 export type stakingLedgerType = {
@@ -64,7 +65,11 @@ type Props = ApiProps & I18nProps & {
   onStatusChange: () => void,
   staking_validators: any,
   staking_nominators: any,
-
+  ledger?: any,
+  stashId?: string,
+  controllerId?: string,
+  sessionKey?: string,
+  nodeName?: Bytes
 };
 
 type State = {
@@ -164,7 +169,7 @@ const StyledWrapper = styled.div`
   .ui--address-value{
     display: flex;
     align-items: center;
-    padding: 35px 20px 35px 5px;
+    padding: 15px 20px 15px 5px;
     .flex-box{
       flex: 1;
       text-align: center;
@@ -372,8 +377,8 @@ class Account extends React.PureComponent<Props, State> {
   //   };
   // }
 
-  static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
-    console.log('getDerivedStateFromProps', staking_info, accountId);
+  static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators, ledger, stashId, controllerId, sessionKey }: Props): Pick<State, never> | null {
+    console.log('getDerivedStateFromProps', staking_info, accountId, staking_nominators);
     console.log('staking_validators', staking_validators)
     // const { nextSessionId, stakingLedger, validatorPrefs } = staking_info;
     if (!accountId) {
@@ -397,79 +402,20 @@ class Account extends React.PureComponent<Props, State> {
       return null
     }
 
-    let stashId = null;
-    let controllerId = null;
+    // let stashId = null;
+    // let controllerId = null;
     let rewardDestination = null
     let nextSessionId = null
     let stakingLedger = null
     let validatorPrefs = null
-    let staking_ledger = null
     let staking_nodeName = null
-    // let staking_validators = null
 
-
-    // const apis = new Promise((resolve, reject) => {
-    api.queryMulti([
-      [api.query.staking.bonded, accountId], // try to map to controller
-      [api.query.staking.ledger, accountId]
-    ], (re) => {
-      // console.log(222,(re as VectorAny<Option<any>>))
-      const [account, ledger] = (re as VectorAny<Option<any>>)
-      const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null
-
-      console.log('ledgerWrap', ledgerWrap)
-      stashId = ledgerWrap ? ledgerWrap.stash : "";
-      if (stashId) {
-        controllerId = accountId
-      } else {
-        controllerId = (account && account.isNone) ? "" : account;
-      }
-
-      console.log('controllerId', controllerId, toIdString(controllerId), ledgerWrap)
-
-      if (!controllerId) {
-        // resolve(0)
-        return;
-      }
-
-      api.queryMulti([
-        [api.query.session.nextKeyFor, toIdString(controllerId)],
-        // [api.query.staking.nominators, stashId],
-        // [api.query.staking.payee, stashId],
-        // [api.query.staking.stakers, stashId],
-        [api.query.staking.validators, toIdString(controllerId)],
-        [api.query.staking.ledger, toIdString(controllerId) || accountId],
-        [api.query.staking.nodeName, toIdString(controllerId) || accountId],
-      ], (re) => {
-        console.log('result', re)
-        const [nextKeyFor, vp, ledger, nodeName] = (re as VectorAny<Option<any>>)
-        // const [nextKeyFor, ledger] = re;
-        const ledgerWrap = ledger && ledger.isSome && ledger.unwrap() || null;
-        stashId = ledgerWrap ? ledgerWrap.stash : "";
-        validatorPrefs = filterValidatorPrefs(staking_validators, stashId);
-        console.log('ledger', nextKeyFor, toIdString(nextKeyFor.unwrapOr(null)), staking_validators, validatorPrefs, ledger, toIdString(stashId))
-        console.log('nodeName', nodeName)
-        staking_ledger = ledger
-        nextSessionId = nextKeyFor
-        staking_nodeName = nodeName
-        // resolve(1)
-        // staking_validators = stakingValidators
-      })
-    })
-    // })
-
-    // const result = await apis
-    // console.log('api-result', result)
-    // return
-    // if (!staking_info) {
-    //   return null;
-    // }
 
     let nominatorIndex = -1;
     let nominators = [];
     if (staking_nominators) {
       staking_nominators[0].forEach((element, index) => {
-        if (toIdString(element) === toIdString(stashId)) {
+        if (toIdString(element) === stashId) {
           nominatorIndex = index;
         }
       });
@@ -477,9 +423,11 @@ class Account extends React.PureComponent<Props, State> {
       nominators = staking_nominators[1][nominatorIndex];
     }
 
+    validatorPrefs = filterValidatorPrefs(staking_validators, stashId);
+
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
-    console.log(99001, controllerId, toIdString(controllerId), stashId)
+    console.log('accountInfo（controllerid, stashid, ledger,sessionKey）', controllerId, stashId, ledger, sessionKey, validatorPrefs)
     const validators = staking_validators && staking_validators[0].map((authorityId) =>
       authorityId.toString()
     )
@@ -493,32 +441,36 @@ class Account extends React.PureComponent<Props, State> {
     // }))
     // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
     console.log('nextSessionId', nextSessionId)
-    const nextSessionIdUnwrap = nextSessionId && nextSessionId.isSome && nextSessionId.unwrapOr({})
+    // const nextSessionIdUnwrap = nextSessionId && nextSessionId.isSome && nextSessionId.unwrapOr({})
     return {
-      controllerId: toIdString(controllerId),
+      controllerId: controllerId,
       destination: rewardDestination && rewardDestination.toNumber(),
-      isActiveController: toIdString(controllerId),
+      isActiveController: controllerId,
       // isActiveController: false,
-      isActiveSession: accountId === toIdString(nextSessionId),
-      isActiveStash: accountId === toIdString(stashId),
+      isActiveSession: accountId === sessionKey,
+      isActiveStash: accountId === stashId,
       isStashNominating,
       isStashValidating,
       nominators,
-      sessionId: toIdString(nextSessionIdUnwrap && nextSessionIdUnwrap.grandpaKey),
+      sessionId: sessionKey,
       // stakers,
       stakingLedger,
-      stashId: toIdString(stashId),
+      stashId: stashId,
       validatorPrefs,
       controllers: staking_controllers[1].filter((optId) => optId && optId.isSome).map((accountId) =>
         accountId.unwrap().toString()
       ),
       validators: validators,
-      staking_ledger: staking_ledger,
+      staking_ledger: ledger,
       isValidator: validators && validators.some((id) => {
-        return id === toIdString(stashId)
+        return id === stashId
       }),
       staking_nodeName
     }
+  }
+
+  componentDidMount() {
+
   }
 
   componentDidUpdate() {
@@ -527,7 +479,7 @@ class Account extends React.PureComponent<Props, State> {
 
   render() {
     // @ts-ignore
-    const { accountId, filter, kton_freeBalance, session_validators, onStatusChange } = this.props;
+    const { accountId, filter, kton_freeBalance, session_validators, onStatusChange, nodeName = new Bytes() } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId } = this.state;
     console.log('render1', controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId)
 
@@ -535,8 +487,11 @@ class Account extends React.PureComponent<Props, State> {
       return null;
     }
 
+    const nodeNameString = u8aToString(nodeName.toU8a(true))
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
+
+    console.log('nodeName', nodeName.toHex(), nodeNameString)
 
     // const next = controllers.filter((address) =>
     //   !validators.includes(address)
@@ -545,7 +500,7 @@ class Account extends React.PureComponent<Props, State> {
     console.log('render', controllerId, stashId, isNominating)
     console.log('status', isActiveStash, isNominating, isValidating, sessionId)
 
-    if ((controllerId == stashId && controllerId != null) || isNominating) {
+    if ((controllerId == stashId && controllerId != null && controllerId != '') || isNominating) {
       return (
         <StyledWrapper>
           <div className={'titleRow'}>
@@ -583,7 +538,7 @@ class Account extends React.PureComponent<Props, State> {
           {this.renderSetSessionAccount()}
           <div className="ui--address-box">
             <img className="ui--address-box-img" src={NodeIcon} />
-            <p className="nodeName">Validators Node</p>
+            <p className="nodeName">{nodeNameString || `Default`}</p>
             {this.renderStatus()}
             <div className="splitSpace"></div>
             {this.renderControllerButtons()}
@@ -633,7 +588,7 @@ class Account extends React.PureComponent<Props, State> {
         </>
         } */}
 
-        {controllerId !== null && <>
+        {controllerId && <>
           <div className={'titleRow'}>
             Account
           </div>
@@ -645,52 +600,13 @@ class Account extends React.PureComponent<Props, State> {
             {this.renderLinkedAccountEmpty()}
           </div>
         </>}
-
-        {/* <div className="ui--accounts-link">
-          <div>
-            <div className={'titleRow'}>
-              Linked account
-            </div>
-            <div className="ui--accounts-box">
-              {this.renderControllerId()}
-              {this.renderStashId()}
-              {this.renderSessionId()}
-              {this.renderLinkedAccountEmpty()}
-            </div>
-          </div>
-          <div className="nominatingBox">
-            <div className={'titleRow'}>
-              Nominating
-            </div>
-            <div className="ui--accounts-box">
-              {this.renderNominee()}
-            </div>
-          </div>
-        </div> */}
-
-        {/* <AddressRow
-          buttons={this.renderButtons()}
-          value={accountId}
-        >
-          <AddressInfo
-            withBalance
-            value={accountId}
-          >
-            <div className='staking--Account-links'>
-              {this.renderControllerId()}
-              {this.renderStashId()}
-              {this.renderSessionId()}
-              {this.renderNominee()}
-            </div>
-          </AddressInfo>
-        </AddressRow> */}
       </StyledWrapper >
     );
   }
 
   private renderStatus() {
 
-    const { controllerId, validators, controllers } = this.state;
+    const { controllerId, validators, controllers, stashId } = this.state;
     const { staking_info } = this.props;
 
     if (!validators) {
@@ -701,20 +617,21 @@ class Account extends React.PureComponent<Props, State> {
       !validators.includes(address)
     );
 
-    if (!staking_info || !validators.includes(controllerId) && !next.includes(controllerId)) {
+    if (!staking_info || !staking_info.stakers || !validators.includes(controllerId) && !next.includes(controllerId)) {
       return null;
     }
 
     return (
       <div className="validatingBox">
-        {validators.includes(controllerId) && <p>validating ({staking_info.stakers.others.length} Nominators)</p>}
-        {next.includes(controllerId) && <p>next up ({staking_info.stakers.others.length} Nominators)</p>}
+        {validators.includes(stashId) && <p>Validating ({staking_info.stakers.others.length} Nominators)</p>}
+        {next.includes(stashId) && <p>Next up ({staking_info.stakers.others.length} Nominators)</p>}
       </div>
     );
   }
 
   private renderSetValidatorPrefs() {
     const { controllerId, isValidateOpen, stashId, validatorPrefs, isValidateOpenWithStep } = this.state;
+    const { nodeName } = this.props
 
     // if (!controllerId || !validatorPrefs || !stashId) {
     //   return null;
@@ -732,6 +649,7 @@ class Account extends React.PureComponent<Props, State> {
           onClose={this.toggleValidate}
           stashId={stashId}
           validatorPrefs={validatorPrefs}
+          nodeName={nodeName}
         />
         <Validate
           controllerId={controllerId}
@@ -740,6 +658,7 @@ class Account extends React.PureComponent<Props, State> {
           withStep
           stashId={stashId}
           validatorPrefs={validatorPrefs}
+          nodeName={nodeName}
         />
       </>
     );
@@ -858,7 +777,7 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   private renderValidating() {
-    const { accountId } = this.props;
+    const { accountId, nodeName } = this.props;
     const { isValidatingOpen, stashId, validatorPrefs, controllerId } = this.state;
     console.log(validatorPrefs, isValidatingOpen, stashId)
     // if (!validatorPrefs || !isValidatingOpen || !stashId) {
@@ -876,6 +795,7 @@ class Account extends React.PureComponent<Props, State> {
         onClose={this.toggleValidating}
         stashId={stashId}
         validatorPrefs={validatorPrefs}
+        nodeName={nodeName}
       />
     );
   }
@@ -1184,13 +1104,13 @@ class Account extends React.PureComponent<Props, State> {
         }
       }
     }
+
     return (
       <Button.Group>
         {buttons}
       </Button.Group>
     );
   }
-
 
   private renderNominateButtons() {
     const { accountId, balances_all, t } = this.props;
