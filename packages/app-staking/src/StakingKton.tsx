@@ -23,6 +23,18 @@ import basicMd from './md/basic.md';
 import Accounts from './Accounts';
 import Overview from './Overview';
 import translate from './translate';
+import { api } from '@polkadot/ui-api'
+import { Codec } from '@polkadot/types/types';
+
+const NOOP = () => {
+  // ignore
+};
+
+function toIdString(id?: AccountId | null): string | null {
+  return id
+    ? id.toString()
+    : null;
+}
 
 type Props = AppProps & ApiProps & I18nProps & {
   allAccounts?: SubjectInfo,
@@ -38,11 +50,14 @@ type State = {
   stashes: Array<string>,
   tabs: Array<TabItem>,
   validators: Array<string>,
-  AccountMain: string
+  AccountMain: string,
+  controllerId?: string,
+  stashId?: string,
 };
 
 class App extends React.PureComponent<Props, State> {
   state: State;
+  apiUnsubscribe: any;
 
   constructor(props: Props) {
     super(props);
@@ -65,8 +80,12 @@ class App extends React.PureComponent<Props, State> {
         }
       ],
       validators: [],
-      AccountMain: ''
+      AccountMain: '',
+      controllerId: '',
+      stashId: ''
     };
+
+    this.apiUnsubscribe = []
   }
 
   static getDerivedStateFromProps({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
@@ -103,29 +122,184 @@ class App extends React.PureComponent<Props, State> {
       this.setState({
         AccountMain
       })
-    },0)
+
+      // stashId -> true -> (controllerId -> accountMain, stashId -> ledger.stashId)
+      // stashId -> false -> (未绑定controllerId || 本身是 stashId)
+      // api.query.staking.ledger(AccountMain, (ledger: Option<Codec>) => {
+      //   let stashId, controllerId = null;
+      //   console.log('111111111112', ledger)
+      //   const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null) || null;
+      //   console.log('111111111112', ledgerWrap)
+
+      //   stashId = ledgerWrap ? ledgerWrap.stash : '';
+
+      //   if (stashId) {
+      //     controllerId = AccountMain;
+      //     this.setState({
+      //       stashId,
+      //       controllerId
+      //     })
+      //     return
+      //   }
+
+      //   api.query.staking.bonded(AccountMain).then((bonded: Option<Codec>) => {
+      //     const bondedWrap = bonded && bonded.isSome && bonded.unwrapOr(null) || null;
+      //     console.log('111111111113', bondedWrap)
+
+      //     if(bondedWrap) {
+      //       stashId = AccountMain;
+      //       controllerId = bondedWrap;
+
+      //       this.setState({
+      //         stashId,
+      //         controllerId
+      //       })
+      //     }
+      //   })
+      // })
+
+      this.getAccountRelated(AccountMain, ({ stashId, controllerId }) => {
+        console.log('getAccountRelated', { stashId, controllerId })
+
+        this.setState({
+          stashId,
+          controllerId
+        })
+      })
+    }, 0);
   }
 
+  componentWillUnmount() {
+    console.log('componentWillUnmount', this.apiUnsubscribe)
+    this.unsubscribe()
+  }
+
+  unsubscribe = () => {
+    this.apiUnsubscribe && this.apiUnsubscribe.map((unsubscribe) => {
+      console.log('unsubscribe')
+      unsubscribe && unsubscribe()
+    })
+  }
+
+  filterUndefined(obj) {
+    return Object.keys(obj).reduce((object,key) => {
+      if(typeof obj[key] !== 'undefined') {object[key] = obj[key]}
+      return object
+    }, {})
+  }
+
+  // async getAccountRelated(AccountMain, callback) {
+  //   // stashId -> true -> (controllerId -> accountMain, stashId -> ledger.stashId)
+  //   // stashId -> false -> (未绑定controllerId || 本身是 stashId)
+  //   this.unsubscribe();
+  //   let staking_ledger_t, staking_bonded_t = null;
+  //   staking_ledger_t = await api.query.staking.ledger((AccountMain), async (ledger: Option<Codec>) => {
+  //     let stashId, controllerId = null;
+
+  //     const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null) || null;
+
+  //     stashId = ledgerWrap ? ledgerWrap.stash : '';
+
+  //     if (stashId) {
+  //       controllerId = AccountMain;
+  //     } else {
+  //       staking_bonded_t = await api.query.staking.bonded(AccountMain).then((bonded: Option<Codec>) => {
+  //         const bondedWrap = bonded && bonded.isSome && bonded.unwrapOr(null) || null;
+
+  //         if (bondedWrap) {
+  //           stashId = AccountMain;
+  //           controllerId = bondedWrap || '';
+  //         }
+  //       })
+  //     }
+
+  //     callback && callback({
+  //       stashId: toIdString(stashId),
+  //       controllerId: toIdString(controllerId)
+  //     })
+  //   })
+  //   this.apiUnsubscribe.push(staking_ledger_t, staking_bonded_t)
+  // }
+
+
+  getAccountRelated = async (AccountMain, callback) => {
+    // stashId -> true -> (controllerId -> accountMain, stashId -> ledger.stashId)
+    // stashId -> false -> (未绑定controllerId || 本身是 stashId)
+    // this.unsubscribe();
+    this.unsubscribe()
+    let staking_ledger_t, staking_bonded_t = null;
+    let isStashId = false
+    staking_ledger_t = await api.query.staking.ledger((AccountMain), async (ledger: Option<Codec>) => {
+      console.log('api.query.staking.ledger', ledger)
+      let stashId = null;
+
+      const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null);
+      console.log('api.query.staking.ledger wrap', ledgerWrap)
+      stashId = ledgerWrap && ledgerWrap.stash || null;
+
+      if (ledger) {
+        const ledgerWrap = ledger.unwrapOr(null);
+        stashId = (ledgerWrap && ledgerWrap.stash) || null
+      }
+
+      console.log('api.query.staking.ledger wrap1', ledger, stashId, toIdString(ledger ? stashId : undefined))
+
+      if (stashId) {
+        // controllerId = AccountMain;
+        callback && callback({
+          stashId: toIdString(ledger ? stashId : undefined),
+          controllerId: toIdString(AccountMain)
+        })
+        isStashId = true
+      } else {
+        isStashId = false
+      }
+    })
+
+    staking_bonded_t = await api.query.staking.bonded(AccountMain, (bonded: Option<Codec>) => {
+      console.log('api.query.staking.bonded', bonded)
+      if (isStashId) {
+        return;
+      }
+
+      let stashId = null, controllerId = null;
+      const bondedWrap = bonded && bonded.isSome && bonded.unwrapOr(null);
+
+      if (bondedWrap) {
+        stashId = AccountMain;
+        controllerId = bondedWrap;
+      }
+
+      callback && callback({
+        stashId: toIdString(stashId),
+        controllerId: toIdString(controllerId)
+      })
+    })
+
+    this.apiUnsubscribe.push(staking_ledger_t, staking_bonded_t);
+  }
+  
   render() {
     const { allAccounts, basePath, onStatusChange } = this.props;
-    const { controllers, recentlyOffline, stashes, validators, AccountMain } = this.state;
+    const { controllers, recentlyOffline, stashes, validators, AccountMain, stashId, controllerId } = this.state;
     const hidden = !allAccounts || Object.keys(allAccounts).length === 0
       ? ['actions']
       : [];
     const { balances = {} } = this.props;
 
-      // @ts-ignore
+    // @ts-ignore
     return (
       <>
-        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
+        {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
         <Accounts
           balances={balances}
           controllers={controllers}
           recentlyOffline={recentlyOffline}
           stashes={stashes}
           validators={validators}
-          // @ts-ignore
           accountMain={AccountMain}
+          stashId={stashId}
+          controllerId={controllerId}
         />
       </>
     );
@@ -145,11 +319,15 @@ class App extends React.PureComponent<Props, State> {
   }
 
   private changeMainAddress = (): void => {
-    this.setState({
-      AccountMain: this.getAccountMain() || ''
+    const AccountMain = this.getAccountMain() || ''
+
+    this.getAccountRelated(AccountMain, ({ stashId, controllerId }) => {
+      const _accountRelated = this.filterUndefined({ stashId, controllerId, AccountMain })
+      console.log('getAccountRelated',_accountRelated, { stashId, controllerId })
+
+      this.setState(_accountRelated)
     })
   }
-
 }
 
 export default withMulti(
@@ -157,6 +335,7 @@ export default withMulti(
   translate,
   withCalls<Props>(
     'derive.staking.controllers',
+    ['api.query.staking.bonded', { paramName: 'accountId' }],
     'query.session.validators',
     'query.staking.recentlyOffline'
   ),
