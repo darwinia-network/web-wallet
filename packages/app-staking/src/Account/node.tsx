@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountFilter, RecentlyOfflineMap } from '../types';
-import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact, Bytes } from '@polkadot/types';
+import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact, Bytes, Enum , RewardDestination} from '@polkadot/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 import { DerivedBalances, DerivedBalancesMap, DerivedStaking } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
@@ -50,16 +50,22 @@ export type stakingLedgerType = {
   isNone: boolean
 }
 
+/** Enum */
+// export interface RewardDestination extends Enum {
+//   /** 0:: Stash */
+//   readonly isStash: boolean;
+//   /** 1:: Controller */
+//   readonly isController: boolean;
+// }
+
 type Props = ApiProps & I18nProps & {
   accountId: string,
   balances: DerivedBalancesMap,
   filter: AccountFilter,
   // isValidator: boolean,
   recentlyOffline: RecentlyOfflineMap,
-  balances_all?: DerivedBalances,
   staking_info?: DerivedStaking,
   stashOptions: Array<KeyringSectionOption>,
-  kton_freeBalance: BN,
   session_validators?: Array<AccountId>,
   staking_controllers?: [Array<AccountId>, Array<Option<AccountId>>],
   onStatusChange: () => void,
@@ -69,7 +75,8 @@ type Props = ApiProps & I18nProps & {
   stashId?: string,
   controllerId?: string,
   sessionKey?: string,
-  nodeName?: Bytes
+  nodeName?: Bytes,
+  staking_payee: RewardDestination
 };
 
 type State = {
@@ -308,7 +315,7 @@ const StyledWrapper = styled.div`
 
 class Account extends React.PureComponent<Props, State> {
   state: State = {
-    destination: 1,
+    destination: 0,
     isActiveController: false,
     isActiveSession: false,
     isActiveStash: true,
@@ -336,7 +343,8 @@ class Account extends React.PureComponent<Props, State> {
     isCreateOpen: false,
     staking_ledger: null,
     isValidator: false,
-    staking_nodeName: null
+    staking_nodeName: null,
+    
   };
 
   // static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
@@ -377,7 +385,7 @@ class Account extends React.PureComponent<Props, State> {
   //   };
   // }
 
-  static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators, ledger, stashId, controllerId, sessionKey }: Props): Pick<State, never> | null {
+  static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators, ledger, stashId, controllerId, sessionKey, staking_payee }: Props): Pick<State, never> | null {
     console.log('getDerivedStateFromProps', staking_info, accountId, staking_nominators);
     console.log('staking_validators', staking_validators)
     // const { nextSessionId, stakingLedger, validatorPrefs } = staking_info;
@@ -404,7 +412,7 @@ class Account extends React.PureComponent<Props, State> {
 
     // let stashId = null;
     // let controllerId = null;
-    let rewardDestination = null
+    let rewardDestination = staking_payee
     let nextSessionId = null
     let stakingLedger = null
     let validatorPrefs = null
@@ -435,6 +443,7 @@ class Account extends React.PureComponent<Props, State> {
     console.log('controllers', staking_controllers[1].filter((optId) => optId && optId.isSome).map((accountId) =>
       accountId.unwrap().toString()
     ))
+    console.log('rewardDestination', rewardDestination)
     // console.log(validators && validators.some((id) => {
     //   console.log(id, toIdString(stashId))
     //   return id === toIdString(stashId)
@@ -469,17 +478,9 @@ class Account extends React.PureComponent<Props, State> {
     }
   }
 
-  componentDidMount() {
-
-  }
-
-  componentDidUpdate() {
-
-  }
-
   render() {
     // @ts-ignore
-    const { accountId, filter, kton_freeBalance, session_validators, onStatusChange, nodeName = new Bytes() } = this.props;
+    const { accountId, filter, session_validators, onStatusChange, nodeName = new Bytes() } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId } = this.state;
     console.log('render1', controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId)
 
@@ -939,7 +940,7 @@ class Account extends React.PureComponent<Props, State> {
         <AddressRow
           // buttons={this.renderButtons()}
           suffixName={'(reward)'}
-          value={destination === 1 ? stashId : controllerId}
+          value={destination === 0 ? stashId : controllerId}
           className="ui--AddressRow"
         >
           <Button
@@ -1043,7 +1044,7 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   private renderControllerButtons() {
-    const { accountId, balances_all, t } = this.props;
+    const { t } = this.props;
     const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen, isValidator, controllerId } = this.state;
     const buttons = [];
 
@@ -1112,73 +1113,8 @@ class Account extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderNominateButtons() {
-    const { accountId, balances_all, t } = this.props;
-    const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen } = this.state;
-    const buttons = [];
-    const isNominating = !!nominators && nominators.length;
-    const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-
-    if (isActiveStash) {
-      // if we are validating/nominating show stop
-      if (isValidating || isNominating) {
-        buttons.push(
-          <TxButton
-            accountId={accountId}
-            // isNegative
-            label={
-              isNominating
-                ? t('Stop Nominating')
-                : t('Stop Validating')
-            }
-            key='stop'
-            tx='staking.chill'
-          />
-        );
-      } else {
-        if (!sessionId) {
-          buttons.push(
-            <Button
-              isBasic={true}
-              isSecondary={true}
-              key='session'
-              onClick={this.toggleSessionKey}
-              label={t('Set Session Key')}
-            />
-          );
-        } else {
-          buttons.push(
-            <Button
-              isBasic={true}
-              isSecondary={true}
-              key='validate'
-              onClick={this.toggleValidating}
-              label={t('Validate')}
-            />
-          );
-        }
-        // buttons.push(
-        //   <Button
-        //     isBasic={true}
-        //     isSecondary={true}
-        //     key='nominate1'
-        //     onClick={this.toggleNominate}
-        //     label={t('Nominate')}
-        //   />
-        // );
-      }
-    }
-
-    return (
-      <Button.Group>
-        {buttons}
-      </Button.Group>
-    );
-  }
-
-
   private renderBondButtons() {
-    const { accountId, balances_all, t } = this.props;
+    const { t } = this.props;
     const { isActiveStash, isActiveController, nominators, sessionId, stashId, stakingLedger, validatorPrefs, isSettingPopupOpen, staking_ledger } = this.state;
     const buttons = [];
     console.log('renderBondButtons', stashId, staking_ledger)
@@ -1231,174 +1167,6 @@ class Account extends React.PureComponent<Props, State> {
       <Button.Group>
         {buttons}
       </Button.Group>
-    );
-  }
-
-  private renderButtons() {
-    const { accountId, balances_all, t } = this.props;
-    const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen } = this.state;
-    const buttons = [];
-
-    if (isActiveStash) {
-      // only show a "Bond Additional" button if this stash account actually doesn't bond everything already
-      // staking_ledger.total gives the total amount that can be slashed (any active amount + what is being unlocked)
-      if (balances_all && stakingLedger && stakingLedger.total && (balances_all.freeBalance.gt(stakingLedger.total))) {
-        buttons.push(
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            key='bond'
-            onClick={this.toggleBondExtra}
-            label={t('Bond Additional')}
-          />
-        );
-      }
-
-      // don't show the `unbond` button if there's nothing to unbond
-      // staking_ledger.active gives the amount that can be unbonded (total - what's being unlocked).
-      if (stakingLedger && stakingLedger.active && stakingLedger.active.gtn(0)) {
-        // buttons.length && buttons.push(<Button.Or key='bondAdditional.or' />);
-        buttons.push(
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            key='unbond'
-            onClick={this.toggleUnbond}
-            label={t('Unbond')}
-          />
-        );
-        buttons.push(
-          <Popup
-            key='settings'
-            onClose={this.toggleSettingPopup}
-            open={isSettingPopupOpen}
-            position='bottom left'
-            trigger={
-              <Button
-                icon='setting'
-                onClick={this.toggleSettingPopup}
-                size='tiny'
-              />
-            }
-          >
-            {this.renderPopupMenu()}
-          </Popup>
-        );
-      }
-    } else if (isActiveController) {
-      const isNominating = !!nominators && nominators.length;
-      const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-
-      // if we are validating/nominating show stop
-      if (isValidating || isNominating) {
-        buttons.push(
-          <TxButton
-            accountId={accountId}
-            isNegative
-            label={
-              isNominating
-                ? t('Stop Nominating')
-                : t('Stop Validating')
-            }
-            key='stop'
-            tx='staking.chill'
-          />
-        );
-      } else {
-        if (!sessionId) {
-          buttons.push(
-            <Button
-              isBasic={true}
-              isSecondary={true}
-              key='session'
-              onClick={this.toggleSessionKey}
-              label={t('Set Session Key')}
-            />
-          );
-        } else {
-          buttons.push(
-            <Button
-              isBasic={true}
-              isSecondary={true}
-              key='validate'
-              onClick={this.toggleValidating}
-              label={t('Validate')}
-            />
-          );
-        }
-        buttons.push(
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            key='nominate'
-            onClick={this.toggleNominate}
-            label={t('Nominate')}
-          />
-        );
-      }
-    } else {
-      // we have nothing here, show the bond to get started
-      // buttons.push(
-      //   <Button
-      //     isBasic={true}
-      //     isSecondary={true}
-      //     key='bond'
-      //     onClick={this.toggleBond}
-      //     label={t('Bond Funds')}
-      //   />
-      // );
-    }
-    return (
-      <Button.Group>
-        {buttons}
-      </Button.Group>
-    );
-  }
-
-  private renderPopupMenu() {
-    const { balances_all, t } = this.props;
-    const { isStashNominating, isStashValidating, sessionId } = this.state;
-
-    // only show a "Bond Additional" button if this stash account actually doesn't bond everything already
-    // staking_ledger.total gives the total amount that can be slashed (any active amount + what is being unlocked)
-    const canBondExtra = balances_all && balances_all.availableBalance.gtn(0);
-
-    return (
-      <Menu
-        vertical
-        text
-        onClick={this.toggleSettingPopup}
-      >
-        {canBondExtra &&
-          <Menu.Item onClick={this.toggleBondExtra}>
-            {t('Bond more funds')}
-          </Menu.Item>
-        }
-        <Menu.Item onClick={this.toggleUnbond}>
-          {t('Unbond funds')}
-        </Menu.Item>
-        <Menu.Item onClick={this.toggleSetControllerAccount}>
-          {t('Change controller account')}
-        </Menu.Item>
-        <Menu.Item onClick={this.toggleSetRewardDestination}>
-          {t('Change reward destination')}
-        </Menu.Item>
-        {isStashValidating &&
-          <Menu.Item onClick={this.toggleValidate}>
-            {t('Change validator preferences')}
-          </Menu.Item>
-        }
-        {sessionId &&
-          <Menu.Item onClick={this.toggleSetSessionAccount}>
-            {t('Change session account')}
-          </Menu.Item>
-        }
-        {isStashNominating &&
-          <Menu.Item onClick={this.toggleNominate}>
-            {t('Change nominee(s)')}
-          </Menu.Item>
-        }
-      </Menu>
     );
   }
 
@@ -1506,10 +1274,8 @@ export default withMulti(
     ['derive.staking.info', { paramName: 'accountId' }],
     'derive.staking.controllers',
     ['query.staking.validators', { paramName: 'accountId' }],
+    ['query.staking.payee', { paramName: 'stashId' }],
     'query.session.validators',
-    // 'query.staking.recentlyOffline',
-    ['derive.balances.all', { paramName: 'accountId' }],
-    ['query.kton.freeBalance', { paramName: 'accountId' }],
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );
