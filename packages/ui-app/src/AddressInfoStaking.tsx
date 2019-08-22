@@ -56,6 +56,7 @@ export type stakingLedgerType = {
   raw: {
     stash?: string,
     total_power?: number,
+    active_power?: number,
     total_ring?: Compact,
     regular_ring?: Compact,
     active_ring?: Compact,
@@ -117,7 +118,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       return null;
     }
 
-    const power = formatBalance(staking_ledger.raw.total_power, false)
+    const power = formatBalance(staking_ledger.raw.active_power, false)
     return (
       <div className="power-box">
         <h3>Power</h3>
