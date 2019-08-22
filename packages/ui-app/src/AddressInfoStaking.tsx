@@ -138,7 +138,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     if (!balanceDisplay || !balances_all) {
       return null;
     }
-    console.log('renderBalance', value, formatBalance(balances_all.availableBalance || 0, false))
+    console.log('renderBalance', value, balances_freeBalance,balances_locks, kton_freeBalance, kton_locks)
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
     
@@ -157,13 +157,13 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       return (
         <div className='column'>
           <div className="ui--address-value">
+          <div className="balance-box">
+              <p>RING</p>
+              <h1>{formatBalance(balances_all.freeBalance)}</h1>
+            </div>
             <div className="balance-box">
               <p>KTON</p>
               <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
-            </div>
-            <div className="balance-box">
-              <p>RING</p>
-              <h1>{formatBalance(balances_all.freeBalance)}</h1>
             </div>
           </div>
         </div>
@@ -199,70 +199,16 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               </div>
               <div className="box-right">
                 <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
-                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
+                <p><label>Bonded</label><span>{formatKtonBalance(_ktonBalances_locks, false)}</span></p>
+                <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
               </div>
             </div>
           </div>
-          {/*           
-          <div className="flex-box">
-            <p>total</p>
-            <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
-          </div>
-          <div className="flex-box">
-            <p>available</p>
-            <h1>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')}</h1>
-          </div>
-          <div className="flex-box">
-            <p>bonded</p>
-            <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}</h1>
-          </div>
-          <div className="flex-box">
-            <p>unbonding</p>
-            <h1>{this.renderUnlocking()}</h1>
-          </div>
-          {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
-            <div className="flex-box">
-              <p>{t('redeemable')}</p>
-              <h1>{formatKtonBalance(staking_info.redeemable)}
-                {this.renderRedeemButton()}</h1>
-            </div>
-          )} */}
+    
           {buttons}
         </div>
       </div>
     )
-
-    // return (
-    //   <div className='column'>
-    //     <div className="ui--address-value">
-    //       <div className="flex-box">
-    //         <p>total</p>
-    //         <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
-    //       </div>
-    //       <div className="flex-box">
-    //         <p>available</p>
-    //         <h1>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')}</h1>
-    //       </div>
-    //       <div className="flex-box">
-    //         <p>bonded</p>
-    //         <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}</h1>
-    //       </div>
-    //       <div className="flex-box">
-    //         <p>unbonding</p>
-    //         <h1>{this.renderUnlocking()}</h1>
-    //       </div>
-    //       {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
-    //         <div className="flex-box">
-    //           <p>{t('redeemable')}</p>
-    //           <h1>{formatKtonBalance(staking_info.redeemable)}
-    //             {this.renderRedeemButton()}</h1>
-    //         </div>
-    //       )}
-    //       {buttons}
-    //     </div>
-    //   </div>
-    // );
   }
 
   // either true (filtered above already) or [own, ...all extras]
