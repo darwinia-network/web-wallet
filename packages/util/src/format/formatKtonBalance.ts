@@ -34,7 +34,7 @@ function _formatBalance (input?: number | string | BN, withSi: boolean = true, d
   let text = (input || '').toString();
 
   if (text.length === 0 || text === '0') {
-    return '0';
+    return withSi ? '0 KTON' : '0';
   }
 
   // strip the negative sign so we can work with clean groupings, re-add this in the
