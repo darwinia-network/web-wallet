@@ -7,11 +7,13 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { ValidatorFilter, RecentlyOfflineMap } from '../types';
 
 import React from 'react';
-import { AccountId, Balance, Exposure } from '@polkadot/types';
+import { AccountId, Balance, Exposure, Bytes } from '@polkadot/types';
 import { withCalls, withMulti } from '@polkadot/ui-api/with';
 import { AddressMini, AddressRow, RecentlyOffline } from '@polkadot/ui-app';
 import keyring from '@polkadot/ui-keyring';
 import { formatBalance } from '@polkadot/util';
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
+import { api } from '@polkadot/ui-api'
 
 import translate from '../translate';
 
@@ -23,7 +25,8 @@ type Props = I18nProps & {
   lastBlock: string,
   recentlyOffline: RecentlyOfflineMap,
   filter: ValidatorFilter,
-  staking_info?: DerivedStaking
+  staking_info?: DerivedStaking,
+  staking_nodeName?: Bytes
 };
 
 type State = {
@@ -33,7 +36,8 @@ type State = {
   sessionId: string | null,
   stakers?: Exposure,
   stashId: string | null,
-  badgeExpanded: boolean;
+  badgeExpanded: boolean,
+  nodeName?: string
 };
 
 class Address extends React.PureComponent<Props, State> {
@@ -48,7 +52,8 @@ class Address extends React.PureComponent<Props, State> {
       stashActive: null,
       stashId: null,
       stashTotal: null,
-      badgeExpanded: false
+      badgeExpanded: false,
+      nodeName: ''
     };
   }
 
@@ -73,9 +78,21 @@ class Address extends React.PureComponent<Props, State> {
     } as State;
   }
 
+  componentDidUpdate(prevProps, prevState) {
+
+    if (prevState.stashId !== this.state.stashId && this.state.stashId) {
+
+      api.query.staking.nodeName(this.state.stashId).then((nodeName) => {
+        this.setState({
+          nodeName: (nodeName && !nodeName.isEmpty) ? u8aToString(nodeName.toU8a(true)) : ''
+        })
+      })
+    }
+  }
+
   render () {
-    const { address, defaultName, lastAuthor, lastBlock, filter } = this.props;
-    const { controllerId, stakers, stashId } = this.state;
+    const { address, defaultName, lastAuthor, lastBlock, filter, staking_nodeName } = this.props;
+    const { controllerId, stakers, stashId, nodeName } = this.state;
     const isAuthor = [address, controllerId, stashId].includes(lastAuthor);
     const bonded = stakers && !stakers.own.isZero()
       ? [stakers.own, stakers.total.sub(stakers.own)]
@@ -89,11 +106,13 @@ class Address extends React.PureComponent<Props, State> {
       return null;
     }
 
+
     return (
       <article key={stashId || controllerId}>
         <AddressRow
           buttons={this.renderKeys()}
           defaultName={defaultName}
+          nodeName={nodeName}
           value={stashId}
           withBalance={{ bonded }}
         >

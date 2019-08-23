@@ -29,6 +29,7 @@ export type Props = I18nProps & {
   buttons?: React.ReactNode,
   children?: React.ReactNode,
   defaultName?: string,
+  nodeName?: string,
   suffixName?: string,
   extraInfo?: React.ReactNode,
   isEditable?: boolean,
@@ -70,13 +71,13 @@ class AddressRow extends React.PureComponent<Props, State> {
     suffixName: ''
   };
 
-  static getDerivedStateFromProps({ accounts_idAndIndex = [], defaultName, value }: Props, prevState: State) {
+  static getDerivedStateFromProps({ accounts_idAndIndex = [], defaultName, value, nodeName }: Props, prevState: State) {
     const [_accountId] = accounts_idAndIndex;
     const accountId = _accountId || value;
     const address = accountId
       ? accountId.toString()
       : DEFAULT_ADDR;
-    const name = getAddressName(address, null, false, defaultName) || '';
+    const name = nodeName || getAddressName(address, null, false, defaultName) || '';
     const tags = getAddressTags(address);
     const state = { tags } as State;
     let hasChanged = false;
@@ -101,12 +102,10 @@ class AddressRow extends React.PureComponent<Props, State> {
     const [accountId, accountIndex] = accounts_idAndIndex;
     const isValid = accountId || accountIndex;
 
-    console.log('my shares:', value, staking_stakers)
-
     let other = [];
     if (staking_stakers) {
       staking_stakers.others.forEach(({ who, value }) => {
-        console.log(who.toString(), nominator)
+
         if (who.toString() === nominator) {
           // return { who, value }
           other.push({ who, value })
