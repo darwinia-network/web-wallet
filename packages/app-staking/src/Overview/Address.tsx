@@ -25,8 +25,7 @@ type Props = I18nProps & {
   lastBlock: string,
   recentlyOffline: RecentlyOfflineMap,
   filter: ValidatorFilter,
-  staking_info?: DerivedStaking,
-  staking_nodeName?: Bytes
+  staking_info?: DerivedStaking
 };
 
 type State = {
@@ -91,7 +90,7 @@ class Address extends React.PureComponent<Props, State> {
   }
 
   render () {
-    const { address, defaultName, lastAuthor, lastBlock, filter, staking_nodeName } = this.props;
+    const { address, defaultName, lastAuthor, lastBlock, filter } = this.props;
     const { controllerId, stakers, stashId, nodeName } = this.state;
     const isAuthor = [address, controllerId, stashId].includes(lastAuthor);
     const bonded = stakers && !stakers.own.isZero()
