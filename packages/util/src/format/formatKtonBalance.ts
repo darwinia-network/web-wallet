@@ -63,6 +63,10 @@ function _formatBalance (input?: number | string | BN, withSi: boolean = true, d
     )
     : '';
 
+  if(isNegative) {
+    return `0${units}`
+  }
+  
   return `${isNegative ? '-' : ''}${formatDecimal(prefix || '0')}.${postfix}${units}`;
 }
 
