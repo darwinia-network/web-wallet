@@ -200,7 +200,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               </div>
               <div className="box-right">
                 <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatKtonBalance(_ktonBalances_locks, false)}</span></p>
+                <p><label>Bonded</label><span>{formatKtonBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
                 <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
               </div>
             </div>
