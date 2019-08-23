@@ -929,9 +929,9 @@ class Account extends React.PureComponent<Props, State> {
     const { t } = this.props;
     const { isActiveSession, sessionId, controllerId, stashId } = this.state;
 
-    if (!sessionId || isActiveSession) {
-      return null;
-    }
+    // if (!sessionId || isActiveSession) {
+    //   return null;
+    // }
 
     return (
       <div className='staking--Account-detail'>
