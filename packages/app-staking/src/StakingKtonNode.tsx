@@ -57,6 +57,9 @@ type State = {
 class App extends React.PureComponent<Props, State> {
   state: State;
   apiUnsubscribe: any;
+  staking_multi_t: any;
+  staking_ledger_t: any;
+  staking_bonded_t: any;
 
   constructor(props: Props) {
     super(props);
@@ -165,8 +168,9 @@ class App extends React.PureComponent<Props, State> {
       return;
     }
     console.log('getStakingInfo params', controllerId, stashId)
-    let staking_multi_t = null;
-    staking_multi_t = await api.queryMulti([
+
+    this.staking_multi_t && this.staking_multi_t();
+    this.staking_multi_t = await api.queryMulti([
       [api.query.session.nextKeyFor, controllerId],
       // [api.query.staking.validators, stashId],
       [api.query.staking.ledger, controllerId],
@@ -174,13 +178,13 @@ class App extends React.PureComponent<Props, State> {
     ], (result) => {
       const [nextKeyFor, ledger, _nodeName] = (result as VectorAny<Option<any>>)
       const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null);
-      const sessionKeyWrap = nextKeyFor && nextKeyFor.isSome && nextKeyFor.unwrapOr(null);
+      const sessionKeyWrap = (nextKeyFor && nextKeyFor.isSome) ? nextKeyFor.unwrap() : {grandpaKey: null};
 
       const nodeName = _nodeName
-      console.log('getStakingInfo', result, sessionKeyWrap, ledgerWrap, nodeName)
+      console.log('getStakingInfo', result,nextKeyFor, sessionKeyWrap, ledgerWrap, nodeName)
 
       callback && callback({
-        sessionKey: sessionKeyWrap ? toIdString(sessionKeyWrap.grandpaKey) : undefined,
+        sessionKey: nextKeyFor ? toIdString(sessionKeyWrap.grandpaKey) : undefined,
         ledger: ledgerWrap || undefined,
         nodeName
       })
@@ -197,7 +201,7 @@ class App extends React.PureComponent<Props, State> {
       // staking_validators = stakingValidators
     })
 
-    this.apiUnsubscribe.push(staking_multi_t);
+    // this.apiUnsubscribe.push(staking_multi_t);
   }
 
   getAccountRelated = async (AccountMain, callback) => {
