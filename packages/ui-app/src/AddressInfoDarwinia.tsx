@@ -95,9 +95,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
         ? withBalance
         : undefined;
 
-        if (!balanceDisplay || !balances_all) {
-          return null;
-        }
+    if (!balanceDisplay || !balances_all) {
+      return null;
+    }
 
     const ringBalance = this.renderQueryRingBalances()
     const ktonBalance = this.renderQueryKtonBalances()
@@ -257,10 +257,10 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
   private renderQueryRingBalances() {
     const { balances_locks, balances_freeBalance = new BN(0), staking_ledger } = this.props;
-    
-    
 
-    if(!balances_locks) return [formatBalance(balances_freeBalance), formatBalance(0)]
+
+
+    if (!balances_locks) return [formatBalance(balances_freeBalance), formatBalance(0)]
     const values = balances_locks.toArray().map((value) => ({
       value
     }));
@@ -271,19 +271,19 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     //   ringBonded = ringBonded.add(value.value.amount)
     // })
 
-    if(staking_ledger && !staking_ledger.isNone) {
+    if (staking_ledger && !staking_ledger.isNone) {
       ringBonded = staking_ledger.raw.active_ring.toBn()
       ringUnbonding = staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn())
     }
 
-    if(balances_freeBalance.lt(ringBonded)) return [formatBalance(0),formatBalance(ringBonded)]
+    if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded)]
     return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded), formatBalance(ringUnbonding)]
   }
 
   private renderQueryKtonBalances() {
     const { kton_locks, kton_freeBalance = new BN(0), staking_ledger } = this.props;
-    
-    if(!kton_locks) return [formatKtonBalance(kton_freeBalance), formatKtonBalance(0)]
+
+    if (!kton_locks) return [formatKtonBalance(kton_freeBalance), formatKtonBalance(0)]
     const values = kton_locks.toArray().map((value) => ({
       value
     }));
@@ -293,13 +293,13 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     // values.forEach((value: { value: {amount:BN} }, _: number) => {
     //   ktonBonded = ktonBonded.add(value.value.amount)
     // })
-    
-    if(staking_ledger && !staking_ledger.isNone) {
+
+    if (staking_ledger && !staking_ledger.isNone) {
       ktonBonded = staking_ledger.raw.active_kton.toBn()
       ktonUnbonding = staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn())
     }
 
-    if(kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0),formatKtonBalance(ktonBonded)]
+    if (kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0), formatKtonBalance(ktonBonded)]
     return [formatKtonBalance(kton_freeBalance.sub(ktonBonded)), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
   }
 
