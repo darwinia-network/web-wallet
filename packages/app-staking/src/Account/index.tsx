@@ -530,12 +530,13 @@ class Account extends React.PureComponent<Props, State> {
   }
 
   private renderBondExtra() {
-    const { accountId } = this.props;
+    const { accountId, stashId } = this.props;
     const { controllerId, isBondExtraOpen } = this.state;
 
     return (
       <BondExtra
         accountId={accountId}
+        stashId={stashId}
         controllerId={controllerId}
         isOpen={isBondExtraOpen}
         onClose={this.toggleBondExtra}

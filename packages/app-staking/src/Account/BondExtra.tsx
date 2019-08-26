@@ -17,7 +17,7 @@ import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 import styled from 'styled-components'
 import { Checkbox } from 'semantic-ui-react'
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { ringToKton, assetToPower } from '@polkadot/util'
 import translate from '../translate';
 
@@ -30,7 +30,9 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   staking_ledger?: Option<StakingLedger>,
   kton_freeBalance: BN,
   kton_locks: Array<any>,
-
+  stashId?: string,
+  balances_locks: Array<any>,
+  balances_freeBalance?: BN,
 };
 
 type State = {
@@ -197,8 +199,25 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, t } = this.props;
+    const { accountId, balances_locks, kton_locks, balances_freeBalance,kton_freeBalance, t } = this.props;
     const { maxBalance, lockLimit, accept, type } = this.state;
+
+    let _balances_locks = new BN(0)
+    let _ktonBalances_locks = new BN(0)
+
+    if (balances_locks) {
+      balances_locks.forEach((item) => {
+        _balances_locks = _balances_locks.add(item.amount)
+      })
+    }
+    if (kton_locks) {
+      kton_locks.forEach((item) => {
+        _ktonBalances_locks = _ktonBalances_locks.add(item.amount)
+      })
+    }
+
+    const ringAvailableBalance = formatBalance((balances_freeBalance && balances_locks) ? balances_freeBalance.sub(_balances_locks).toString() : '0')
+    const ktonAvailableBalance = formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')
 
     return (
       <>
@@ -218,6 +237,7 @@ class BondExtra extends TxComponent<Props, State> {
             help={t('The maximum amount to increase the bonded value, this is adjusted using the available free funds on the account.')}
             label={t('max additional value')}
             siValue={'kton'}
+            placeholder={type ==='ring' ? ringAvailableBalance : ktonAvailableBalance}
             // maxValue={maxBalance}
             onChange={this.onChangeValue}
             onEnter={this.sendTx}
@@ -229,7 +249,7 @@ class BondExtra extends TxComponent<Props, State> {
           {type === 'ring' ? <Dropdown
             className='medium'
             defaultValue={lockLimit}
-            help={t('???')}
+            help={t('lock limit')}
             label={t('lock limit')}
             onChange={this.onChangeLockLimit}
             options={lockLimitOptions}
@@ -338,6 +358,8 @@ export default withMulti(
   withCalls<Props>(
     'derive.balances.fees',
     ['derive.balances.all', { paramName: 'accountId' }],
+    ['query.balances.locks', { paramName: 'accountId' }],
+    ['query.balances.freeBalance', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
     ['query.staking.ledger', { paramName: 'controllerId' }],
     ['query.kton.locks', { paramName: 'accountId' }],
