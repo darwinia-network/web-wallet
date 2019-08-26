@@ -59,7 +59,9 @@ type Props = BareProps & I18nProps & {
   withExtended?: boolean | CryptoActiveType,
   staking_ledger: stakingLedgerType,
   transferCb?: (type: string) => void,
-  history: any
+  history: any,
+  controllerId?: string,
+  stashId?: string,
 };
 
 export type stakingLedgerType = {
@@ -276,7 +278,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
       ringUnbonding = staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn())
     }
 
-    if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded)]
+    // if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded), formatBalance(ringUnbonding)]
     return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded), formatBalance(ringUnbonding)]
   }
 
@@ -299,7 +301,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
       ktonUnbonding = staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn())
     }
 
-    if (kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0), formatKtonBalance(ktonBonded)]
+    // if (kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
     return [formatKtonBalance(kton_freeBalance.sub(ktonBonded)), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
   }
 
@@ -518,7 +520,7 @@ export default withMulti(
     ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
     ['query.kton.locks', { paramName: 'value' }],
-    ['query.staking.ledger', { paramName: 'value' }],
+    ['query.staking.ledger', { paramName: 'controllerId' }],
     ['derive.staking.info', { paramName: 'value' }]
   )
 );

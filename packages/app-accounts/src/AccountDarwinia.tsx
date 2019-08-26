@@ -18,7 +18,9 @@ import translate from './translate';
 import TransferDarwinia from './modals/TransferDarwinia';
 
 type Props = I18nProps & {
-  address: string
+  address: string,
+  controllerId?: string,
+  stashId?: string,
 };
 
 type State = {
@@ -27,7 +29,8 @@ type State = {
   isForgetOpen: boolean,
   isPasswordOpen: boolean,
   isTransferOpen: boolean,
-  type: string
+  type: string,
+  
 };
 
 class AccountDarwinia extends React.PureComponent<Props> {
@@ -47,7 +50,7 @@ class AccountDarwinia extends React.PureComponent<Props> {
   }
 
   render() {
-    const {address} = this.props;
+    const {address,controllerId, stashId} = this.props;
     const {isEditable} = this.state;
 
     // FIXME It is a bit heavy-handled switching of being editable here completely
@@ -75,6 +78,8 @@ class AccountDarwinia extends React.PureComponent<Props> {
             withExtended
             value={address}
             transferCb={this.transferCB}
+            controllerId={controllerId}
+            stashId={stashId}
           />
       </div>
     );

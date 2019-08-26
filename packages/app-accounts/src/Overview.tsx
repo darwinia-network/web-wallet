@@ -22,6 +22,15 @@ import AccountDarwinia from './AccountDarwinia';
 import translate from './translate';
 import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 import noAccountImg from './img/noAccount.svg'
+import { AccountId, Option } from '@polkadot/types';
+import { api } from '@polkadot/ui-api'
+import { Codec } from '@polkadot/types/types';
+
+function toIdString(id?: AccountId | null): string | null {
+  return id
+    ? id.toString()
+    : null;
+}
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[]
@@ -31,7 +40,9 @@ type State = {
   isCreateOpen: boolean,
   isImportOpen: boolean,
   isAccountsListOpen: boolean,
-  AccountMain: string
+  AccountMain: string,
+  controllerId?: string,
+  stashId?: string,
 };
 
 class Overview extends React.PureComponent<Props, State> {
@@ -39,9 +50,18 @@ class Overview extends React.PureComponent<Props, State> {
     isCreateOpen: false,
     isImportOpen: false,
     isAccountsListOpen: false,
-    AccountMain: ''
+    AccountMain: '',
+    controllerId: '',
+    stashId: ''
   };
+  apiUnsubscribe: any;
 
+  constructor(props: Props) {
+    super(props);
+
+    this.apiUnsubscribe = []
+  }
+  
   componentDidMount() {
     setTimeout(() => {
       const AccountMain = this.getAccountMain() || '';
@@ -49,7 +69,92 @@ class Overview extends React.PureComponent<Props, State> {
       this.setState({
         AccountMain
       })
+
+      this.getAccountRelated(AccountMain, ({ stashId, controllerId }) => {
+        console.log('getAccountRelated', { stashId, controllerId })
+
+        this.setState({
+          stashId,
+          controllerId
+        })
+      })
     }, 0)
+  }
+
+  componentWillUnmount() {
+    console.log('componentWillUnmount', this.apiUnsubscribe)
+    this.unsubscribe()
+  }
+
+  unsubscribe = () => {
+    this.apiUnsubscribe && this.apiUnsubscribe.map((unsubscribe) => {
+      console.log('unsubscribe')
+      unsubscribe && unsubscribe()
+    })
+  }
+
+  filterUndefined(obj) {
+    return Object.keys(obj).reduce((object,key) => {
+      if(typeof obj[key] !== 'undefined') {object[key] = obj[key]}
+      return object
+    }, {})
+  }
+
+  getAccountRelated = async (AccountMain, callback) => {
+    // stashId -> true -> (controllerId -> accountMain, stashId -> ledger.stashId)
+    // stashId -> false -> (未绑定controllerId || 本身是 stashId)
+    // this.unsubscribe();
+    this.unsubscribe()
+    let staking_ledger_t, staking_bonded_t = null;
+    let isStashId = false
+    staking_ledger_t = await api.query.staking.ledger((AccountMain), async (ledger: Option<Codec>) => {
+      console.log('api.query.staking.ledger', ledger)
+      let stashId = null;
+
+      const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null);
+      console.log('api.query.staking.ledger wrap', ledgerWrap)
+      stashId = ledgerWrap && ledgerWrap.stash || null;
+
+      if (ledger) {
+        const ledgerWrap = ledger.unwrapOr(null);
+        stashId = (ledgerWrap && ledgerWrap.stash) || null
+      }
+
+      console.log('api.query.staking.ledger wrap1', ledger, stashId, toIdString(ledger ? stashId : undefined))
+
+      if (stashId) {
+        // controllerId = AccountMain;
+        callback && callback({
+          stashId: toIdString(ledger ? stashId : undefined),
+          controllerId: toIdString(AccountMain)
+        })
+        isStashId = true
+      } else {
+        isStashId = false
+      }
+    })
+
+    staking_bonded_t = await api.query.staking.bonded(AccountMain, (bonded: Option<Codec>) => {
+      console.log('api.query.staking.bonded', bonded)
+      if (isStashId) {
+        return;
+      }
+
+      let stashId = null, controllerId = null;
+      const bondedWrap = bonded && bonded.isSome && bonded.unwrapOr(null);
+
+      if (bondedWrap) {
+        stashId = AccountMain;
+        controllerId = bondedWrap;
+      }
+
+      callback && callback({
+        stashId: toIdString(stashId),
+        controllerId: toIdString(controllerId)
+      })
+    })
+
+    this.apiUnsubscribe.push(staking_ledger_t, staking_bonded_t);
   }
 
   private _wrapperStatusChange = (e) => {
@@ -67,7 +172,7 @@ class Overview extends React.PureComponent<Props, State> {
 
   render() {
     const { accounts, onStatusChange, t } = this.props;
-    const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
+    const { isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain ,stashId, controllerId} = this.state;
 
     return (
       <Wrapper>
@@ -80,6 +185,8 @@ class Overview extends React.PureComponent<Props, State> {
         {AccountMain && <AccountDarwinia
           address={AccountMain}
           key={AccountMain}
+          stashId={stashId}
+          controllerId={controllerId}
         />}
 
         {!AccountMain && <div className='noAccount'>
@@ -155,8 +262,13 @@ class Overview extends React.PureComponent<Props, State> {
   }
 
   private changeMainAddress = (): void => {
-    this.setState({
-      AccountMain: this.getAccountMain() || ''
+    const AccountMain = this.getAccountMain() || ''
+
+    this.getAccountRelated(AccountMain, ({ stashId, controllerId }) => {
+      const _accountRelated = this.filterUndefined({ stashId, controllerId, AccountMain })
+      console.log('getAccountRelated',_accountRelated, { stashId, controllerId })
+
+      this.setState(_accountRelated)
     })
   }
 }
