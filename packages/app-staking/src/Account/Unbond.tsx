@@ -7,19 +7,34 @@ import { ApiProps } from '@polkadot/ui-api/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { AccountId, Option, StakingLedger } from '@polkadot/types';
+import { AccountId, Option, StakingLedger, Compact } from '@polkadot/types';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import styled from 'styled-components'
 import { withRouter } from 'react-router-dom';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 
 import translate from '../translate';
+
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    active_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
 
 type Props = I18nProps & ApiProps & {
   controllerId?: AccountId | null,
   isOpen: boolean,
   onClose: () => void,
-  staking_ledger?: Option<StakingLedger>,
+  staking_ledger?: stakingLedgerType,
   history: any
 };
 
@@ -110,8 +125,8 @@ class Unbond extends TxComponent<Props, State> {
   }
 
   private renderContent () {
-    const { controllerId, t } = this.props;
-    const { maxBalance } = this.state;
+    const { controllerId,staking_ledger, t } = this.props;
+    const { maxBalance, type } = this.state;
 
     return (
       <>
@@ -131,6 +146,7 @@ class Unbond extends TxComponent<Props, State> {
             help={t('The maximum amount to unbond, this is adjusted using the bonded funds on the account.')}
             label={t('unbond amount')}
             // maxValue={maxBalance}
+            placeholder={type === 'ring' ? formatBalance(staking_ledger.raw.active_ring.toBn()) : formatKtonBalance(staking_ledger.raw.active_kton.toBn())}
             siValue='kton'
             onChange={this.onChangeValue}
             onChangeType={this.onChangeType}
