@@ -139,7 +139,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     if (!balanceDisplay || !balances_all) {
       return null;
     }
-    console.log('renderBalance', value, balances_freeBalance,balances_locks, kton_freeBalance, kton_locks)
+
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
     
