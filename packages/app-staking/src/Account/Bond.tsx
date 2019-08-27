@@ -205,7 +205,7 @@ class Bond extends TxComponent<Props, State> {
               isSecondary={true}
               isBasic={true}
               onClick={onClose}
-              label={t('Cancel')}
+              label={t('Skip')}
             />
           </Button.Group>
         </Modal.Actions>
@@ -217,7 +217,7 @@ class Bond extends TxComponent<Props, State> {
     const { accountId, t, disableController = false, easyMode = false, checkSameController = false, withStep, balances_locks, kton_locks,balances_freeBalance, kton_freeBalance } = this.props;
     const { controllerId, controllerError, bondValue, destination, maxBalance, lockLimit = 0, accept, type } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0);
-    
+
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
     

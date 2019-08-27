@@ -161,7 +161,7 @@ class Validate extends TxComponent<Props, State> {
           <Button
             isBasic
             isSecondary
-            label={t('Cancel')}
+            label={t('Skip')}
             onClick={onClose}
           />
         </Button.Group>
