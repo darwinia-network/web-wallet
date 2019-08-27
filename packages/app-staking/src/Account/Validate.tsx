@@ -28,50 +28,91 @@ type State = {
   unstakeThreshold?: BN,
   unstakeThresholdError: string | null,
   validatorPayment?: BN,
-  nodeName?: Bytes
+  nodeName?: string,
+  isUpdateProps?: boolean
 };
 
 class Validate extends TxComponent<Props, State> {
   state: State = {
-    unstakeThreshold: new BN(3),
+    unstakeThreshold: undefined,
     unstakeThresholdError: null,
     validatorPayment: undefined,
-    nodeName: undefined
+    nodeName: undefined,
+    isUpdateProps: false
   };
 
   // inject the preferences returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
   // static getDerivedStateFromProps(props: Props, state: State): State | null {
-    // console.log('validatorPrefs valiidate',state.unstakeThreshold ,state.validatorPayment )
-    // if (state.unstakeThreshold && state.validatorPayment && state.nodeName) {
-    //   return null;
+  // console.log('validatorPrefs valiidate',state.unstakeThreshold ,state.validatorPayment )
+  // if (state.unstakeThreshold && state.validatorPayment && state.nodeName) {
+  //   return null;
+  // }
+
+  // const { nodeName = new Bytes() } = props
+  // console.log('validatorPrefs valiidate1', props.validatorPrefs, nodeName)
+
+  // // if (props.validatorPrefs) {
+  // //   // @ts-ignore
+  // //   const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+  // //   console.log('validatorPrefs valiidate2', unstake_threshold.toBn(), validator_payment_ratio.toBn())
+  // //   return {
+  // //     unstakeThreshold: unstake_threshold.toBn(),
+  // //     unstakeThresholdError: null,
+  // //     validatorPayment: validator_payment_ratio.toBn(),
+  // //     nodeName: u8aToString(nodeName.toU8a(true))
+  // //   };
+  // // }
+
+  // // @ts-ignore
+  // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+
+  // return {
+  //   unstakeThreshold: props.validatorPrefs ? unstake_threshold.toBn() : undefined,
+  //   unstakeThresholdError: null,
+  //   validatorPayment: props.validatorPrefs ? validator_payment_ratio.toBn() : undefined,
+  //   nodeName: nodeName
+  // };
+  // }
+
+
+  static getDerivedStateFromProps(props: Props, state: State): State | null {
+    console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+    // console.log('111111',props.validatorPrefs)
+    if (!props.validatorPrefs || state.isUpdateProps) {
+      return null;
+    }
+    const {nodeName = new Bytes()}  = props
+    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+    // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+    // return {
+    //   unstakeThreshold: unstake_threshold.toBn(),
+    //   validatorPayment: validator_payment_ratio.toBn()
     // }
 
-    // const { nodeName = new Bytes() } = props
-    // console.log('validatorPrefs valiidate1', props.validatorPrefs, nodeName)
+    if (props.validatorPrefs && !state.isUpdateProps) {
+      // @ts-ignore
+      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+      console.log('props.validatorPrefs1', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
 
-    // // if (props.validatorPrefs) {
-    // //   // @ts-ignore
-    // //   const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
-    // //   console.log('validatorPrefs valiidate2', unstake_threshold.toBn(), validator_payment_ratio.toBn())
-    // //   return {
-    // //     unstakeThreshold: unstake_threshold.toBn(),
-    // //     unstakeThresholdError: null,
-    // //     validatorPayment: validator_payment_ratio.toBn(),
-    // //     nodeName: u8aToString(nodeName.toU8a(true))
-    // //   };
-    // // }
+      return {
+        unstakeThreshold: unstake_threshold.toBn(),
+        unstakeThresholdError: null,
+        validatorPayment: validator_payment_ratio.toBn().div(new BN(10000000)),
+        nodeName: u8aToString(nodeName.toU8a(true)),
+        isUpdateProps: true
+      };
+    }
 
-    // // @ts-ignore
-    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+    return {
+      unstakeThreshold: new BN(3),
+      unstakeThresholdError: null,
+      validatorPayment: undefined,
+      nodeName: u8aToString(nodeName.toU8a(true)),
+      isUpdateProps: false
+    };
 
-    // return {
-    //   unstakeThreshold: props.validatorPrefs ? unstake_threshold.toBn() : undefined,
-    //   unstakeThresholdError: null,
-    //   validatorPayment: props.validatorPrefs ? validator_payment_ratio.toBn() : undefined,
-    //   nodeName: nodeName
-    // };
-  // }
+  }
 
   componentDidMount() {
 
@@ -113,7 +154,7 @@ class Validate extends TxComponent<Props, State> {
             label={isChangingPrefs ? t('Set validator preferences') : t('Validate')}
             onClick={onClose}
             onClose={onClose}
-            params={[u8aToHex(u8aToU8a(nodeName)), unstakeThreshold, validatorPayment]}
+            params={[u8aToHex(u8aToU8a(nodeName)), validatorPayment, unstakeThreshold]}
             tx='staking.validate'
             ref={this.button}
           />
@@ -166,7 +207,7 @@ class Validate extends TxComponent<Props, State> {
             onChange={this.onChangeNodeName}
             value={
               nodeName
-                ? u8aToString(nodeName.toU8a(true))
+                ? nodeName
                 : ''
             }
           />
@@ -223,8 +264,7 @@ class Validate extends TxComponent<Props, State> {
   }
 
   private onChangeNodeName = (nodeName: string) => {
-    console.log('nodeName1', new Bytes(nodeName))
-    this.setState({ nodeName: new Bytes(nodeName) });
+    this.setState({ nodeName });
   }
 
   private onUnstakeThresholdError = (unstakeThresholdError: string | null) => {

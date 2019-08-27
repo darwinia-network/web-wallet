@@ -36,7 +36,7 @@ class Staking extends TxComponent<Props, State> {
   // inject the preferences are returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
   static getDerivedStateFromProps(props: Props, state: State): State | null {
-    console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+    // console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
 
     if (state.unstakeThreshold) {
       return null;
@@ -162,6 +162,7 @@ class Staking extends TxComponent<Props, State> {
             label={t('payment preferences')}
             onChange={this.onChangePayment}
             onEnter={this.sendTx}
+            rightLabel={'%'}
             isSi={false}
             value={
               validatorPayment
