@@ -37,7 +37,9 @@ type Props = BareProps & I18nProps & {
   value?: BN | string,
   withEllipsis?: boolean,
   withLabel?: boolean,
-  withMax?: boolean
+  withMax?: boolean,
+  rightLabel?: string,
+  power?: number
 };
 
 type State = {
@@ -99,35 +101,46 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isType, isDisabled, isError = false, maxLength, maxValue, minValue, onEnter, style, withMax, t, placeholder } = this.props;
+    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isType, isDisabled, isError = false, maxLength, maxValue, minValue, onEnter, style, withMax, t, placeholder, rightLabel } = this.props;
     const { isValid, value } = this.state;
     const maxValueLength = this.maxValue(bitLength).toString().length - 1;
 
     return (
-      <Input
-        {...this.props}
-        className={classes('ui--InputNumber', className)}
-        help={help}
-        isAction={isSi}
-        isDisabled={isDisabled}
-        isError={!isValid || isError}
-        maxLength={maxLength || maxValueLength}
-        min={minValue}
-        onChange={this.onChange}
-        onEnter={onEnter}
-        onKeyDown={this.onKeyDown}
-        onKeyUp={this.onKeyUp}
-        onPaste={this.onPaste}
-        placeholder={placeholder || t('Positive number')}
-        style={style}
-        type='text'
-        value={value}
-      >
-        {(withMax && !!maxValue) && this.renderMaxButton()}
-        {isSi && this.renderSiDropdown()}
-        {isType && this.renderTypeDropdown()}
-      </Input>
+      <>
+        <Input
+          {...this.props}
+
+          className={classes('ui--InputNumber', rightLabel ? 'ui--InputNumber-RightLabel' : undefined, className)}
+          help={help}
+          isAction={isSi}
+          isDisabled={isDisabled}
+          isError={!isValid || isError}
+          maxLength={maxLength || maxValueLength}
+          min={minValue}
+          onChange={this.onChange}
+          onEnter={onEnter}
+          onKeyDown={this.onKeyDown}
+          onKeyUp={this.onKeyUp}
+          onPaste={this.onPaste}
+          placeholder={placeholder || t('Positive number')}
+          style={style}
+          type='text'
+          value={value}
+        >
+          {(withMax && !!maxValue) && this.renderMaxButton()}
+          {isSi && this.renderSiDropdown()}
+          {isType && this.renderTypeDropdown()}
+          {rightLabel && this.renderRightLabel()}
+        </Input>
+
+      </>
     );
+  }
+
+  private renderRightLabel() {
+    const { rightLabel } = this.props;
+
+    return (<div className="ui basic label label">{rightLabel}</div>)
   }
 
   private renderSiDropdown() {
@@ -378,11 +391,11 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   private getSiPowers = (siUnit = this.state.siUnit): [BN, number, number] => {
-    const { isSi = true, siValue } = this.props;
+    const { isSi = true, siValue, power = 0 } = this.props;
 
     const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
     const basePower = isSi ? commonFormatBalance.getDefaults().decimals : 0;
-    const siUnitPower = isSi ? commonFormatBalance.findSi(siUnit).power : 0;
+    const siUnitPower = isSi ? commonFormatBalance.findSi(siUnit).power : power;
 
     return [new BN(basePower + siUnitPower), basePower, siUnitPower];
   }

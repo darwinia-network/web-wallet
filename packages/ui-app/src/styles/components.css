@@ -67,6 +67,22 @@ button.ui.icon.iconButton {
   }
 }
 
+.ui--InputNumber.ui--InputNumber-RightLabel{
+  input {
+    border-top-right-radius: 0;
+    border-right: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .label{
+    display: flex;
+    align-items: center;
+    margin-left: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+}
+
 .ui--Input {
   &.disabled {
     overflow: hidden;
