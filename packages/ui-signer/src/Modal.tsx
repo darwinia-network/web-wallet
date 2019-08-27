@@ -99,6 +99,7 @@ class Signer extends React.PureComponent<Props, State> {
       <Modal
         className='ui--signer-Signer'
         dimmer='inverted'
+        onClose={this.onCancel}
         open
       >
         {this.renderContent()}

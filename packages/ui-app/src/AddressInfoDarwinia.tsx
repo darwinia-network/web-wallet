@@ -142,7 +142,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             <div className="ui--value-box">
               <p className="p-title">unbonding:</p>
               <p className="p-amount">{ringBalance[2]}</p>
-              <p className="p-btn"> </p>
+              <p className="p-btn">
+                {this.renderRedeemButton()}
+              </p>
             </div>
           </div>
         </div>
@@ -183,7 +185,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             <div className="ui--value-box">
               <p className="p-title">unbonding:</p>
               <p className="p-amount">{ktonBalance[2]}</p>
-              <p className="p-btn"> </p>
+              <p className="p-btn">
+                {this.renderRedeemButton()}
+              </p>
             </div>
           </div>
         </div>
@@ -191,7 +195,6 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
     )
   }
-
 
   private renderBalances() {
     const { balances_all, staking_info, t, withBalance = true } = this.props;
@@ -362,18 +365,16 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
   }
 
   private renderRedeemButton() {
-    const { staking_info, t } = this.props;
+    const { t, controllerId } = this.props;
 
-    return (staking_info && staking_info.controllerId && (
+    return (controllerId && (
       <TxButton
-        accountId={staking_info.controllerId.toString()}
-        className='iconButton'
-        icon='lock'
-        size='small'
-        isPrimary
+        accountId={controllerId.toString()}
+        isBasic={true}
+        isSecondary={true}
+        label={t('Withdraw')}
         key='unlock'
         params={[]}
-        tooltip={t('Redeem these funds')}
         tx='staking.withdrawUnbonded'
       />
     ));
