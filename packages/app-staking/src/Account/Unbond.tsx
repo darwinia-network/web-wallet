@@ -182,11 +182,12 @@ class Unbond extends TxComponent<Props, State> {
       return;
     }
 
-    const { active: maxBalance } = staking_ledger.unwrap();
+    // const { active: maxBalance } = staking_ledger.raw;
 
-    this.nextState({
-      maxBalance
-    });
+    // this.nextState({
+
+    //   maxBalance
+    // });
   }
 
   private onChangeValue = (maxUnbond?: BN) => {
