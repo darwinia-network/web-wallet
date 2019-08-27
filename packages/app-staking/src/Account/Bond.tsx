@@ -28,11 +28,14 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   disableController?: boolean,
   onClose: () => void,
   onSuccess?: (status: SubmittableResult) => void,
-  kton_locks: Array<any>,
-  kton_freeBalance: BN,
   easyMode: boolean,
   checkSameController?: boolean,
-  withStep?: boolean
+  withStep?: boolean,
+  kton_freeBalance?: BN,
+  kton_locks: Array<any>,
+  balances_locks: Array<any>,
+  balances_freeBalance?: BN,
+
 };
 
 type State = {
@@ -49,8 +52,8 @@ type State = {
 
 const stashOptions = [
   // { text: 'Stash account (increase the amount at stake)', value: 0 },
-  { text: 'Stash account (do not increase the amount at stake)', value: 1 },
-  { text: 'Controller account', value: 2 }
+  { text: 'Stash account (do not increase the amount at stake)', value: 0 },
+  { text: 'Controller account', value: 1 }
 ];
 
 const ockLimitOptionsMaker = (): Array<object> => {
@@ -173,6 +176,8 @@ class Bond extends TxComponent<Props, State> {
       return null;
     }
 
+
+
     return (
       <Modal
         className='staking--Bonding'
@@ -209,9 +214,23 @@ class Bond extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, t, disableController = false, easyMode = false, checkSameController = false, withStep } = this.props;
+    const { accountId, t, disableController = false, easyMode = false, checkSameController = false, withStep, balances_locks, kton_locks,balances_freeBalance, kton_freeBalance } = this.props;
     const { controllerId, controllerError, bondValue, destination, maxBalance, lockLimit = 0, accept, type } = this.state;
     const hasValue = !!bondValue && bondValue.gtn(0);
+    
+    let _balances_locks = new BN(0)
+    let _ktonBalances_locks = new BN(0)
+    
+    if (balances_locks) {
+      balances_locks.forEach((item) => {
+        _balances_locks = _balances_locks.add(item.amount)
+      })
+    }
+    if (kton_locks) {
+      kton_locks.forEach((item) => {
+        _ktonBalances_locks = _ktonBalances_locks.add(item.amount)
+      })
+    }
 
     return (
       <>
@@ -272,13 +291,14 @@ class Bond extends TxComponent<Props, State> {
             onChange={this.onChangeValue}
             onChangeType={this.onChangeType}
             onEnter={this.sendTx}
+            // placeholder={formatBalance((balances_freeBalance && balances_locks) ? balances_freeBalance.sub(_balances_locks).toString() : '0', false)}
             // withMax
             isType
           />
           {type === 'ring' ? <Dropdown
             className='medium'
             defaultValue={lockLimit}
-            help={t('???')}
+            help={t('lock limit')}
             label={t('lock limit')}
             onChange={this.onChangeLockLimit}
             options={lockLimitOptions}
@@ -444,7 +464,8 @@ export default withMulti(
     'derive.balances.fees',
     ['derive.balances.all', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
-    ['query.kton.locks', { paramName: 'accountId' }],
-    ['query.kton.freeBalance', { paramName: 'accountId' }]
+    ['query.balances.locks', { paramName: 'stashId' }],
+    ['query.kton.locks', { paramName: 'stashId' }],
+    ['query.kton.freeBalance', { paramName: 'stashId' }]
   )
 );
