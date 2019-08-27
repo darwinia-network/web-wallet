@@ -1052,8 +1052,9 @@ class Account extends React.PureComponent<Props, State> {
       console.log('nominators', nominators)
       console.log('validatorPrefs', validatorPrefs)
       const isNominating = !!nominators && nominators.length;
-      const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-
+      // const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
+      const isValidating = !!validatorPrefs;
+      
       // if we are validating/nominating show stop
       if (isValidating || isNominating) {
         // if (isValidator) {
