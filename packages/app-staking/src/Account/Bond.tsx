@@ -56,7 +56,7 @@ const stashOptions = [
   { text: 'Controller account', value: 1 }
 ];
 
-const ockLimitOptionsMaker = (): Array<object> => {
+const lockLimitOptionsMaker = (): Array<object> => {
   const month = [0, 3, 6, 12, 18, 24, 30, 36]
   let options = []
   month.map((i) => {
@@ -69,7 +69,7 @@ const ockLimitOptionsMaker = (): Array<object> => {
   return options
 }
 
-const lockLimitOptions = ockLimitOptionsMaker()
+const lockLimitOptions = lockLimitOptionsMaker()
 
 const ZERO = new BN(0);
 const noop = function () { };
