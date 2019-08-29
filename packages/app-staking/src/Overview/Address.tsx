@@ -81,7 +81,7 @@ class Address extends React.PureComponent<Props, State> {
 
     if (prevState.stashId !== this.state.stashId && this.state.stashId) {
 
-      api.query.staking.nodeName(this.state.stashId).then((nodeName) => {
+      api.query.staking.nodeName(this.state.controllerId).then((nodeName) => {
         this.setState({
           nodeName: (nodeName && !nodeName.isEmpty) ? u8aToString(nodeName.toU8a(true)) : ''
         })
