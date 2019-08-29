@@ -174,7 +174,7 @@ class App extends React.PureComponent<Props, State> {
       [api.query.session.nextKeyFor, controllerId],
       // [api.query.staking.validators, stashId],
       [api.query.staking.ledger, controllerId],
-      [api.query.staking.nodeName, stashId]
+      [api.query.staking.nodeName, controllerId]
     ], (result) => {
       const [nextKeyFor, ledger, _nodeName] = (result as VectorAny<Option<any>>)
       const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null);
