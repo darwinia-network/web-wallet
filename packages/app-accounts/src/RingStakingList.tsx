@@ -14,7 +14,7 @@ import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
 import { Button, CardGrid, ColorButton, TxButton} from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
-import { formatBalance, formatKtonBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatKtonBalance, formatNumber, ringToKton } from '@polkadot/util';
 import ringStakingBtn from './img/stakingBtn.svg';
 import dayjs from 'dayjs'
 
@@ -53,17 +53,16 @@ class Overview extends React.PureComponent<Props, State> {
     }
   }
 
-  process(start, month): number {
+  process(start, expire): number {
     const now = dayjs().unix();
-    const end = dayjs(start).add(month * 30, 'day').unix();
+    const end = dayjs(expire).unix();
     if (end <= now) {
       return 100
     } else {
-      return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
+      return 100 - (end - now) / (end -  dayjs(start).unix()) * 100
     }
   }
  
-
   render() {
     const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow, staking_ledger } = this.props;
     // if(!staking_ledger){
@@ -73,13 +72,13 @@ class Overview extends React.PureComponent<Props, State> {
     
 
     console.log('staking_ledger', staking_ledger, ledger)
-    if ( !ledger || !ledger.regular_items || (ledger.regular_items.length === 0)) {
+    if ( !ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
       return (
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
             <tbody>
               <tr className='stakingTh'><td>Expire Date</td><td>Deposit</td>
-              {/* <td>Reward</td> */}
+              <td>Reward</td>
               <td>Setting</td></tr>
               <tr>
                 <td colSpan={4} className="emptyTd">
@@ -93,25 +92,25 @@ class Overview extends React.PureComponent<Props, State> {
       );
     }
 
-    let regularList = ledger.regular_items
+    let regularList = ledger.deposit_items
     return (
       <Wrapper>
         <table className={'stakingTable'}>
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td>
-            {/* <td>Reward</td> */}
+            <td>Reward</td>
             <td>Setting</td></tr>
             {regularList.map((item, index) => {
               console.log('item', item, item.expire_time)
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(item.expire_time.raw)}`}</p>
-                  {/* <div className="stakingProcess">
-                    <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
-                  </div> */}
+                  <p className="stakingRange">{`${this.formatDate(item.start_time.raw)} - ${this.formatDate(item.expire_time.raw)}`}</p>
+                  <div className="stakingProcess">
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_time.raw, item.expire_time.raw)}%` }}></div>
+                  </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                {/* <td className="textGradient">{formatKtonBalance(0)}</td> */}
+                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time.raw).unix() - dayjs(item.start_time.raw).unix()) / (30*24*3600))))}</td>
                 <td>
                 <TxButton
                   accountId={account}
