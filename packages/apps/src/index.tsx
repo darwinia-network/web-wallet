@@ -39,10 +39,6 @@ const DARWINIA_TYPES = {
   "RingBalanceOf": "u128",
   "KtonBalanceOf": "u128",
   "ExtendedBalance": "u128",
-  "IndividualExpo": {
-    "who": "AccountId",
-    "value": "ExtendedBalance"
-  },
   "ValidatorPrefs": {
     "unstake_threshold": "Compact<u32>",
     "validator_payment_ratio": "Compact<RingBalanceOf>"
@@ -53,28 +49,31 @@ const DARWINIA_TYPES = {
       "Kton": "KtonBalanceOf"
     }
   },
-  "RegularItem": {
+  "TimeDepositItem": {
     "value": "Compact<RingBalanceOf>",
+    "start_time": "Compact<Moment>",
     "expire_time": "Compact<Moment>"
   },
   "UnlockChunk": {
     "value": "StakingBalance",
     "era": "Compact<EraIndex>",
-    "dt_power": "ExtendedBalance",
-    "is_regular": "bool"
+    "is_time_deposit": "bool"
   },
   "StakingLedgers": {
     "stash": "AccountId",
-    "total_power": "Compact<ExtendedBalance>",
-    "active_power": "Compact<ExtendedBalance>",
     "total_ring": "Compact<RingBalanceOf>",
-    "total_regular_ring": "Compact<RingBalanceOf>",
+    "total_deposit_ring": "Compact<RingBalanceOf>",
+    
     "active_ring": "Compact<RingBalanceOf>",
-    "active_regular_ring": "Compact<RingBalanceOf>",
+    "active_deposit_ring": "Compact<RingBalanceOf>",
     "total_kton": "Compact<KtonBalanceOf>",
     "active_kton": "Compact<KtonBalanceOf>",
-    "regular_items": "Vec<RegularItem>",
+    "deposit_items": "Vec<TimeDepositItem>",
     "unlocking": "Vec<UnlockChunk>"
+  },
+  "IndividualExpo": {
+    "who": "AccountId",
+    "value": "ExtendedBalance"
   },
   "Exposures": {
     "total": "ExtendedBalance",
