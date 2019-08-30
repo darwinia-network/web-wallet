@@ -41,7 +41,7 @@ const DARWINIA_TYPES = {
   "ExtendedBalance": "u128",
   "ValidatorPrefs": {
     "unstake_threshold": "Compact<u32>",
-    "validator_payment_ratio": "Compact<RingBalanceOf>"
+    "validator_payment_ratio": "u32"
   },
   "StakingBalance": {
     "_enum": {

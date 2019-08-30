@@ -22,6 +22,7 @@ import translate from './translate';
 import BondedDisplay from './Bonded';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
 import { formatKtonBalance, formatNumber, formatBalance } from '@polkadot/util';
+import Bignumber from 'bignumber.js'
 
 export type Props = I18nProps & {
   accounts_idAndIndex?: [AccountId?, AccountIndex?],
@@ -43,6 +44,7 @@ export type Props = I18nProps & {
   withBonded?: boolean,
   nominator?: string,
   staking_stakers: Exposure,
+  staking_ringPool?: Balance,
   isShare?: boolean
 };
 
@@ -105,7 +107,6 @@ class AddressRow extends React.PureComponent<Props, State> {
     let other = [];
     if (staking_stakers) {
       staking_stakers.others.forEach(({ who, value }) => {
-
         if (who.toString() === nominator) {
           // return { who, value }
           other.push({ who, value })
@@ -132,7 +133,7 @@ class AddressRow extends React.PureComponent<Props, State> {
             {this.renderTags()}
           </div>
         </div>
-        {this.renderShares(other)}
+        {this.renderShares(other, staking_stakers && staking_stakers.total)}
         {this.renderChildren()}
         {this.renderExplorer()}
       </div>
@@ -158,14 +159,16 @@ class AddressRow extends React.PureComponent<Props, State> {
     };
   }
 
-  protected renderShares(other) {
-    const { isShare } = this.props;
-    if (!isShare || other.length === 0) {
+  protected renderShares(other, total) {
+    const { isShare,staking_ringPool } = this.props;
+    if (!isShare || other.length === 0 || !staking_ringPool) {
       return null;
     }
-
+    const myshare = new Bignumber(other[0] ? other[0].value.toString() : 0);
+    // const totalShare = new Bignumber(total ? total.toString() : 0);
+    const div = myshare.div(new Bignumber(staking_ringPool.toString()).times(2)).times(100000)
     return (
-      <div className="myshare">My share: {formatBalance((other[0] ? other[0].value : 0), false)} Power</div>
+      <div className="myshare">My share: {div.toFixed(0).toString()}</div>
     );
   }
 
@@ -278,7 +281,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   protected renderBalances() {
-    const { accounts_idAndIndex = [], withBalance } = this.props;
+    const { accounts_idAndIndex = [], withBalance, staking_ringPool } = this.props;
     const [accountId] = accounts_idAndIndex;
 
     if (!withBalance || !accountId) {
@@ -290,6 +293,7 @@ class AddressRow extends React.PureComponent<Props, State> {
         <AddressInfo
           value={accountId}
           withBalance={withBalance}
+          ringPool={staking_ringPool}
         />
       </div>
     );
@@ -640,5 +644,6 @@ export default withMulti(
   withCalls<Props>(
     ['derive.accounts.idAndIndex', { paramName: 'value' }],
     ['query.staking.stakers', { paramName: 'value' }],
+    'query.staking.ringPool',
   )
 );

@@ -44,23 +44,36 @@ class Power extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { staking_ktonPool, staking_ringPool,ringAmount, ktonAmount, t } = this.props;
-    if(!staking_ktonPool || !staking_ringPool || !ringAmount || !ktonAmount){
+    const { staking_ktonPool = ZERO, staking_ringPool = ZERO, ringAmount = ZERO, ktonAmount = ZERO, t } = this.props;
+    if(!staking_ktonPool || (staking_ktonPool && staking_ktonPool.toString() == '0')  || !ringAmount || !ktonAmount){
       return (
         <>
         0
         </>
       )
     }
+    console.log('ringAmountktonAmount',staking_ktonPool, staking_ktonPool.toString(), staking_ringPool.toString(), ringAmount.toString(), ktonAmount.toString())
 
-    // console.log('ringAmountktonAmount', staking_ktonPool.toString(), staking_ringPool.toString(), ringAmount.toString(), ktonAmount.toString())
     const _div = new bignumber(staking_ringPool.toString()).div(new bignumber(staking_ktonPool.toString()))
 
-    const _power = new bignumber(ringAmount.toString()).plus(new bignumber(ktonAmount.toString()).multipliedBy(_div))
+    const _power = new bignumber(ringAmount.toString()).plus(new bignumber(ktonAmount.toString()).times(_div)).div(new bignumber(staking_ringPool.toString()).times(2)).times(100000)
+
+    // let ring_percent = new bignumber(0)
+    // let kton_percent = new bignumber(0)
+    // if(staking_ringPool && staking_ringPool.toString() != '0') {
+    //   ring_percent = new bignumber(ringAmount.toString()).div(new bignumber(staking_ringPool.toString()))
+    // }
+
+    // if(staking_ktonPool && staking_ktonPool.toString() != '0') {
+    //   kton_percent = new bignumber(ktonAmount.toString()).div(new bignumber(staking_ktonPool.toString()))
+    // }
+    // // console.log('ringAmountktonAmount',staking_ktonPool, staking_ktonPool.toString(), staking_ringPool.toString(), ringAmount.toString(), ktonAmount.toString())
+
+    // const _power = ring_percent.plus(kton_percent).multipliedBy(100000).toFixed(2);
 
     return (
       <>
-      {formatBalance(_power.toString().split('.')[0], false)}
+        {_power.toFixed(0).toString()}
       </>
     );
   }

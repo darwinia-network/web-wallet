@@ -6,17 +6,18 @@ import { BareProps } from './types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { AccountId, AccountIndex, Address } from '@polkadot/types';
+import { AccountId, AccountIndex, Address, Balance } from '@polkadot/types';
 import { formatKtonBalance } from '@polkadot/util';
 import { Bonded } from '@polkadot/ui-reactive';
-
+import Bignumber from 'bignumber.js'
 import { classes } from './util';
 
 export type Props = BareProps & {
   bonded?: BN | Array<BN>,
   label?: React.ReactNode,
   params?: AccountId | AccountIndex | Address | string | Uint8Array | null,
-  withLabel?: boolean
+  withLabel?: boolean,
+  ringPool?: Balance
 };
 
 export default class BondedDisplay extends React.PureComponent<Props> {
@@ -39,14 +40,20 @@ export default class BondedDisplay extends React.PureComponent<Props> {
      );
   }
 
-  private renderProvided () {
-    const { bonded, className, label, style } = this.props;
-    let value = `${formatKtonBalance(Array.isArray(bonded) ? bonded[0] : bonded, false)} Power`;
+  toPower(bonded, ringPool){
+    if(!bonded || !ringPool || (ringPool && ringPool.toString() === '0')){
+      return '0'
+    }
+    return new Bignumber(bonded.toString()).div(new Bignumber(ringPool.toString()).times(2)).times(100000).toFixed(0).toString();
+  }
 
+  private renderProvided () {
+    const { bonded, className, label, style, ringPool } = this.props;
+    let value = `${this.toPower(Array.isArray(bonded) ? bonded[0] : bonded, ringPool )} Power`;
     if (Array.isArray(bonded)) {
       const totals = bonded.filter((value, index) => index !== 0);
       const total = totals.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${totals.map((bonded) => formatKtonBalance(bonded, false) + 'Power').join(', ')})`
+        ? `(+${totals.map((bonded) => this.toPower(bonded, ringPool) + 'Power').join(', ')})`
         : '';
 
       value = `${value}  ${total}`;

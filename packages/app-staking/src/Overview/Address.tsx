@@ -14,7 +14,6 @@ import keyring from '@polkadot/ui-keyring';
 import { formatBalance } from '@polkadot/util';
 import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 import { api } from '@polkadot/ui-api'
-
 import translate from '../translate';
 
 type Props = I18nProps & {
@@ -25,7 +24,8 @@ type Props = I18nProps & {
   lastBlock: string,
   recentlyOffline: RecentlyOfflineMap,
   filter: ValidatorFilter,
-  staking_info?: DerivedStaking
+  staking_info?: DerivedStaking,
+  staking_ringPool?: Balance
 };
 
 type State = {
@@ -195,7 +195,7 @@ class Address extends React.PureComponent<Props, State> {
   }
 
   private renderNominators () {
-    const { t } = this.props;
+    const { t, staking_ringPool } = this.props;
     const nominators = this.getNominators();
 
     if (!nominators.length) {
@@ -214,6 +214,7 @@ class Address extends React.PureComponent<Props, State> {
         {nominators.map(([who, bonded]) =>
           <AddressMini
             bonded={bonded}
+            ringPool={staking_ringPool}
             key={who.toString()}
             value={who}
             withBonded
@@ -247,6 +248,7 @@ export default withMulti(
   Address,
   translate,
   withCalls<Props>(
-    ['derive.staking.info', { paramName: 'address' }]
+    ['derive.staking.info', { paramName: 'address' }],
+    'query.staking.ringPool'
   )
 );
