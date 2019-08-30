@@ -19,6 +19,7 @@ import { StructAny, Option, Struct, Compact } from '@polkadot/types';
 import powerbg from './styles/icon/power-bg.svg'
 import ringIcon from './styles/icon/ring.svg'
 import ktonIcon from './styles/icon/kton.svg'
+import Power from './Power'
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
@@ -122,7 +123,8 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     return (
       <div className="power-box">
         <h3>Power</h3>
-        <p>{power}</p>
+        {/* <p>{power}</p> */}
+        <p><Power ringAmount={staking_ledger.raw.active_ring} ktonAmount={staking_ledger.raw.active_kton} /></p>
       </div>
     );
   }
