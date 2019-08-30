@@ -9,7 +9,7 @@ import { CalculateBalanceProps } from '../types';
 import BN from 'bn.js';
 import React from 'react';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Dropdown } from '@polkadot/ui-app';
-import { Option, StakingLedger } from '@polkadot/types';
+import { Option, StakingLedger, Balance } from '@polkadot/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
@@ -20,6 +20,7 @@ import { Checkbox } from 'semantic-ui-react'
 import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { ringToKton, assetToPower } from '@polkadot/util'
 import translate from '../translate';
+import Bignumber from 'bignumber.js'
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
@@ -33,6 +34,7 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   stashId?: string,
   balances_locks: Array<any>,
   balances_freeBalance?: BN,
+  staking_ringPool?: Balance
 };
 
 type State = {
@@ -132,13 +134,21 @@ class BondExtra extends TxComponent<Props, State> {
     return '0'
   }
 
-  getPowerAmount = () => {
-    const { type, maxAdditional = ZERO } = this.state
-    let power = ZERO;
-    power = assetToPower(maxAdditional, type)
-    return formatBalance(power, false)
+
+  toPower(bonded, ringPool){
+    if(!bonded || !ringPool || (ringPool && ringPool.toString() === '0')){
+      return '0'
+    }
+    return new Bignumber(bonded.toString()).div(new Bignumber(ringPool.toString()).times(2)).times(100000).toFixed(0).toString();
   }
 
+  getPowerAmount = () => {
+    const {staking_ringPool} = this.props
+    const { type, maxAdditional = ZERO } = this.state
+    let power = '0';
+    power = this.toPower(maxAdditional, staking_ringPool)
+    return power
+  }
 
   render() {
     const { accountId, balances_all = ZERO_BALANCE, isOpen, onClose, onSuccess, t } = this.props;
@@ -363,6 +373,7 @@ export default withMulti(
     ['query.system.accountNonce', { paramName: 'accountId' }],
     ['query.staking.ledger', { paramName: 'controllerId' }],
     ['query.kton.locks', { paramName: 'accountId' }],
-    ['query.kton.freeBalance', { paramName: 'accountId' }]
+    ['query.kton.freeBalance', { paramName: 'accountId' }],
+    'query.staking.ringPool'
   )
 );

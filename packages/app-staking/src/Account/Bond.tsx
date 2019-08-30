@@ -11,6 +11,8 @@ import React from 'react';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Button, Dropdown, InputAddress, InputNumber, InputBalance, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
+import { Balance } from '@polkadot/types';
+
 import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
 import { ZERO_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
 import { Checkbox } from 'semantic-ui-react'
@@ -20,6 +22,7 @@ import { formatBalance, formatNumber, ringToKton, assetToPower } from '@polkadot
 import translate from '../translate';
 import ValidateController from './ValidateController';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
+import Bignumber from 'bignumber.js'
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
@@ -35,7 +38,7 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   kton_locks: Array<any>,
   balances_locks: Array<any>,
   balances_freeBalance?: BN,
-
+  staking_ringPool?: Balance
 };
 
 type State = {
@@ -151,17 +154,31 @@ class Bond extends TxComponent<Props, State> {
     const {type, bondValue = ZERO, lockLimit} = this.state
     let kton = null;
     let parsedBondValue = bondValue
-    console.log(parsedBondValue.toString(),111)
     if(type === 'ring' && lockLimit != 0) {
       return formatBalance(new BN(ringToKton(parsedBondValue.toString(), lockLimit)), false)
     }
     return '0'
   }
 
+
+  toPower(bonded, ringPool){
+    if(!bonded || !ringPool || (ringPool && ringPool.toString() === '0')){
+      return '0'
+    }
+
+    // const _div = new bignumber(staking_ringPool.toString()).div(new bignumber(staking_ktonPool.toString()))
+
+    // const _power = new bignumber(ringAmount.toString()).plus(new bignumber(ktonAmount.toString()).times(_div)).div(new bignumber(staking_ringPool.toString()).times(2)).times(100000)
+
+
+    return new Bignumber(bonded.toString()).div(new Bignumber(ringPool.toString()).times(2)).times(100000).toFixed(0).toString();
+  }
+
   getPowerAmount = () => {
-    const { type, bondValue = ZERO } = this.state
-    let power = ZERO;
-    power = assetToPower(bondValue, type)
+    const {staking_ringPool} = this.props
+    const { bondValue = ZERO } = this.state
+    let power = '0';
+    power = this.toPower(bondValue, staking_ringPool)
     return formatBalance(power, false)
   }
 
@@ -367,9 +384,6 @@ class Bond extends TxComponent<Props, State> {
 
       const fees = transactionBaseFee
         .add(transactionByteFee.muln(txLength));
-
-
-
       let _ktonBalances_locks = new BN(0)
 
       if (kton_locks) {
@@ -466,6 +480,7 @@ export default withMulti(
     ['query.system.accountNonce', { paramName: 'accountId' }],
     ['query.balances.locks', { paramName: 'stashId' }],
     ['query.kton.locks', { paramName: 'stashId' }],
-    ['query.kton.freeBalance', { paramName: 'stashId' }]
+    ['query.kton.freeBalance', { paramName: 'stashId' }],
+    'query.staking.ringPool'
   )
 );
