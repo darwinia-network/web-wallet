@@ -11,7 +11,7 @@ import React from 'react';
 import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid, ColorButton, TxButton} from '@polkadot/ui-app';
+import { Button, CardGrid, ColorButton, TxButton } from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
 import { formatBalance, formatKtonBalance, formatNumber, ringToKton } from '@polkadot/util';
@@ -59,27 +59,27 @@ class Overview extends React.PureComponent<Props, State> {
     if (end <= now) {
       return 100
     } else {
-      return 100 - (end - now) / (end -  dayjs(start).unix()) * 100
+      return 100 - (end - now) / (end - dayjs(start).unix()) * 100
     }
   }
- 
+
   render() {
     const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow, staking_ledger } = this.props;
     // if(!staking_ledger){
     //   return null;
     // }
     let ledger = staking_ledger && staking_ledger.unwrapOr(null)
-    
+
 
     console.log('staking_ledger', staking_ledger, ledger)
-    if ( !ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
+    if (!ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
       return (
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
             <tbody>
               <tr className='stakingTh'><td>Expire Date</td><td>Deposit</td>
-              <td>Reward</td>
-              <td>Setting</td></tr>
+                <td>Reward</td>
+                <td>Setting</td></tr>
               <tr>
                 <td colSpan={4} className="emptyTd">
                   <p className="no-items">No items</p>
@@ -98,8 +98,8 @@ class Overview extends React.PureComponent<Props, State> {
         <table className={'stakingTable'}>
           <tbody>
             <tr className='stakingTh'><td>Date</td><td>Deposit</td>
-            <td>Reward</td>
-            <td>Setting</td></tr>
+              <td>Reward</td>
+              <td>Setting</td></tr>
             {regularList.map((item, index) => {
               console.log('item', item, item.expire_time)
               return <tr key={index}>
@@ -110,22 +110,29 @@ class Overview extends React.PureComponent<Props, State> {
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time.raw).unix() - dayjs(item.start_time.raw).unix()) / (30*24*3600))))}</td>
+                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time.raw).unix() - dayjs(item.start_time.raw).unix()) / (30 * 24 * 3600))))}</td>
                 <td>
-                <TxButton
-                  accountId={account}
-                  className={'colorButton'}
-                  // isNegative
-                  params={[
-                    item.value.toString(),
-                    item.expire_time.raw
-                  ]}
-                  label={
-                    t('Redeem')
-                  }
-                  key='Redeem'
-                  tx='staking.unbondWithPunish'
-                />
+                  {dayjs(item.expire_time.raw).unix() < dayjs().unix() ? <TxButton
+                    accountId={account}
+                    className={'colorButton'}
+                    isPrimary
+                    label={t('Unbond')}
+                    params={[{ "Ring": item.value.toString() }]}
+                    tx='staking.unbond'
+                  /> : <TxButton
+                      accountId={account}
+                      className={'colorButton'}
+                      // isNegative
+                      params={[
+                        item.value.toString(),
+                        item.expire_time.raw
+                      ]}
+                      label={
+                        t('Redeem')
+                      }
+                      key='Redeem'
+                      tx='staking.unbondWithPunish'
+                    />}
                   {/* <ColorButton onClick={onStakingNow}>{t('Redeem')}</ColorButton> */}
                 </td>
               </tr>
