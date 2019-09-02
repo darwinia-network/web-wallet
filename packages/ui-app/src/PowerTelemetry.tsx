@@ -5,6 +5,7 @@
 import { I18nProps } from '@polkadot/ui-app/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 
+
 import BN from 'bn.js';
 import React from 'react';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
@@ -19,7 +20,9 @@ type Props = I18nProps & ApiProps & {
   staking_ktonPool: Balance,
   staking_ringPool: Balance,
   ringAmount?: Balance,
-  ktonAmount?: Balance
+  ktonAmount?: Balance,
+  ringExtraAmount?: Balance,
+  ktonExtraAmount?: Balance,
 };
 
 type State = {
@@ -28,30 +31,31 @@ type State = {
 const ZERO = new Balance(0);
 const noop = function () { };
 
-class Power extends React.PureComponent<Props, State> {
+class PowerTelemetry extends React.PureComponent<Props, State> {
   state: State;
 
   constructor(props: Props) {
     super(props);
-
     this.state = {
 
     };
   }
 
   render() {
-    const { staking_ktonPool = ZERO, staking_ringPool = ZERO, ringAmount = ZERO, ktonAmount = ZERO, t } = this.props;
+    const { staking_ktonPool = ZERO, staking_ringPool = ZERO, ringAmount = ZERO, ringExtraAmount = ZERO, ktonAmount = ZERO, ktonExtraAmount = ZERO, t } = this.props;
     const power = assetToPower(ringAmount, ktonAmount, staking_ringPool, staking_ktonPool)
+    const powerTelemetry = assetToPower(ringAmount.add(ringExtraAmount) as Balance, ktonAmount.add(ktonExtraAmount) as Balance, staking_ringPool.add(ringExtraAmount) as Balance, staking_ktonPool.add(ktonExtraAmount) as Balance)
+    const subPower = powerTelemetry.minus(power)
     return (
       <>
-        {power.toFixed(0).toString()}
+        {subPower.toFixed(0).toString()}
       </>
     )
   }
 }
 
 export default withMulti(
-  Power,
+  PowerTelemetry,
   // translate,
   withApi,
   withCalls<Props>(
