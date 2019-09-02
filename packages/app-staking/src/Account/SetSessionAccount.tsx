@@ -72,7 +72,7 @@ class SetSessionKey extends React.PureComponent<Props, State> {
               isBasic
               isSecondary
               onClick={onClose}
-              label={t('Cancel')}
+              label={t('Skip')}
             />
           </Button.Group>
         </Modal.Actions>
