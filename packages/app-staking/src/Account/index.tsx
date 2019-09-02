@@ -10,7 +10,7 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 import React from 'react';
-import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking } from '@polkadot/ui-app';
+import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp} from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 import { formatBalance, formatNumber } from '@polkadot/util';
 import BN from 'bn.js';
@@ -312,7 +312,7 @@ class Account extends React.PureComponent<Props, State> {
 
     const isStashNominating = nominators && nominators.length !== 0;
     const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
-    console.log(99001, controllerId, stashId, staking_nominators)
+
     // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
     return {
       controllerId: controllerId,
@@ -343,7 +343,7 @@ class Account extends React.PureComponent<Props, State> {
     }
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-    console.log(1111, controllerId, stashId, controllerId != stashId, sessionId)
+    // console.log(1111, controllerId, stashId, controllerId != stashId, sessionId)
     if ((controllerId != stashId) || (sessionId)) {
       return (
         <StyledWrapper>
@@ -390,7 +390,8 @@ class Account extends React.PureComponent<Props, State> {
             {this.renderNominateButtons()}
           </div>
           <div className={'titleRow'}>
-            POWER MANAGER
+            POWER MANAGER 
+            <LabelHelp help={'You can manage POWER with bond more/unbond asset, which can be used to nominate nodes to earn RING. RING/KTON will have 21days of unbonding status after unbond. Assets in thiis state can not nominate and transfer'}/>
           </div>
           <AddressInfoStaking
             value={accountId}
