@@ -10,7 +10,7 @@ import { ComponentProps } from '../types';
 
 import React, { ReactComponentElement } from 'react';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
-import { withMulti, withObservable } from '@polkadot/ui-api';
+import { withMulti, withObservable, withApi } from '@polkadot/ui-api';
 import { Header, Popup, Grid } from 'semantic-ui-react'
 import { AddressInfo, AddressRowReverse, AddressRow, Button, Card, Icon } from '@polkadot/ui-app';
 import translate from '../translate';
@@ -30,7 +30,8 @@ import SwitchIcon from '../img/switchAccount.svg'
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   address: string,
-  changeAccountMain:() => void
+  changeAccountMain:() => void,
+  currentChain?: string
 };
 
 type State = {
@@ -60,13 +61,13 @@ class AccountStatus extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t, address } = this.props;
+    const { accounts, onStatusChange, t, address, currentChain } = this.props;
 
     return (
       <StyledWrapper>
         <div className="ui--AccountStatus-Box">
           <div className="ui--AccountStatus-Network">
-            <span>•</span><span>Trilobita</span>
+            <span>•</span><span>{currentChain}</span>
           </div>
           <AddressRowReverse
             isEditable={true}
@@ -310,5 +311,6 @@ const PopupExampleFlowing = (Box, address: string) => (
 export default withMulti(
   AccountStatus,
   translate,
-  withObservable(accountObservable.subject, { propName: 'accounts' })
+  withObservable(accountObservable.subject, { propName: 'accounts' }),
+  withApi
 );
