@@ -10,7 +10,7 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 import React from 'react';
-import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking } from '@polkadot/ui-app';
+import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp } from '@polkadot/ui-app';
 import { withCalls, withMulti, withObservable } from '@polkadot/ui-api';
 import { formatBalance, formatNumber } from '@polkadot/util';
 import BN from 'bn.js';
@@ -546,6 +546,7 @@ class Account extends React.PureComponent<Props, State> {
           </div>
           <div className={'titleRow'}>
             Nomination share
+            <LabelHelp help={'You can manage POWER with bond more/unbond asset, which can be used to nominate nodes to earn RING. RING/KTON will have 21days of unbonding status after unbond. Assets in thiis state can not nominate and transfer'}/>
           </div>
           <AddressInfoStaking
             // value={stashId || accountId}
