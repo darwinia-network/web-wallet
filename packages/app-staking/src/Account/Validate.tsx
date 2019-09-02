@@ -141,7 +141,7 @@ class Validate extends TxComponent<Props, State> {
 
   private renderButtons() {
     const { controllerId, onClose, t, validatorPrefs } = this.props;
-    const { unstakeThreshold, unstakeThresholdError, validatorPayment, nodeName } = this.state;
+    const { unstakeThreshold = new BN(3), unstakeThresholdError, validatorPayment, nodeName } = this.state;
     const isChangingPrefs = validatorPrefs && !!validatorPrefs.unstakeThreshold;
 
     return (
