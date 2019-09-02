@@ -9,7 +9,7 @@ import { CalculateBalanceProps } from '../types';
 import BN from 'bn.js';
 import React from 'react';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Dropdown } from '@polkadot/ui-app';
-import { Option, StakingLedger, Balance } from '@polkadot/types';
+import { Option, StakingLedger, Balance, Compact } from '@polkadot/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
@@ -19,8 +19,22 @@ import styled from 'styled-components'
 import { Checkbox } from 'semantic-ui-react'
 import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { ringToKton, assetToPower } from '@polkadot/util'
+import { PowerTelemetry } from '@polkadot/ui-app'
 import translate from '../translate';
 import Bignumber from 'bignumber.js'
+
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
 
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
@@ -28,13 +42,14 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   isOpen: boolean,
   onClose: () => void,
   onSuccess?: (status: SubmittableResult) => void,
-  staking_ledger?: Option<StakingLedger>,
+  staking_ledger?: stakingLedgerType,
   kton_freeBalance: BN,
   kton_locks: Array<any>,
   stashId?: string,
   balances_locks: Array<any>,
   balances_freeBalance?: BN,
-  staking_ringPool?: Balance
+  staking_ringPool?: Balance,
+  staking_ktonPool?: Balance
 };
 
 type State = {
@@ -135,19 +150,34 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
 
-  toPower(bonded, ringPool){
-    if(!bonded || !ringPool || (ringPool && ringPool.toString() === '0')){
+  toPower(bonded, ringPool) {
+    if (!bonded || !ringPool || (ringPool && ringPool.toString() === '0')) {
       return '0'
     }
     return new Bignumber(bonded.toString()).div(new Bignumber(ringPool.toString()).times(2)).times(100000).toFixed(0).toString();
   }
 
   getPowerAmount = () => {
-    const {staking_ringPool} = this.props
+    const { staking_ringPool, staking_ledger, staking_ktonPool } = this.props
     const { type, maxAdditional = ZERO } = this.state
-    let power = '0';
-    power = this.toPower(maxAdditional, staking_ringPool)
-    return power
+
+    let ktonBonded = new BN(0);
+    let ringBonded = new BN(0);
+
+    if (staking_ledger && !staking_ledger.isNone) {
+      ktonBonded = staking_ledger.raw.active_kton.toBn()
+      ringBonded = staking_ledger.raw.active_ring.toBn()
+    }
+
+
+    return <PowerTelemetry
+      ringAmount={ringBonded as Balance}
+      ktonAmount={ktonBonded as Balance}
+      ringPool={staking_ringPool}
+      ktonPool={staking_ktonPool}
+      ringExtraAmount={type === 'ring' ? maxAdditional : new Balance(0)}
+      ktonExtraAmount={type === 'kton' ? maxAdditional : new Balance(0)}
+    />
   }
 
   render() {
@@ -209,7 +239,7 @@ class BondExtra extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, balances_locks, kton_locks, balances_freeBalance,kton_freeBalance, t } = this.props;
+    const { accountId, balances_locks, kton_locks, balances_freeBalance, kton_freeBalance, t } = this.props;
     const { maxBalance, lockLimit, accept, type } = this.state;
 
     let _balances_locks = new BN(0)
@@ -247,7 +277,7 @@ class BondExtra extends TxComponent<Props, State> {
             help={t('The maximum amount to increase the bonded value, this is adjusted using the available free funds on the account.')}
             label={t('max additional value')}
             siValue={'kton'}
-            placeholder={type ==='ring' ? ringAvailableBalance : ktonAvailableBalance}
+            placeholder={type === 'ring' ? ringAvailableBalance : ktonAvailableBalance}
             // maxValue={maxBalance}
             onChange={this.onChangeValue}
             onEnter={this.sendTx}
@@ -318,10 +348,10 @@ class BondExtra extends TxComponent<Props, State> {
     let maxBalance = new BN(1);
     let extrinsic;
 
-    let bonded = new BN(0);
-    if (staking_ledger && !staking_ledger.isNone) {
-      bonded = staking_ledger.unwrap().active;
-    }
+    // let bonded = new BN(0);
+    // if (staking_ledger && !staking_ledger.isNone) {
+    //   bonded = staking_ledger.unwrap().active;
+    // }
 
     while (!prevMax.eq(maxBalance)) {
       prevMax = maxBalance;
@@ -346,7 +376,7 @@ class BondExtra extends TxComponent<Props, State> {
           _ktonBalances_locks = _ktonBalances_locks.add(new BN(item.amount))
         })
       }
-      console.log(3, _ktonBalances_locks, kton_freeBalance)
+
       maxBalance = kton_freeBalance.sub(_ktonBalances_locks);
     }
 
@@ -374,6 +404,7 @@ export default withMulti(
     ['query.staking.ledger', { paramName: 'controllerId' }],
     ['query.kton.locks', { paramName: 'accountId' }],
     ['query.kton.freeBalance', { paramName: 'accountId' }],
-    'query.staking.ringPool'
+    'query.staking.ringPool',
+    'query.staking.ktonPool'
   )
 );
