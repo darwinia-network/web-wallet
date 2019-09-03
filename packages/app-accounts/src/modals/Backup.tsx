@@ -28,7 +28,7 @@ class Backup extends TxComponent<Props, State> {
     password: ''
   };
 
-  render () {
+  render() {
     const { t, onClose } = this.props;
 
     return (
@@ -45,7 +45,7 @@ class Backup extends TxComponent<Props, State> {
     );
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { onClose, t } = this.props;
     const { isPassValid } = this.state;
 
@@ -53,25 +53,24 @@ class Backup extends TxComponent<Props, State> {
       <Modal.Actions>
         <Button.Group>
           <Button
-            isBasic={true}
-            isSecondary={true}
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
-          <Button
             isDisabled={!isPassValid}
             isPrimary
             label={t('Download')}
             onClick={this.doBackup}
             ref={this.button}
           />
+          <Button
+            isBasic
+            isSecondary
+            label={t('Cancel')}
+            onClick={onClose}
+          />
         </Button.Group>
       </Modal.Actions>
     );
   }
 
-  private renderContent () {
+  private renderContent() {
     const { address, t } = this.props;
     const { isPassValid, password } = this.state;
 

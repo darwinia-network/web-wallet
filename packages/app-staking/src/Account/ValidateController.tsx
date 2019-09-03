@@ -16,7 +16,8 @@ type Props = I18nProps & {
   bondedId?: string | null,
   controllerId: string,
   onError: (error: string | null) => void,
-  stashId?: string | null
+  stashId?: string | null,
+  checkSameController?: boolean
 };
 
 type State = {
@@ -28,11 +29,15 @@ class ValidateController extends React.PureComponent<Props, State> {
     error: null
   };
 
-  static getDerivedStateFromProps ({ accountId, bondedId, controllerId, onError, stashId, t }: Props, prevState: State): State {
+  static getDerivedStateFromProps ({ accountId, bondedId, controllerId, onError, stashId, t, checkSameController = false }: Props, prevState: State): State {
     const error = (() => {
-      if (controllerId === accountId) {
-        return t('A controller account which is not the same as your selected account is required');
-      } else if (bondedId) {
+      if(checkSameController){
+        if (controllerId === accountId ) {
+          return t('A controller account which is not the same as your selected account is required');
+        }
+      }
+      
+      if (bondedId) {
         return t('A controller account should not map to another stash. This selected controller is a stash, controlled by {{bondedId}}', { replace: { bondedId } });
       } else if (stashId) {
         return t('A controller account should not be set to manages multiple stashes. The selected controller is already controlling {{stashId}}', { replace: { stashId } });

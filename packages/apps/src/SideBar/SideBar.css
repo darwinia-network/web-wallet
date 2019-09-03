@@ -10,6 +10,10 @@
   flex-direction: row;
   transition: width 0.3s linear;
 
+  .apps-SideBar-Split{
+    flex: 1
+  }
+  
   .apps-Menu-bg {
     background: rgba(0,0,0,0.6);
     height: 100%;
@@ -196,7 +200,7 @@
 a.apps--SideBar-Item-NavLink {
   color: #97959D;
   display: block;
-  text-align: center;
+  text-align: left;
   padding: 1.4em 0.75em;
   transition: background 0.15s;
   white-space: nowrap;

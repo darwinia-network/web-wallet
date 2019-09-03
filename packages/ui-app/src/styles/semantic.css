@@ -103,14 +103,21 @@
   > .actions,
   > .content {
     background: transparent;
-    padding: 1.5rem 3.5rem;
+    padding:  1.5rem 3.5rem;
+  }
+
+  > .content {
+    background: transparent;
+    padding:  1.5rem 3.5rem 0rem 3.5rem;
   }
 
   > .actions {
     border-top: none;
     text-align: right;
   }
-
+  > .header{
+    border-bottom: none;
+  }
   > .header:not(.ui) {
     background: #f5f5f5;
     font-size: 1.25rem !important;
@@ -124,8 +131,8 @@
   }
 
   > :first-child:not(.icon) {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    /* border-top-left-radius: 0;
+    border-top-right-radius: 0; */
   }
 
   > .modal-header{
@@ -223,5 +230,33 @@
   margin-right: 0;
   .highlight:before{
     box-shadow: 0 0 5px 2px #DAD1F7!important;
+  }
+}
+
+.ui.modal>.header.ui-step-header{
+  display: flex!important;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px!important;
+  i{
+    display: inline-block;
+    width:57px;
+    height:2px;
+    background:rgba(48,43,60,1);
+    margin: 0 10px;
+  }
+  &>div{
+    display: flex;
+    align-items: center;
+  }
+}
+
+.ui.modal>.header.ui-step-header{
+  span.step{
+    color: #D2D1D4;
+  
+  }
+  i.step{
+    background: #D2D1D4;
   }
 }

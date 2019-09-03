@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountId, AccountIndex, Address } from '@polkadot/types';
+import { AccountId, AccountIndex, Address, Exposure, Balance } from '@polkadot/types';
 import { I18nProps } from './types';
 
 import BN from 'bn.js';
@@ -21,6 +21,8 @@ import LinkPolkascan from './LinkPolkascan';
 import translate from './translate';
 import BondedDisplay from './Bonded';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
+import { formatKtonBalance, formatNumber, formatBalance } from '@polkadot/util';
+import Bignumber from 'bignumber.js'
 
 export type Props = I18nProps & {
   accounts_idAndIndex?: [AccountId?, AccountIndex?],
@@ -28,6 +30,8 @@ export type Props = I18nProps & {
   buttons?: React.ReactNode,
   children?: React.ReactNode,
   defaultName?: string,
+  nodeName?: string,
+  suffixName?: string,
   extraInfo?: React.ReactNode,
   isEditable?: boolean,
   isInline?: boolean,
@@ -37,7 +41,11 @@ export type Props = I18nProps & {
   withIcon?: boolean,
   withIndex?: boolean,
   withTags?: boolean,
-  withBonded?: boolean
+  withBonded?: boolean,
+  nominator?: string,
+  staking_stakers: Exposure,
+  staking_ringPool?: Balance,
+  isShare?: boolean
 };
 
 type State = {
@@ -49,28 +57,29 @@ type State = {
 };
 
 const DEFAULT_ADDR = '5'.padEnd(16, 'x');
-const ICON_SIZE = 48;
+const ICON_SIZE = 56;
 
 class AddressRow extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = this.createState();
   }
 
   static defaultProps = {
-    defaultName: '<unknown>'
+    defaultName: '<unknown>',
+    suffixName: ''
   };
 
-  static getDerivedStateFromProps ({ accounts_idAndIndex = [], defaultName, value }: Props, prevState: State) {
+  static getDerivedStateFromProps({ accounts_idAndIndex = [], defaultName, value, nodeName }: Props, prevState: State) {
     const [_accountId] = accounts_idAndIndex;
     const accountId = _accountId || value;
     const address = accountId
       ? accountId.toString()
       : DEFAULT_ADDR;
-    const name = getAddressName(address,null, false, defaultName) || '';
+    const name = nodeName || getAddressName(address, null, false, defaultName) || '';
     const tags = getAddressTags(address);
     const state = { tags } as State;
     let hasChanged = false;
@@ -90,14 +99,24 @@ class AddressRow extends React.PureComponent<Props, State> {
       : null;
   }
 
-  render () {
-    const { accounts_idAndIndex = [], className, isInline, style } = this.props;
+  render() {
+    const { accounts_idAndIndex = [], className, isInline, style, staking_stakers, nominator, isShare, value } = this.props;
     const [accountId, accountIndex] = accounts_idAndIndex;
     const isValid = accountId || accountIndex;
 
+    let other = [];
+    if (staking_stakers) {
+      staking_stakers.others.forEach(({ who, value }) => {
+        if (who.toString() === nominator) {
+          // return { who, value }
+          other.push({ who, value })
+        }
+      })
+    }
+
     return (
       <div
-        className={classes('ui--AddressRow', !isValid && 'invalid', isInline && 'inline', className)}
+        className={classes('ui--AddressRow', !isValid && 'invalid', isInline && 'inline', isShare && 'share', className)}
         style={style}
       >
         <div className='ui--AddressRow-base'>
@@ -108,26 +127,27 @@ class AddressRow extends React.PureComponent<Props, State> {
               {this.renderName()}
               {this.renderAddress()}
               {this.renderAccountIndex()}
-              {this.renderBonded()}
+              {/* {this.renderBonded()} */}
             </div>
             {this.renderBalances()}
             {this.renderTags()}
           </div>
         </div>
+        {this.renderShares(other, staking_stakers && staking_stakers.total)}
         {this.renderChildren()}
         {this.renderExplorer()}
       </div>
     );
   }
 
-  private createState () {
+  private createState() {
     const { accounts_idAndIndex = [], defaultName, value } = this.props;
     const [_accountId] = accounts_idAndIndex;
     const accountId = _accountId || value;
     const address = accountId
       ? accountId.toString()
       : DEFAULT_ADDR;
-    const name = getAddressName(address, null,false, defaultName) || '';
+    const name = getAddressName(address, null, false, defaultName) || '';
     const tags = getAddressTags(address);
 
     return {
@@ -139,7 +159,20 @@ class AddressRow extends React.PureComponent<Props, State> {
     };
   }
 
-  protected renderAddress () {
+  protected renderShares(other, total) {
+    const { isShare,staking_ringPool } = this.props;
+    if (!isShare || other.length === 0 || !staking_ringPool) {
+      return null;
+    }
+    const myshare = new Bignumber(other[0] ? other[0].value.toString() : 0);
+    // const totalShare = new Bignumber(total ? total.toString() : 0);
+    const div = myshare.div(new Bignumber(staking_ringPool.toString()).times(2)).times(100000)
+    return (
+      <div className="myshare">My share: {div.toFixed(0).toString()}</div>
+    );
+  }
+
+  protected renderAddress() {
     const { address } = this.state;
 
     return (
@@ -154,7 +187,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderButtons () {
+  protected renderButtons() {
     const { buttons } = this.props;
 
     return buttons
@@ -162,7 +195,7 @@ class AddressRow extends React.PureComponent<Props, State> {
       : null;
   }
 
-  protected renderExplorer () {
+  protected renderExplorer() {
     const { value, withExplorer } = this.props;
 
     if (!withExplorer) {
@@ -180,7 +213,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderBonded () {
+  private renderBonded() {
     const { bonded, value, withBonded = false } = this.props;
 
     if (!withBonded || !value) {
@@ -197,8 +230,8 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderName () {
-    const { isEditable } = this.props;
+  protected renderName() {
+    const { isEditable, suffixName } = this.props;
     const { isEditingName, name } = this.state;
 
     return isEditingName
@@ -215,10 +248,10 @@ class AddressRow extends React.PureComponent<Props, State> {
       )
       : (
         <div
-          className={classes('ui--AddressRow-name', isEditable && 'editable')}
+          className={classes('ui--AddressRow-name', isEditable && 'editable', suffixName && 'ui--AddressRow-long-name')}
           onClick={isEditable ? this.toggleNameEditor : undefined}
         >
-          {name}
+          {`${name} ${suffixName}`}
           {isEditable && this.renderEditIcon()}
         </div>
       );
@@ -232,7 +265,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     this.setState({ tags });
   }
 
-  protected renderAccountIndex () {
+  protected renderAccountIndex() {
     const { accounts_idAndIndex = [], withIndex } = this.props;
     const [, accountIndex] = accounts_idAndIndex;
 
@@ -247,8 +280,8 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderBalances () {
-    const { accounts_idAndIndex = [], withBalance } = this.props;
+  protected renderBalances() {
+    const { accounts_idAndIndex = [], withBalance, staking_ringPool } = this.props;
     const [accountId] = accounts_idAndIndex;
 
     if (!withBalance || !accountId) {
@@ -260,12 +293,13 @@ class AddressRow extends React.PureComponent<Props, State> {
         <AddressInfo
           value={accountId}
           withBalance={withBalance}
+          ringPool={staking_ringPool}
         />
       </div>
     );
   }
 
-  protected renderChildren () {
+  protected renderChildren() {
     const { children } = this.props;
     // we need children, or when an array, at least 1 non-empty value
     const hasChildren = !children
@@ -285,7 +319,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderEditIcon () {
+  protected renderEditIcon() {
     return (
       <Button
         className='iconButton'
@@ -297,7 +331,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderIcon () {
+  protected renderIcon() {
     const { accounts_idAndIndex = [], withIcon = true } = this.props;
     const { address } = this.state;
     const [accountId] = accounts_idAndIndex;
@@ -321,7 +355,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderSaveIcon (callback: () => void) {
+  protected renderSaveIcon(callback: () => void) {
     return (
       <Button
         className='saveButton'
@@ -334,7 +368,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     );
   }
 
-  protected renderTags () {
+  protected renderTags() {
     const { isEditingTags, tags } = this.state;
     const { isEditable, withTags = false } = this.props;
 
@@ -350,7 +384,7 @@ class AddressRow extends React.PureComponent<Props, State> {
           onChange={this.onChangeTags}
           onClose={this.saveTags}
           openOnFocus
-          defaultValue = {tags}
+          defaultValue={tags}
           searchInput={{ autoFocus: true }}
           value={tags}
           withLabel={false}
@@ -450,6 +484,17 @@ export default withMulti(
       opacity: 0.5;
     }
 
+    &.share{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .myshare{
+      color: #302B3C;
+      font-size: 18px;
+    }
+
     button.ui.icon.editButton {
       padding: 0em .3em .3em .3em;
       color: #2e86ab;
@@ -542,11 +587,15 @@ export default withMulti(
       padding: 0;
       overflow: hidden;
       text-overflow: ellipsis;
-      text-transform: uppercase;
+      /* text-transform: uppercase; */
       white-space: normal;
       width: 17rem;
       font-size: 18px;
       color: #302B3C;
+    }
+
+    .ui--AddressRow-long-name {
+      width: 26rem;
     }
 
     .ui--AddressRow-name-input {
@@ -588,9 +637,13 @@ export default withMulti(
       font-family: monospace;
       color: #B3B3B3;
     }
+
+   
   `,
   translate,
   withCalls<Props>(
-    ['derive.accounts.idAndIndex', { paramName: 'value' }]
+    ['derive.accounts.idAndIndex', { paramName: 'value' }],
+    ['query.staking.stakers', { paramName: 'value' }],
+    'query.staking.ringPool',
   )
 );

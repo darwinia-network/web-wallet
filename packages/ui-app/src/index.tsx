@@ -17,6 +17,7 @@ export { default as Balance } from './Balance';
 export { default as Bonded } from './Bonded';
 export { default as Bubble } from './Bubble';
 export { default as Button } from './Button';
+export { default as ColorButton } from './ColorButton/Button';
 export { default as Call } from './Call';
 export { default as Card } from './Card';
 export { default as CardGrid } from './CardGrid';
@@ -63,7 +64,8 @@ export { default as Tabs } from './Tabs';
 export { default as Tooltip } from './Tooltip';
 export { default as TxButton } from './TxButton';
 export { default as TxComponent } from './TxComponent';
-
+export { default as Power } from './Power';
+export { default as PowerTelemetry } from './PowerTelemetry';
 export { default as media } from './media';
 export { default as Forget } from './Forget';
 export { default as AddressCard } from './AddressCard';

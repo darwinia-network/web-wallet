@@ -7,7 +7,7 @@ import { BareProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { AccountId, AccountIndex, Address } from '@polkadot/types';
+import { AccountId, AccountIndex, Address, Balance } from '@polkadot/types';
 import { OfflineStatus } from '@polkadot/app-staking/types';
 import { RecentlyOffline } from '@polkadot/ui-app';
 
@@ -26,7 +26,8 @@ type Props = BareProps & {
   offlineStatus?: Array<OfflineStatus>,
   withAddress?: boolean,
   withBalance?: boolean,
-  withBonded?: boolean
+  withBonded?: boolean,
+  ringPool?: Balance
 };
 
 class AddressMini extends React.PureComponent<Props> {
@@ -97,7 +98,7 @@ class AddressMini extends React.PureComponent<Props> {
   }
 
   private renderBonded () {
-    const { bonded, value, withBonded = false } = this.props;
+    const { bonded, value, withBonded = false, ringPool } = this.props;
 
     if (!withBonded || !value) {
       return null;
@@ -105,6 +106,7 @@ class AddressMini extends React.PureComponent<Props> {
 
     return (
       <BondedDisplay
+        ringPool={ringPool}
         bonded={bonded}
         label=''
         params={value}

@@ -8,7 +8,7 @@ import React from 'react';
 import { AccountId, AccountIndex, Address, StakingLedger } from '@polkadot/types';
 
 import { withCalls } from '@polkadot/ui-api';
-import { formatBalance } from '@polkadot/util';
+import { formatKtonBalance } from '@polkadot/util';
 
 type Props = BareProps & CallProps & {
   children?: React.ReactNode,
@@ -25,7 +25,7 @@ export class BondedDisplay extends React.PureComponent<Props> {
       <div className={className}>
         {label}{
           staking_ledger
-            ? formatBalance(staking_ledger.active)
+            ? formatKtonBalance(staking_ledger.active)
             : '0'
         }{children}
       </div>

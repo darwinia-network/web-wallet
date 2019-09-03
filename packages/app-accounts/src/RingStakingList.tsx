@@ -11,10 +11,10 @@ import React from 'react';
 import store from 'store'
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid } from '@polkadot/ui-app';
+import { Button, CardGrid, ColorButton, TxButton } from '@polkadot/ui-app';
 import BN from 'bn.js';
 import translate from './translate';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatKtonBalance, formatNumber, ringToKton } from '@polkadot/util';
 import ringStakingBtn from './img/stakingBtn.svg';
 import dayjs from 'dayjs'
 
@@ -22,7 +22,9 @@ type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   balances_locks: Array<{ amount: BN }>,
   account: string,
-  kton_depositLedger: { raw: { deposit_list: Array<any> } }
+  gringotts_depositLedger: { raw: { deposit_list: Array<any> } },
+  onStakingNow: () => void,
+  staking_ledger: any
 };
 
 type State = {
@@ -40,7 +42,6 @@ class Overview extends React.PureComponent<Props, State> {
     isImportOpen: false,
     isAccountsListOpen: false,
     AccountMain: '',
-
   };
 
   componentDidMount() {
@@ -52,52 +53,88 @@ class Overview extends React.PureComponent<Props, State> {
     }
   }
 
-  process(start, month): number {
+  process(start, expire): number {
     const now = dayjs().unix();
-    const end = dayjs(start).add(month * 30, 'day').unix();
+    const end = dayjs(expire).unix();
     if (end <= now) {
       return 100
     } else {
-      return 100 - (end - now) / (3600 * 24 * 30 * month) * 100
+      return 100 - (end - now) / (end - dayjs(start).unix()) * 100
     }
   }
 
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, kton_depositLedger = { raw: { deposit_list: [] } } } = this.props;
-
-    // if ((kton_depositLedger.raw.deposit_list.length === 0)) {
-    //   return (
-    //     <Wrapper>
-    //       <table className={'stakingTable'}>
-    //         <tbody>
-    //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-    //           <tr>
-    //             <td colSpan={4}>
-    //               <p className="no-items">No items</p>
-    //             </td>
-    //           </tr>
-    //         </tbody>
-    //       </table>
-    //     </Wrapper>
-    //   );
+    const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow, staking_ledger } = this.props;
+    // if(!staking_ledger){
+    //   return null;
     // }
+    let ledger = staking_ledger && staking_ledger.unwrapOr(null)
 
+
+    console.log('staking_ledger', staking_ledger, ledger)
+    if (!ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
+      return (
+        <Wrapper>
+          <table className={'stakingTable stakingTableEmpty'}>
+            <tbody>
+              <tr className='stakingTh'><td>Expire Date</td><td>Deposit</td>
+                <td>Reward</td>
+                <td>Setting</td></tr>
+              <tr>
+                <td colSpan={4} className="emptyTd">
+                  <p className="no-items">No items</p>
+                  <ColorButton onClick={onStakingNow}>{t('Deposit Now')}</ColorButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </Wrapper>
+      );
+    }
+
+    let regularList = ledger.deposit_items
     return (
       <Wrapper>
         <table className={'stakingTable'}>
           <tbody>
-            <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-            {kton_depositLedger && kton_depositLedger.raw.deposit_list && kton_depositLedger.raw.deposit_list.map((item, index) => {
+            <tr className='stakingTh'><td>Date</td><td>Deposit</td>
+              <td>Reward</td>
+              <td>Setting</td></tr>
+            {regularList.map((item, index) => {
+              console.log('item', item, item.expire_time)
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
+                  <p className="stakingRange">{`${this.formatDate(item.start_time.raw)} - ${this.formatDate(item.expire_time.raw)}`}</p>
                   <div className="stakingProcess">
-                    <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_time.raw, item.expire_time.raw)}%` }}></div>
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td>{formatBalance(item.balance)}</td>
-                <td>----</td>
+                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time.raw).unix() - dayjs(item.start_time.raw).unix()) / (30 * 24 * 3600))))}</td>
+                <td>
+                  {dayjs(item.expire_time.raw).unix() < dayjs().unix() ? <TxButton
+                    accountId={account}
+                    className={'colorButton'}
+                    isPrimary
+                    label={t('Unbond')}
+                    params={[{ "Ring": item.value.toString() }]}
+                    tx='staking.unbond'
+                  /> : <TxButton
+                      accountId={account}
+                      className={'colorButton'}
+                      // isNegative
+                      params={[
+                        item.value.toString(),
+                        item.expire_time.raw
+                      ]}
+                      label={
+                        t('Redeem')
+                      }
+                      key='Redeem'
+                      tx='staking.unbondWithPunish'
+                    />}
+                  {/* <ColorButton onClick={onStakingNow}>{t('Redeem')}</ColorButton> */}
+                </td>
               </tr>
             })}
           </tbody>
@@ -105,9 +142,34 @@ class Overview extends React.PureComponent<Props, State> {
       </Wrapper>
     );
   }
+
+  //   return (
+  //     <Wrapper>
+  //       <table className={'stakingTable'}>
+  //         <tbody>
+  //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
+  //           {regularList.map((item, index) => {
+  //             item.start_at = '1565758536'
+  //             return <tr key={index}>
+  //               <td>
+  //                 <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
+  //                 <div className="stakingProcess">
+  //                   <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
+  //                 </div>
+  //               </td>
+  //               <td>{formatBalance(item.value)}</td>
+  //               <td className="textGradient">{formatKtonBalance(0)}</td>
+  //               <td>----</td>
+  //             </tr>
+  //           })}
+  //         </tbody>
+  //       </table>
+  //     </Wrapper>
+  //   );
 }
 
 const Wrapper = styled.div`
+    padding-bottom: 30px;
     .stakingTable{
       border-collapse: collapse;
       background: #fff;
@@ -148,12 +210,27 @@ const Wrapper = styled.div`
           background: #FBFBFB;
         }
       }
+      
+    }
+
+    .stakingTableEmpty{
       .no-items{
         padding: 15px;
         text-align: center;
-
+        color: #B4B6BC;
+        margin-bottom: 0;
+      }
+      .emptyTd{
+        padding: 100px 0!important;
+        background: #fff!important;
       }
     }
+
+    /* .textGradient{
+      background: linear-gradient(to right, red, blue);
+        -webkit-background-clip: text;
+        color: transparent;
+    } */
 `
 
 export default withMulti(
@@ -161,7 +238,7 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['query.balances.locks', { paramName: 'account' }],
-    ['query.kton.depositLedger', { paramName: 'account' }],
+    ['query.staking.ledger', { paramName: 'account' }],
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

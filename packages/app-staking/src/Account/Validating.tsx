@@ -6,43 +6,67 @@ import { I18nProps } from '@polkadot/ui-app/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { ValidatorPrefs } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { ValidatorPrefs, Bytes } from '@polkadot/types';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
 
 import translate from '../translate';
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
 type Props = I18nProps & {
   accountId: string,
   isOpen: boolean,
   onClose: () => void,
   stashId: string,
-  validatorPrefs: ValidatorPrefs
+  validatorPrefs: ValidatorPrefs,
+  nodeName?: Bytes
 };
 
 type State = {
   unstakeThreshold?: BN,
-  validatorPayment?: BN
+  validatorPayment?: BN,
+  nodeName?: string,
 };
 
 class Staking extends TxComponent<Props, State> {
   state: State = {
-    unstakeThreshold: new BN(3),
+    // unstakeThreshold: new BN(3),
     validatorPayment: new BN(0)
   };
 
   // inject the preferences are returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
   static getDerivedStateFromProps(props: Props, state: State): State | null {
+    // console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+
     if (state.unstakeThreshold) {
       return null;
     }
+    const {nodeName = new Bytes()}  = props
+    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+    // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+    // return {
+    //   unstakeThreshold: unstake_threshold.toBn(),
+    //   validatorPayment: validator_payment_ratio.toBn()
+    // }
 
-    const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
+    if (props.validatorPrefs) {
+      // @ts-ignore
+      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+      console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+
+      return {
+        unstakeThreshold: unstake_threshold.toBn(),
+        validatorPayment: validator_payment_ratio.toBn(),
+        nodeName: u8aToString(nodeName.toU8a(true))
+      };
+    }
 
     return {
-      unstakeThreshold: unstakeThreshold.toBn(),
-      validatorPayment: validatorPayment.toBn()
+      unstakeThreshold: new BN(3),
+      validatorPayment: undefined,
+      nodeName: u8aToString(nodeName.toU8a(true))
     };
+
   }
 
   render() {
@@ -68,7 +92,7 @@ class Staking extends TxComponent<Props, State> {
 
   private renderButtons() {
     const { accountId, onClose, t } = this.props;
-    const { unstakeThreshold, validatorPayment } = this.state;
+    const { unstakeThreshold, validatorPayment, nodeName } = this.state;
 
     return (
       <Modal.Actions>
@@ -78,10 +102,11 @@ class Staking extends TxComponent<Props, State> {
             isPrimary
             label={t('Validate')}
             onClick={onClose}
-            params={[{
-              unstakeThreshold,
-              validatorPayment
-            }]}
+            params={[
+              u8aToHex(u8aToU8a(nodeName)),
+              validatorPayment,
+              unstakeThreshold
+            ]}
             tx='staking.validate'
             ref={this.button}
           />
@@ -99,7 +124,7 @@ class Staking extends TxComponent<Props, State> {
 
   private renderContent() {
     const { accountId, stashId, t } = this.props;
-    const { unstakeThreshold, validatorPayment } = this.state;
+    const { unstakeThreshold, validatorPayment, nodeName } = this.state;
 
     return (
       <>
@@ -119,6 +144,32 @@ class Staking extends TxComponent<Props, State> {
             isDisabled
             label={t('stash account')}
           />
+          <Input
+            className='medium'
+            help={t('node name')}
+            label={t('node name')}
+            onChange={this.onChangeNodeName}
+            onEnter={this.sendTx}
+            value={
+              nodeName
+                ? nodeName
+                : ''
+            }
+          />
+          <InputNumber
+            className='medium'
+            help={t('Reward that validator takes up-front, the remainder is split between themselves and nominators')}
+            label={t('payment preferences')}
+            onChange={this.onChangePayment}
+            onEnter={this.sendTx}
+            rightLabel={'%'}
+            isSi={false}
+            value={
+              validatorPayment
+                ? validatorPayment.toString()
+                : '0'
+            }
+          />
           <InputNumber
             autoFocus
             bitLength={32}
@@ -127,22 +178,11 @@ class Staking extends TxComponent<Props, State> {
             label={t('unstake threshold')}
             onChange={this.onChangeThreshold}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               unstakeThreshold
                 ? unstakeThreshold.toString()
                 : '3'
-            }
-          />
-          <InputBalance
-            className='medium'
-            help={t('Reward that validator takes up-front, the remainder is split between themselves and nominators')}
-            label={t('payment preferences')}
-            onChange={this.onChangePayment}
-            onEnter={this.sendTx}
-            value={
-              validatorPayment
-                ? validatorPayment.toString()
-                : '0'
             }
           />
         </Modal.Content>
@@ -160,6 +200,10 @@ class Staking extends TxComponent<Props, State> {
     if (unstakeThreshold) {
       this.setState({ unstakeThreshold });
     }
+  }
+
+  private onChangeNodeName = (nodeName: string) => {
+    this.setState({ nodeName });
   }
 }
 

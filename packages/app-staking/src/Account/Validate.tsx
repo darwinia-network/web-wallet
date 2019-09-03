@@ -6,59 +6,120 @@ import { I18nProps } from '@polkadot/ui-app/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { ValidatorPrefs } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { ValidatorPrefs, Bytes } from '@polkadot/types';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
 
 import InputValidationUnstakeThreshold from './InputValidationUnstakeThreshold';
 import translate from '../translate';
+
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
 type Props = I18nProps & {
   controllerId: string,
   isOpen: boolean,
   onClose: () => void,
   stashId: string,
-  validatorPrefs?: ValidatorPrefs
+  validatorPrefs?: ValidatorPrefs,
+  withStep?: boolean
+  nodeName?: Bytes
 };
 
 type State = {
   unstakeThreshold?: BN,
   unstakeThresholdError: string | null,
-  validatorPayment?: BN
+  validatorPayment?: BN,
+  nodeName?: string,
+  isUpdateProps?: boolean
 };
 
 class Validate extends TxComponent<Props, State> {
   state: State = {
-    unstakeThreshold: new BN(3),
+    unstakeThreshold: undefined,
     unstakeThresholdError: null,
-    validatorPayment: new BN(0)
+    validatorPayment: undefined,
+    nodeName: undefined,
+    isUpdateProps: false
   };
 
   // inject the preferences returned via RPC once into the state (from this
   // point forward it will be entirely managed by the actual inputs)
-  static getDerivedStateFromProps (props: Props, state: State): State | null {
-    if (state.unstakeThreshold && state.validatorPayment) {
+  // static getDerivedStateFromProps(props: Props, state: State): State | null {
+  // console.log('validatorPrefs valiidate',state.unstakeThreshold ,state.validatorPayment )
+  // if (state.unstakeThreshold && state.validatorPayment && state.nodeName) {
+  //   return null;
+  // }
+
+  // const { nodeName = new Bytes() } = props
+  // console.log('validatorPrefs valiidate1', props.validatorPrefs, nodeName)
+
+  // // if (props.validatorPrefs) {
+  // //   // @ts-ignore
+  // //   const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+  // //   console.log('validatorPrefs valiidate2', unstake_threshold.toBn(), validator_payment_ratio.toBn())
+  // //   return {
+  // //     unstakeThreshold: unstake_threshold.toBn(),
+  // //     unstakeThresholdError: null,
+  // //     validatorPayment: validator_payment_ratio.toBn(),
+  // //     nodeName: u8aToString(nodeName.toU8a(true))
+  // //   };
+  // // }
+
+  // // @ts-ignore
+  // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs || {};
+
+  // return {
+  //   unstakeThreshold: props.validatorPrefs ? unstake_threshold.toBn() : undefined,
+  //   unstakeThresholdError: null,
+  //   validatorPayment: props.validatorPrefs ? validator_payment_ratio.toBn() : undefined,
+  //   nodeName: nodeName
+  // };
+  // }
+
+
+  static getDerivedStateFromProps(props: Props, state: State): State | null {
+    console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+    // console.log('111111',props.validatorPrefs)
+    if (!props.validatorPrefs || state.isUpdateProps) {
       return null;
     }
+    const {nodeName = new Bytes()}  = props
+    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+    // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+    // return {
+    //   unstakeThreshold: unstake_threshold.toBn(),
+    //   validatorPayment: validator_payment_ratio.toBn()
+    // }
 
-    if (props.validatorPrefs) {
-      const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
+    if (props.validatorPrefs && !state.isUpdateProps) {
+      // @ts-ignore
+      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+      console.log('props.validatorPrefs1', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
 
       return {
-        unstakeThreshold: unstakeThreshold.toBn(),
+        unstakeThreshold: unstake_threshold.toBn(),
         unstakeThresholdError: null,
-        validatorPayment: validatorPayment.toBn()
+        validatorPayment: validator_payment_ratio.toBn().div(new BN(10000000)),
+        nodeName: u8aToString(nodeName.toU8a(true)),
+        isUpdateProps: true
       };
     }
 
     return {
-      unstakeThreshold: undefined,
+      unstakeThreshold: new BN(3),
       unstakeThresholdError: null,
-      validatorPayment: undefined
+      validatorPayment: undefined,
+      nodeName: u8aToString(nodeName.toU8a(true)),
+      isUpdateProps: false
     };
+
   }
 
-  render () {
-    const { isOpen } = this.props;
+  componentDidMount() {
+
+  }
+
+  render() {
+    const { isOpen, onClose } = this.props;
 
     if (!isOpen) {
       return null;
@@ -69,6 +130,7 @@ class Validate extends TxComponent<Props, State> {
         className='staking--Staking'
         dimmer='inverted'
         open
+        onClose={onClose}
         size='small'
       >
         {this.renderContent()}
@@ -77,47 +139,52 @@ class Validate extends TxComponent<Props, State> {
     );
   }
 
-  private renderButtons () {
+  private renderButtons() {
     const { controllerId, onClose, t, validatorPrefs } = this.props;
-    const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
+    const { unstakeThreshold = new BN(3), unstakeThresholdError, validatorPayment, nodeName } = this.state;
     const isChangingPrefs = validatorPrefs && !!validatorPrefs.unstakeThreshold;
 
     return (
       <Modal.Actions>
         <Button.Group>
-          <Button
-            isNegative
-            label={t('Cancel')}
-            onClick={onClose}
-          />
-          <Button.Or />
           <TxButton
             accountId={controllerId}
             isDisabled={!!unstakeThresholdError}
             isPrimary
             label={isChangingPrefs ? t('Set validator preferences') : t('Validate')}
             onClick={onClose}
-            params={[{
-              unstakeThreshold,
-              validatorPayment
-            }]}
+            onClose={onClose}
+            params={[u8aToHex(u8aToU8a(nodeName)), validatorPayment, unstakeThreshold]}
             tx='staking.validate'
             ref={this.button}
+          />
+          <Button
+            isBasic
+            isSecondary
+            label={t('Skip')}
+            onClick={onClose}
           />
         </Button.Group>
       </Modal.Actions>
     );
   }
 
-  private renderContent () {
-    const { controllerId, stashId, t, validatorPrefs } = this.props;
-    const { unstakeThreshold, unstakeThresholdError, validatorPayment } = this.state;
+  private renderContent() {
+    const { controllerId, stashId, t, validatorPrefs, withStep } = this.props;
+    const { unstakeThreshold, unstakeThresholdError, validatorPayment, nodeName } = this.state;
     const defaultValue = validatorPrefs && validatorPrefs.unstakeThreshold && validatorPrefs.unstakeThreshold.toBn();
 
     return (
       <>
-        <Modal.Header>
+        <Modal.Header className="ui-step-header">
           {t('Set validator preferences')}
+          {withStep && <div>
+            <span className="">STEP1</span>
+            <i className=""></i>
+            <span className="">STEP2</span>
+            <i className=""></i>
+            <span className="">STEP3</span>
+          </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
@@ -132,6 +199,32 @@ class Validate extends TxComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
+          <Input
+            className='medium'
+            defaultValue={nodeName}
+            help={t('node name')}
+            label={t('node name')}
+            onChange={this.onChangeNodeName}
+            value={
+              nodeName
+                ? nodeName
+                : ''
+            }
+          />
+          <InputNumber
+            className='medium'
+            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
+            help={t('Amount taken up-front from the reward by the validator before spliting the remainder between themselves and the nominators')}
+            label={t('reward commission')}
+            onChange={this.onChangePayment}
+            onEnter={this.sendTx}
+            isSi={false}
+            value={
+              validatorPayment
+                ? validatorPayment.toString()
+                : '0'
+            }
+          />
           <InputNumber
             autoFocus
             bitLength={32}
@@ -142,6 +235,7 @@ class Validate extends TxComponent<Props, State> {
             label={t('automatic unstake threshold')}
             onChange={this.onChangeThreshold}
             onEnter={this.sendTx}
+            isSi={false}
             value={
               unstakeThreshold
                 ? unstakeThreshold.toString()
@@ -151,19 +245,6 @@ class Validate extends TxComponent<Props, State> {
           <InputValidationUnstakeThreshold
             onError={this.onUnstakeThresholdError}
             unstakeThreshold={unstakeThreshold}
-          />
-          <InputBalance
-            className='medium'
-            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
-            help={t('Amount taken up-front from the reward by the validator before spliting the remainder between themselves and the nominators')}
-            label={t('reward commission')}
-            onChange={this.onChangePayment}
-            onEnter={this.sendTx}
-            value={
-              validatorPayment
-                ? validatorPayment.toString()
-                : '0'
-            }
           />
         </Modal.Content>
       </>
@@ -182,9 +263,14 @@ class Validate extends TxComponent<Props, State> {
     }
   }
 
+  private onChangeNodeName = (nodeName: string) => {
+    this.setState({ nodeName });
+  }
+
   private onUnstakeThresholdError = (unstakeThresholdError: string | null) => {
     this.setState({ unstakeThresholdError });
   }
+
 }
 
 export default translate(Validate);

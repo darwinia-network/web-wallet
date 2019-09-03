@@ -30,9 +30,7 @@ class Unlock extends TxComponent<Props, State> {
 
   static getDerivedStateFromProps ({ pair }: Props): State {
     return {
-      address: pair
-        ? pair.address
-        : ''
+      address: (pair && pair.address) || ''
     } as State;
   }
 
@@ -48,7 +46,6 @@ class Unlock extends TxComponent<Props, State> {
         className='toolbox--Unlock'
         dimmer='inverted'
         open
-        onClose={this.onCancel}
       >
         <Modal.Header>
           {t('Unlock account')}

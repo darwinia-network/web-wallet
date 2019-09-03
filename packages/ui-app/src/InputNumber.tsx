@@ -6,7 +6,7 @@ import { BareProps, BitLength, I18nProps } from './types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { formatBalance, isUndefined } from '@polkadot/util';
+import { formatBalance, isUndefined, formatKtonBalance } from '@polkadot/util';
 
 import { classes } from './util';
 import { BitLengthOption } from './constants';
@@ -23,17 +23,23 @@ type Props = BareProps & I18nProps & {
   isDisabled?: boolean,
   isError?: boolean,
   isSi?: boolean,
+  isType?: boolean,
+  siValue?: string,
   isDecimal?: boolean,
   label?: any,
   maxLength?: number,
   maxValue?: BN,
+  minValue?: BN,
   onChange?: (value?: BN) => void,
+  onChangeType?: (value?: string) => void,
   onEnter?: () => void,
   placeholder?: string,
   value?: BN | string,
   withEllipsis?: boolean,
   withLabel?: boolean,
-  withMax?: boolean
+  withMax?: boolean,
+  rightLabel?: string,
+  power?: number
 };
 
 type State = {
@@ -42,7 +48,8 @@ type State = {
   siOptions: Array<{ value: string, text: string }>,
   siUnit: string,
   value: string,
-  valueBN: BN
+  valueBN: BN,
+  type: string
 };
 
 const DEFAULT_BITLENGTH = BitLengthOption.NORMAL_NUMBERS as BitLength;
@@ -50,77 +57,93 @@ const ZERO = new BN(0);
 const TEN = new BN(10);
 
 class InputNumber extends React.PureComponent<Props, State> {
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
-    const { defaultValue, isSi, value } = this.props;
+    const { defaultValue, isSi, value, siValue } = this.props;
     let valueBN = new BN(value || 0);
-    const si = formatBalance.findSi('-');
-
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
+    const si = commonFormatBalance.findSi('-');
     this.state = {
       value: isSi
         ? new BN(defaultValue || valueBN).div(new BN(10).pow(new BN(si.power))).toString()
         : (defaultValue || valueBN).toString(),
       isPreKeyDown: false,
       isValid: !isUndefined(value),
-      siOptions: formatBalance.getOptions().map(({ power, text, value }) => ({
+      siOptions: commonFormatBalance.getOptions().map(({ power, text, value }) => ({
         value,
-        text: power === 0
-          ? InputNumber.units
-          : text
+        // text: power === 0
+        //   ? InputNumber.units
+        //   : text
+        text
       })),
       siUnit: si.value,
-      valueBN
+      valueBN,
+      type: 'ring'
     };
   }
 
   static units: string = 'Unit';
-  static setUnit (units: string = InputNumber.units): void {
+  static setUnit(units: string = InputNumber.units): void {
     InputNumber.units = units;
   }
 
-  static getDerivedStateFromProps ({ isDisabled, isSi, defaultValue = '0' }: Props): Partial<State> | null {
+  static getDerivedStateFromProps({ isDisabled, isSi, defaultValue = '0', siValue }: Props): Partial<State> | null {
     if (!isDisabled || !isSi) {
       return null;
     }
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
 
     return {
-      value: formatBalance(defaultValue, false),
-      siUnit: formatBalance.calcSi(defaultValue.toString(), formatBalance.getDefaults().decimals).value
+      value: commonFormatBalance(defaultValue, false),
+      siUnit: commonFormatBalance.calcSi(defaultValue.toString(), commonFormatBalance.getDefaults().decimals).value
     };
   }
 
-  render () {
-    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isDisabled, isError = false, maxLength, maxValue, onEnter, style, withMax, t } = this.props;
+  render() {
+    const { bitLength = DEFAULT_BITLENGTH, className, help, isSi, isType, isDisabled, isError = false, maxLength, maxValue, minValue, onEnter, style, withMax, t, placeholder, rightLabel } = this.props;
     const { isValid, value } = this.state;
     const maxValueLength = this.maxValue(bitLength).toString().length - 1;
 
     return (
-      <Input
-        {...this.props}
-        className={classes('ui--InputNumber', className)}
-        help={help}
-        isAction={isSi}
-        isDisabled={isDisabled}
-        isError={!isValid || isError}
-        maxLength={maxLength || maxValueLength}
-        onChange={this.onChange}
-        onEnter={onEnter}
-        onKeyDown={this.onKeyDown}
-        onKeyUp={this.onKeyUp}
-        onPaste={this.onPaste}
-        placeholder={t('Positive number')}
-        style={style}
-        type='text'
-        value={value}
-      >
-        {(withMax && !!maxValue) && this.renderMaxButton()}
-        {isSi && this.renderSiDropdown()}
-      </Input>
+      <>
+        <Input
+          {...this.props}
+
+          className={classes('ui--InputNumber', rightLabel ? 'ui--InputNumber-RightLabel' : undefined, className)}
+          help={help}
+          isAction={isSi}
+          isDisabled={isDisabled}
+          isError={!isValid || isError}
+          maxLength={maxLength || maxValueLength}
+          min={minValue}
+          onChange={this.onChange}
+          onEnter={onEnter}
+          onKeyDown={this.onKeyDown}
+          onKeyUp={this.onKeyUp}
+          onPaste={this.onPaste}
+          placeholder={placeholder || t('Positive number')}
+          style={style}
+          type='text'
+          value={value}
+        >
+          {(withMax && !!maxValue) && this.renderMaxButton()}
+          {isSi && this.renderSiDropdown()}
+          {isType && this.renderTypeDropdown()}
+          {rightLabel && this.renderRightLabel()}
+        </Input>
+
+      </>
     );
   }
 
-  private renderSiDropdown () {
+  private renderRightLabel() {
+    const { rightLabel } = this.props;
+
+    return (<div className="ui basic label label">{rightLabel}</div>)
+  }
+
+  private renderSiDropdown() {
     const { siOptions, siUnit } = this.state;
 
     return (
@@ -134,7 +157,29 @@ class InputNumber extends React.PureComponent<Props, State> {
     );
   }
 
-  private renderMaxButton () {
+  private renderTypeDropdown() {
+    const { siOptions, siUnit, type } = this.state;
+    const typeOptions = [{
+      text: 'RING',
+      value: 'ring'
+    }, {
+      text: 'KTON',
+      value: 'kton'
+    }];
+
+    return (
+      <Dropdown
+        dropdownClassName='ui--TypeDropdown'
+        isButton
+
+        onChange={this.selectType}
+        options={typeOptions}
+        defaultValue={type}
+      />
+    );
+  }
+
+  private renderMaxButton() {
     const { valueBN } = this.state;
     const { maxValue } = this.props;
 
@@ -152,15 +197,15 @@ class InputNumber extends React.PureComponent<Props, State> {
     );
   }
 
-  private maxValue (bitLength?: number): BN {
+  private maxValue(bitLength?: number): BN {
     return new BN(2).pow(new BN(bitLength || DEFAULT_BITLENGTH)).subn(1);
   }
 
-  private isValidBitLength (value: BN, bitLength?: number): boolean {
+  private isValidBitLength(value: BN, bitLength?: number): boolean {
     return value.bitLength() <= (bitLength || DEFAULT_BITLENGTH);
   }
 
-  private isValidNumber (input: BN, bitLength: number = DEFAULT_BITLENGTH): boolean {
+  private isValidNumber(input: BN, bitLength: number = DEFAULT_BITLENGTH): boolean {
     const { maxValue, withMax } = this.props;
     const maxBN = this.maxValue(bitLength);
 
@@ -177,7 +222,7 @@ class InputNumber extends React.PureComponent<Props, State> {
   }
 
   private regex = (): RegExp => {
-    const { isDecimal, isSi } = this.props;
+    const { isDecimal = true, isSi } = this.props;
     return new RegExp(
       (isSi || isDecimal) ?
         `^(0|[1-9]\\d*)(\\${KEYS.DECIMAL}\\d*)?$` :
@@ -217,11 +262,11 @@ class InputNumber extends React.PureComponent<Props, State> {
       const { selectionStart: i, selectionEnd: j, value } = event.target as HTMLInputElement;
       const newValue = `${
         value.substring(0, i!)
-      }${
+        }${
         event.key
-      }${
+        }${
         value.substring(j!)
-      }`;
+        }`;
 
       if (!this.regex().test(newValue)) {
         event.preventDefault();
@@ -264,6 +309,16 @@ class InputNumber extends React.PureComponent<Props, State> {
     });
   }
 
+  private selectType = (type: string): void => {
+    const { onChangeType } = this.props
+    onChangeType(type);
+    this.setState((prevState: State) => {
+      return {
+        type: type
+      };
+    });
+  }
+
   private setToMaxValue = () => {
     this.setState((prevState: State) => {
       const { bitLength, maxValue, onChange } = this.props;
@@ -300,11 +355,12 @@ class InputNumber extends React.PureComponent<Props, State> {
       }
 
       const div = new BN(value.replace(/\.\d*$/, ''));
-      const mod = new BN(value.replace(/^\d+\./, ''));
+      const modString = value.replace(/^\d+\./, '')
+      const mod = new BN(modString);
 
       return div
         .mul(TEN.pow(siPower))
-        .add(mod.mul(TEN.pow(new BN(basePower + siUnitPower - mod.toString().length))));
+        .add(mod.mul(TEN.pow(new BN(basePower + siUnitPower - modString.length))));
     } else {
       return new BN(value.replace(/[^\d]/g, ''))
         .mul(TEN.pow(siPower));
@@ -320,7 +376,7 @@ class InputNumber extends React.PureComponent<Props, State> {
 
     return `${
       div.gt(ZERO) ? div.toString() : '0'
-    }${
+      }${
       mod.gt(ZERO) ?
         (() => {
           const padding = Math.max(
@@ -331,14 +387,15 @@ class InputNumber extends React.PureComponent<Props, State> {
           return `.${mod.toString(10, padding).replace(/0*$/, '')}`;
         })() :
         ''
-    }`;
+      }`;
   }
 
   private getSiPowers = (siUnit = this.state.siUnit): [BN, number, number] => {
-    const { isSi } = this.props;
+    const { isSi = true, siValue, power = 0 } = this.props;
 
-    const basePower = isSi ? formatBalance.getDefaults().decimals : 0;
-    const siUnitPower = isSi ? formatBalance.findSi(siUnit).power : 0;
+    const commonFormatBalance = (siValue === 'kton' ? formatKtonBalance : formatBalance);
+    const basePower = isSi ? commonFormatBalance.getDefaults().decimals : 0;
+    const siUnitPower = isSi ? commonFormatBalance.findSi(siUnit).power : power;
 
     return [new BN(basePower + siUnitPower), basePower, siUnitPower];
   }

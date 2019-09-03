@@ -11,9 +11,9 @@ export default ([
     Component: Settings,
     display: {},
     i18n: {
-      defaultValue: 'Settings'
+      defaultValue: 'Endpoint'
     },
-    icon: 'settings',
+    icon: 'connectdevelop',
     name: 'settings'
   }
 ] as Routes);

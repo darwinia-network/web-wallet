@@ -86,7 +86,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
   componentDidUpdate(prevProps: Props, prevState: State) {
     const { balances_fees } = this.props;
     const { extrinsic, recipientId, senderId } = this.state;
-
+    console.log('balances_fees', balances_fees)
     const hasLengthChanged = ((extrinsic && extrinsic.encodedLength) || 0) !== ((prevState.extrinsic && prevState.extrinsic.encodedLength) || 0);
 
     if ((recipientId && prevState.recipientId !== recipientId) ||
@@ -192,6 +192,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
             label={t('amount')}
             maxValue={maxBalance}
             onChange={this.onChangeAmount}
+            siValue={type}
             withMax
           />
           {/* <Checks

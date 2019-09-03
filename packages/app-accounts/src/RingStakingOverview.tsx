@@ -4,6 +4,7 @@
 
 import { I18nProps } from '@polkadot/ui-app/types';
 import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
+import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact } from '@polkadot/types';
 import { ComponentProps } from './types';
 import styled from 'styled-components';
 
@@ -23,7 +24,18 @@ import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 import RingStaking from './modals/RingStaking'
 import ringStakingBtn from './img/stakingBtn.svg';
 import RingStakingList from './RingStakingList';
-const ringStakingBanner = require('./img/ringStakingBanner.png');
+const ringStakingBanner = require('./img/ringStakingBanner.jpg');
+
+import Bond from '@polkadot/app-staking/Account/Bond';
+import BondExtra from '@polkadot/app-staking/Account/BondExtra';
+
+import { api } from '@polkadot/ui-api'
+
+function toIdString(id?: AccountId | null): string | null {
+  return id
+    ? id.toString()
+    : null;
+}
 
 type Props = ComponentProps & I18nProps & {
   allAccounts?: SubjectInfo[],
@@ -35,7 +47,11 @@ type State = {
   isRingStakingOpen: boolean,
   isImportOpen: boolean,
   isAccountsListOpen: boolean,
-  AccountMain: string
+  AccountMain: string,
+  controllerId: string,
+  stashId: string,
+  isBondOpen: boolean,
+  isBondExtraOpen: boolean,
 };
 
 class Overview extends React.PureComponent<Props, State> {
@@ -44,7 +60,11 @@ class Overview extends React.PureComponent<Props, State> {
     isCreateOpen: false,
     isImportOpen: false,
     isAccountsListOpen: false,
-    AccountMain: ''
+    AccountMain: '',
+    controllerId: '',
+    stashId: '',
+    isBondOpen: false,
+    isBondExtraOpen: false,
   };
 
   componentDidMount() {
@@ -52,27 +72,112 @@ class Overview extends React.PureComponent<Props, State> {
     this.setState({
       AccountMain
     })
+    this.getControllerId(AccountMain)
+  }
+
+  componentWillReceiveProps(nextProps){
+    const AccountMain = this.getAccountMain() || '';
+    this.setState({
+      AccountMain
+    })
+    this.getControllerId(AccountMain)
+    console.log('AccountMain', AccountMain)
+  }
+
+  getControllerId = (accountId) => {
+    if (!accountId) {
+      return;
+    }
+    let stashId = null;
+    let controllerId = null;
+    api.queryMulti([
+      [api.query.staking.bonded, accountId], // try to map to controller
+      [api.query.staking.ledger, accountId]
+    ], (re) => {
+      const [account, ledger] = (re as VectorAny<Option<any>>)
+      const ledgerWrap = ledger.isSome && ledger.unwrap() || null
+      console.log('ledger', account, ledger)
+      stashId = ledgerWrap ? ledgerWrap.stash : "";
+      if (stashId) {
+        controllerId = accountId
+      } else {
+        // @ts-ignore
+        controllerId = (account && account.isNone) ? "" : toIdString(account);
+      }
+      console.log('getControllerId', accountId, controllerId)
+      this.setState({
+        controllerId,
+        stashId
+      })
+    })
   }
 
   render() {
     const { allAccounts, onStatusChange, t, balances_locks = [] } = this.props;
-    
-    const { isRingStakingOpen, isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain } = this.state;
 
+    const { isRingStakingOpen, isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain, stashId, controllerId } = this.state;
+    console.log('box-ring')
     return (
       <Wrapper>
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
         <div className='bannerBox'>
           <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton" />
-          <div className='stakingBtn' onClick={this.toggleRingStaking}><p>Staking now</p></div>
+          <div className='stakingBtn' onClick={() => {
+            if(controllerId) {
+              this.toggleBondExtra()
+            } else {
+              this.toggleBond()
+            }
+            }}><p>Deposit now</p></div>
         </div>
 
         <div className={'titleRow'}>
           Deposit Ring
         </div>
-        <RingStakingList account={AccountMain} />
-        {isRingStakingOpen && <RingStaking senderId={AccountMain} onClose={this.toggleRingStaking}/>}
+
+        <RingStakingList account={controllerId} onStakingNow={() => {
+            if(controllerId) {
+              this.toggleBondExtra()
+            } else {
+              this.toggleBond()
+            }
+            }} />
+        {isRingStakingOpen && <RingStaking senderId={AccountMain} onClose={this.toggleRingStaking} />}
+        {this.renderBond()}
+        {this.renderBondExtra()}
       </Wrapper>
+    );
+  }
+
+  private renderBond() {
+    const { stashId, AccountMain } = this.state;
+    const { controllerId, isBondOpen } = this.state;
+
+    return (
+      <>
+        <Bond
+          accountId={stashId || AccountMain}
+          controllerId={controllerId}
+          isOpen={isBondOpen}
+          onClose={this.toggleBond}
+          disableController={true}
+          easyMode={true}
+        />
+      </>
+    );
+  }
+
+  private renderBondExtra() {
+    const { controllerId, isBondExtraOpen, stashId, AccountMain } = this.state;
+    console.log('renderBondExtra', controllerId, isBondExtraOpen, stashId, AccountMain)
+    return (
+      <BondExtra
+        // @ts-ignore
+        accountId={toIdString(stashId) || AccountMain}
+        controllerId={controllerId}
+        isOpen={isBondExtraOpen}
+        onClose={this.toggleBondExtra}
+      />
     );
   }
 
@@ -112,6 +217,18 @@ class Overview extends React.PureComponent<Props, State> {
       AccountMain: this.getAccountMain() || ''
     })
   }
+  private toggleBond = () => {
+    this.setState(({ isBondOpen }) => ({
+      isBondOpen: !isBondOpen
+    }));
+  }
+
+  private toggleBondExtra = () => {
+    this.setState(({ isBondExtraOpen }) => ({
+      isBondExtraOpen: !isBondExtraOpen
+    }));
+  }
+
 }
 
 const Wrapper = styled.div`
@@ -120,8 +237,9 @@ const Wrapper = styled.div`
       justify-content: flex-start;
       align-items: center;
       margin-top: 20px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       font-size: 16px;
+      text-transform: uppercase;
     }
 
     .titleRow::before {
@@ -131,6 +249,7 @@ const Wrapper = styled.div`
       height:18px;
       background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%);
       margin-right: 0.5rem;
+      margin-top: -1px;
     }
 
     .ringStakingBanner{

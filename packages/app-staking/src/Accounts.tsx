@@ -16,8 +16,10 @@ import Account from './Account';
 import translate from './translate';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
-type Props = I18nProps & ComponentProps &{
-  accountMain: 'string'
+type Props = I18nProps & ComponentProps & {
+  accountMain: string,
+  stashId?: string,
+  controllerId?: string
 };
 
 type State = {
@@ -45,28 +47,31 @@ class Accounts extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { balances, recentlyOffline, t, validators , accountMain} = this.props;
-    console.log('accountMain',accountMain)
+    const { balances, recentlyOffline, t, validators, accountMain , stashId, controllerId} = this.props;
+
     const { filter, filterOptions } = this.state;
     const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
 
-
+    console.log('Accounts Page', stashId, controllerId)
+    
     return (
       <StyledWrapper>
         {/* 
   // @ts-ignore */}
         <Account
-                accountId={accountMain}
-                balances={balances}
-                filter={filter}
-                isValidator={validators.includes(accountMain)}
-                key={accountMain}
-                recentlyOffline={recentlyOffline}
-                stashOptions={stashOptions}
-              />
+          accountId={accountMain}
+          stashId={stashId}
+          controllerId={controllerId}
+          balances={balances}
+          filter={filter}
+          isValidator={validators.includes(accountMain)}
+          key={accountMain}
+          recentlyOffline={recentlyOffline}
+          stashOptions={stashOptions}
+        />
 
-          {/* {accounts.map((account) => {
+        {/* {accounts.map((account) => {
             const address = account.address();
 
             return (
@@ -81,7 +86,7 @@ class Accounts extends React.PureComponent<Props, State> {
               />
             );
           })} */}
-     
+
       </StyledWrapper>
     );
   }
@@ -100,7 +105,7 @@ class Accounts extends React.PureComponent<Props, State> {
 }
 
 const StyledWrapper = styled.div`
-
+  margin-top: 10px;
 `
 
 export default translate(Accounts);

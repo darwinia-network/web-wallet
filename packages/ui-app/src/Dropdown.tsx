@@ -56,6 +56,7 @@ export default class Dropdown<Option> extends React.PureComponent<Props<Option>>
       ? prevProps.defaultValue
       : prevProps.value;
 
+
     if (startValue !== prevStart) {
       this.onChange(null as any, {
         value: startValue
@@ -127,7 +128,6 @@ export default class Dropdown<Option> extends React.PureComponent<Props<Option>>
 
   private onChange = (_: React.SyntheticEvent<HTMLElement>, { value }: DropdownProps): void => {
     const { onChange, transform } = this.props;
-
     onChange && onChange(
       transform
         ? transform(value)

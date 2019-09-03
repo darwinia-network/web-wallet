@@ -22,8 +22,7 @@ type Props = I18nProps & {
 };
 
 type State = {
-  filter: ValidatorFilter,
-  filterOptions: Array<{ text: React.ReactNode, value: ValidatorFilter }>
+  filter: ValidatorFilter
 };
 
 class CurrentList extends React.PureComponent<Props, State> {
@@ -35,29 +34,21 @@ class CurrentList extends React.PureComponent<Props, State> {
     const { t } = props;
 
     this.state = {
-      filter: 'all',
-      filterOptions: [
-        { text: t('Show all validators and intentions'), value: 'all' },
-        { text: t('Show only my nominations'), value: 'iNominated' },
-        { text: t('Show only with nominators'), value: 'hasNominators' },
-        { text: t('Show only without nominators'), value: 'noNominators' },
-        { text: t('Show only with warnings'), value: 'hasWarnings' },
-        { text: t('Show only without warnings'), value: 'noWarnings' }
-      ]
+      filter: 'all'
     };
   }
 
   render () {
     const { current, next, t } = this.props;
-    const { filter, filterOptions } = this.state;
+
     return (
       <div>
         
         <Columar className='validator--ValidatorsList'>
-          <Column headerText={t('validators')}>
+          <Column headerText={t('VALIDATORS')}>
             {this.renderColumn(current, t('validator (stash)'))}
           </Column>
-          <Column headerText={t('next up')}>
+          <Column headerText={t('NEXT UP')}>
             {this.renderColumn(next, t('intention (stash)'))}
           </Column>
         </Columar>
@@ -87,10 +78,6 @@ class CurrentList extends React.PureComponent<Props, State> {
         recentlyOffline={recentlyOffline}
       />
     ));
-  }
-
-  private onChangeFilter = (filter: ValidatorFilter): void => {
-    this.setState({ filter });
   }
 }
 

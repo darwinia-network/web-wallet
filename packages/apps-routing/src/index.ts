@@ -17,13 +17,16 @@ import explorer from './explorer';
 import extrinsics from './extrinsics';
 import js from './js';
 import settings from './settings';
-import staking from './staking';
+import stakingKton from './staking';
+import stakingKtonNode from './node';
+import staking from './stakingoverview';
 import storage from './storage';
 import sudo from './sudo';
 import toolbox from './toolbox';
 import transfer from './transfer';
+import dev from './dev';
 
-const routes: Routes = appSettings.uiMode === 'light'
+const routes: Routes = appSettings.uiMode === 'full'
   ? ([] as Routes).concat(
     // dashboard,
     // explorer,
@@ -33,8 +36,12 @@ const routes: Routes = appSettings.uiMode === 'light'
     accounts,
     staking,
     RingStaking,
+    stakingKton,
+    stakingKtonNode,
     // addressbook,
     // transfer,
+    null,
+    dev
     // null,
     // settings,
     // template
@@ -45,9 +52,18 @@ const routes: Routes = appSettings.uiMode === 'light'
     
     // democracy,
     // null,
+
+
+
     accounts,
     staking,
     RingStaking,
+    stakingKton,
+    stakingKtonNode,
+
+
+
+
     // addressbook,
     
     // transfer,
@@ -55,9 +71,12 @@ const routes: Routes = appSettings.uiMode === 'light'
     // contracts,
     storage,
     extrinsics,
+    settings,
+    null,
+    dev,
     // sudo,
     // null,
-    // settings,
+
     // toolbox,
     // js,
     // template

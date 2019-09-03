@@ -15,7 +15,9 @@ type Props = I18nProps & {
   isOpen: boolean,
   onClose: () => void,
   stashId: string,
-  stashOptions: Array<KeyringSectionOption>
+  stashOptions: Array<KeyringSectionOption>,
+  easyMode?: boolean,
+  cancelText?: string
 };
 
 type State = {
@@ -49,7 +51,7 @@ class Nominating extends React.PureComponent<Props, State> {
   }
 
   renderButtons () {
-    const { accountId, onClose, t } = this.props;
+    const { accountId, onClose, t, cancelText } = this.props;
     const { nominees } = this.state;
 
     return (
@@ -68,7 +70,7 @@ class Nominating extends React.PureComponent<Props, State> {
             isBasic={true}
             isSecondary={true}
             onClick={onClose}
-            label={t('Cancel')}
+            label={cancelText || t('Cancel')}
           />
         </Button.Group>
       </Modal.Actions>
@@ -76,7 +78,7 @@ class Nominating extends React.PureComponent<Props, State> {
   }
 
   renderContent () {
-    const { accountId, stashId, stashOptions, t } = this.props;
+    const { accountId, stashId, stashOptions, t, easyMode = false} = this.props;
 
     return (
       <>
@@ -90,12 +92,13 @@ class Nominating extends React.PureComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
-          <InputAddress
+
+          {!easyMode && <InputAddress
             className='medium'
             defaultValue={stashId}
             isDisabled
             label={t('stash account')}
-          />
+          />}
           <InputAddress
             className='medium'
             isMultiple

@@ -70,9 +70,8 @@ class App extends React.PureComponent<Props, State> {
   }
 
   static getDerivedStateFromProps({ staking_controllers = [[], []], session_validators = [], staking_recentlyOffline = [] }: Props): State {
-    console.log(9999999,staking_controllers)
     return {
-      controllers: staking_controllers[1].filter((optId) => optId.isSome).map((accountId) =>
+      controllers: staking_controllers[1].filter((optId) => optId && optId.isSome).map((accountId) =>
         accountId.unwrap().toString()
       ),
       stashes: staking_controllers[0].map((accountId) => accountId.toString()),
@@ -108,30 +107,27 @@ class App extends React.PureComponent<Props, State> {
 
   render() {
     const { allAccounts, basePath, onStatusChange } = this.props;
-    const { tabs, AccountMain } = this.state;
+    // const { tabs, AccountMain } = this.state;
     const hidden = !allAccounts || Object.keys(allAccounts).length === 0
       ? ['actions']
       : [];
-
+      const { controllers, recentlyOffline, stashes, validators, AccountMain, tabs } = this.state;
+      const { balances = {} } = this.props;
       // @ts-ignore
     return (
       <>
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => {this.changeMainAddress()}} address={AccountMain} />}
 
         <main className='staking--App'>
-          <header>
-            <Tabs
-              basePath={basePath}
-              hidden={hidden}
-              items={tabs}
-            />
-          </header>
-          <Switch>
-            {/* 
-              // @ts-ignore */}
-            <Route path={`${basePath}/actions`} render={this.renderComponent(Accounts)} />
-            <Route render={this.renderComponent(Overview)} />
-          </Switch>
+          <Overview
+          balances={balances}
+          controllers={controllers}
+          recentlyOffline={recentlyOffline}
+          stashes={stashes}
+          validators={validators}
+          // @ts-ignore
+          accountMain={AccountMain}
+          />
         </main>
       </>
     );

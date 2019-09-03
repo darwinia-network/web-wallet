@@ -4,7 +4,7 @@
 
 export enum BitLengthOption {
   CHAIN_SPEC = 128,
-  NORMAL_NUMBERS = 32
+  NORMAL_NUMBERS = 128
 }
 
 export enum ScreenSizes {

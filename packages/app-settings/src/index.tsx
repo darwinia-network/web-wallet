@@ -45,7 +45,7 @@ class App extends React.PureComponent<Props, State> {
     const { basePath } = this.props;
     const { tabs } = this.state;
     const hidden = uiSettings.uiMode === 'full'
-      ? []
+      ? ['developer']
       : ['developer'];
 
     return (

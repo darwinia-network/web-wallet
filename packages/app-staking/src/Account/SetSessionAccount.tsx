@@ -53,17 +53,12 @@ class SetSessionKey extends React.PureComponent<Props, State> {
         className='staking--SetSessionAccount'
         dimmer='inverted'
         open
+        onClose={onClose}
         size='small'
       >
         {this.renderContent()}
         <Modal.Actions>
           <Button.Group>
-            <Button
-              isNegative
-              onClick={onClose}
-              label={t('Cancel')}
-            />
-            <Button.Or />
             <TxButton
               accountId={controllerId}
               isDisabled={!sessionId || !!sessionError}
@@ -72,6 +67,12 @@ class SetSessionKey extends React.PureComponent<Props, State> {
               onClick={ onClose }
               params={ isV2 ? [{ auraKey: sessionId, grandpaKey: sessionId }, new Uint8Array([])] : [sessionId]}
               tx={isV2 ? 'session.setKeys' : 'session.setKey'}
+            />
+             <Button
+              isBasic
+              isSecondary
+              onClick={onClose}
+              label={t('Skip')}
             />
           </Button.Group>
         </Modal.Actions>

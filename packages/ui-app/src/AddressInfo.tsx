@@ -8,13 +8,14 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
-
+import {Balance} from '@polkadot/types'
 import translate from './translate';
 import CryptoType from './CryptoType';
 import Label from './Label';
+import Bignumber from 'bignumber.js'
 
 // true to display, or (for bonded) provided values [own, ...all extras]
 export type BalanceActiveType = {
@@ -36,7 +37,8 @@ type Props = BareProps & I18nProps & {
   staking_info?: DerivedStaking,
   value: string,
   withBalance?: boolean | BalanceActiveType,
-  withExtended?: boolean | CryptoActiveType
+  withExtended?: boolean | CryptoActiveType,
+  ringPool?: Balance
 };
 
 // <AddressInfo
@@ -96,7 +98,7 @@ class AddressInfo extends React.PureComponent<Props> {
           <>
             <Label label={t('redeemable')} />
             <div className='result'>
-              {formatBalance(staking_info.redeemable)}
+              {formatKtonBalance(staking_info.redeemable)}
               {this.renderRedeemButton()}
             </div>
           </>
@@ -113,21 +115,28 @@ class AddressInfo extends React.PureComponent<Props> {
     );
   }
 
+  toPower(bonded, ringPool){
+    if(!bonded || !bonded || !ringPool || (ringPool && ringPool.toString() === '0')){
+      return '0'
+    }
+    return new Bignumber(bonded.toString()).div(new Bignumber(ringPool.toString()).times(2)).times(100000).toFixed(0).toString();
+  }
+
   // either true (filtered above already) or [own, ...all extras]
   private renderBonded (bonded: true | Array<BN>) {
-    const { staking_info, t } = this.props;
+    const { staking_info, t, ringPool } = this.props;
     let value = undefined;
 
     if (Array.isArray(bonded)) {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => this.toPower(bonded, ringPool) + ' Power').join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${this.toPower(bonded[0], ringPool)} Power ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = this.toPower(staking_info.stakingLedger.active, ringPool) + ' Power';
     }
 
     return value
@@ -199,7 +208,7 @@ class AddressInfo extends React.PureComponent<Props> {
       staking_info.unlocking &&
       staking_info.unlocking.map(({ remainingBlocks, value }, index) => (
         <div key={index}>
-          {formatBalance(value)}
+          {formatKtonBalance(value)}
           <Icon
             name='info circle'
             data-tip

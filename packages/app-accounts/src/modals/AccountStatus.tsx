@@ -10,7 +10,7 @@ import { ComponentProps } from '../types';
 
 import React, { ReactComponentElement } from 'react';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
-import { withMulti, withObservable } from '@polkadot/ui-api';
+import { withMulti, withObservable, withApi } from '@polkadot/ui-api';
 import { Header, Popup, Grid } from 'semantic-ui-react'
 import { AddressInfo, AddressRowReverse, AddressRow, Button, Card, Icon } from '@polkadot/ui-app';
 import translate from '../translate';
@@ -25,12 +25,13 @@ import ChangePass from './ChangePass';
 import AccountsList from './AccountsList';
 
 import ChangeIcon from '../img/changeIcon.svg'
-
+import SwitchIcon from '../img/switchAccount.svg'
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   address: string,
-  changeAccountMain:() => void
+  changeAccountMain:() => void,
+  currentChain?: string
 };
 
 type State = {
@@ -60,17 +61,25 @@ class AccountStatus extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t, address } = this.props;
+    const { accounts, onStatusChange, t, address, currentChain } = this.props;
 
     return (
       <StyledWrapper>
         <div className="ui--AccountStatus-Box">
           <div className="ui--AccountStatus-Network">
-            <span>•</span><span>Trilobita</span>
+            <span>•</span><span>{currentChain}</span>
           </div>
+          <AddressRowReverse
+            isEditable={true}
+            value={address}
+          // withExplorer
+          // withIndex
+          // withTags
+          >
+          </AddressRowReverse>
+          {/* {PopupExampleFlowing(this.renderButtons(), address)} */}
 
-          {PopupExampleFlowing(this.renderButtons(), address)}
-
+          <div><img onClick={this.toggleAccount} className="switchBtn" src={SwitchIcon}/></div>
           {this.renderModals()}
         </div>
       </StyledWrapper>
@@ -263,7 +272,7 @@ const ButtonStyledWrapper = styled.div`
 
 const StyledWrapper = styled.div`
   background: #fff;
-  padding: 8px 2rem;
+  padding: 8px 0 8px 2rem;
   margin:0 -2rem;
   border-bottom:1px solid rgba(237,237,237,1);
   .ui--AccountStatus-Box{
@@ -275,6 +284,7 @@ const StyledWrapper = styled.div`
     color: #8231D8;
     font-size: 14px;
     font-weight: bold;
+    flex: 1;
     span{
       margin-right: .5rem;
     }
@@ -285,18 +295,15 @@ const StyledWrapper = styled.div`
   .accounts--Account-buttons{
     padding: 40px;
   }
+  .switchBtn{
+    margin-left: 16px;
+    cursor: pointer;
+  }
 `
 
 // @ts-ignore
 const PopupExampleFlowing = (Box, address: string) => (
-  <Popup basic position='bottom right' trigger={<div><AddressRowReverse
-    isEditable={true}
-    value={address}
-  // withExplorer
-  // withIndex
-  // withTags
-  >
-  </AddressRowReverse></div>} flowing hoverable>
+  <Popup basic position='bottom right' trigger={<div><img className="switchBtn" src={SwitchIcon}/></div>} flowing hoverable>
     {Box}
   </Popup>
 )
@@ -304,6 +311,6 @@ const PopupExampleFlowing = (Box, address: string) => (
 export default withMulti(
   AccountStatus,
   translate,
-  withObservable(accountObservable.subject, { propName: 'accounts' })
+  withObservable(accountObservable.subject, { propName: 'accounts' }),
+  withApi
 );
-

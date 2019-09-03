@@ -141,7 +141,7 @@ export default class Apps extends React.Component<Props, State> {
         setTimeout(() => {
           this.setState({
             isMenu: false,
-            isCollapsed: store.get('sidebar').isCollapsed,
+            // isCollapsed: store.get('sidebar').isCollapsed,
             transition: SideBarTransition.EXPANDED
           });
         }, SIDEBAR_TRANSITION_DURATION);

@@ -17,11 +17,12 @@ type Props = ApiProps & BareProps & {
   isError?: boolean,
   onChange: (value: StorageEntry) => void,
   options: DropdownOptions,
-  value: StorageEntry
+  value: StorageEntry,
+
 };
 
 class SelectKey extends React.PureComponent<Props> {
-  render () {
+  render() {
     const { api, className, isError, onChange, options, style, value } = this.props;
 
     if (!options.length) {
@@ -38,11 +39,23 @@ class SelectKey extends React.PureComponent<Props> {
         onChange={onChange}
         options={options}
         style={style}
-        transform={transform}
+        transform={this.transform}
         value={value.method}
         withLabel={false}
       />
     );
+  }
+
+  private transform = (method: string): StorageEntry => {
+    const { api, value } = this.props;
+
+    // We should not get to the fallback, but ... https://github.com/polkadot-js/apps/issues/1375
+    let result = api.query[value.section]
+      ? api.query[value.section][method] as any
+      : value;
+
+    result.section = value.section;
+    return result;
   }
 }
 

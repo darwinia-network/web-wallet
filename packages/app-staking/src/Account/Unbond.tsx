@@ -7,26 +7,62 @@ import { ApiProps } from '@polkadot/ui-api/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { AccountId, Option, StakingLedger } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
+import { AccountId, Option, StakingLedger, Compact } from '@polkadot/types';
+import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
+import styled from 'styled-components'
+import { withRouter } from 'react-router-dom';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 
 import translate from '../translate';
+
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    active_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
 
 type Props = I18nProps & ApiProps & {
   controllerId?: AccountId | null,
   isOpen: boolean,
   onClose: () => void,
-  staking_ledger?: Option<StakingLedger>
+  staking_ledger?: stakingLedgerType,
+  history: any
 };
 
 type State = {
   maxBalance?: BN
-  maxUnbond?: BN
+  maxUnbond?: BN,
+  type: string,
 };
 
+const StyleWrapper = styled.div`
+  margin: 0 0 1em;
+  line-height: 1.4285em;
+  position: absolute;
+  bottom: -41px;
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  a{
+    color: #fff;
+    text-decoration: underline;
+    margin-left: 10px;
+  }
+`
+
 class Unbond extends TxComponent<Props, State> {
-  state: State = {};
+  state: State = {
+    type: 'ring',
+  };
 
   componentDidUpdate (prevProps: Props) {
     const { staking_ledger } = this.props;
@@ -36,16 +72,23 @@ class Unbond extends TxComponent<Props, State> {
     }
   }
 
+  goDepositRing = () => {
+    const {history} = this.props
+    history.push('ringstaking');
+  }
+
   render () {
     const { controllerId, isOpen, onClose, t } = this.props;
-    const { maxUnbond } = this.state;
+    const { maxUnbond, type } = this.state;
     const canSubmit = !!maxUnbond && maxUnbond.gtn(0);
+    const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
     if (!isOpen) {
       return null;
     }
 
     return (
+      <>
       <Modal
         className='staking--Unbond'
         dimmer='inverted'
@@ -62,7 +105,8 @@ class Unbond extends TxComponent<Props, State> {
               isPrimary
               label={t('Unbond')}
               onClick={onClose}
-              params={[maxUnbond]}
+              onClose={onClose}
+              params={[{[typeKey]: maxUnbond && maxUnbond}]}
               tx='staking.unbond'
               ref={this.button}
             />
@@ -74,16 +118,21 @@ class Unbond extends TxComponent<Props, State> {
             />
           </Button.Group>
         </Modal.Actions>
+        <StyleWrapper>If you want to unlock the ring that set the lock limit <a href="javascript:void(0)" onClick={this.goDepositRing}>[ click here]</a></StyleWrapper>
       </Modal>
+      </>
     );
   }
 
   private renderContent () {
-    const { controllerId, t } = this.props;
-    const { maxBalance } = this.state;
+    const { controllerId,staking_ledger, t } = this.props;
+    const { maxBalance, type } = this.state;
 
     return (
       <>
+      <Modal.Header>
+          {t('Unbond funds')}
+        </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
           <InputAddress
             className='medium'
@@ -91,28 +140,37 @@ class Unbond extends TxComponent<Props, State> {
             isDisabled
             label={t('controller account')}
           />
-          <InputBalance
+          <InputNumber
             autoFocus
             className='medium'
             help={t('The maximum amount to unbond, this is adjusted using the bonded funds on the account.')}
             label={t('unbond amount')}
-            maxValue={maxBalance}
+            // maxValue={maxBalance}
+            placeholder={type === 'ring' ? formatBalance(staking_ledger.raw.active_ring.toBn()) : formatKtonBalance(staking_ledger.raw.active_kton.toBn())}
+            siValue='kton'
             onChange={this.onChangeValue}
+            onChangeType={this.onChangeType}
             onEnter={this.sendTx}
-            withMax
+            // withMax
+            isType
           />
         </Modal.Content>
       </>
     );
   }
 
+  private onChangeType = (type?: string) => {
+    this.nextState({ type });
+  }
+
   private nextState (newState: Partial<State>): void {
     this.setState((prevState: State): State => {
-      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance } = newState;
+      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance, type= prevState.type } = newState;
 
       return {
         maxUnbond,
-        maxBalance
+        maxBalance,
+        type
       };
     });
   }
@@ -124,11 +182,12 @@ class Unbond extends TxComponent<Props, State> {
       return;
     }
 
-    const { active: maxBalance } = staking_ledger.unwrap();
+    // const { active: maxBalance } = staking_ledger.raw;
 
-    this.nextState({
-      maxBalance
-    });
+    // this.nextState({
+
+    //   maxBalance
+    // });
   }
 
   private onChangeValue = (maxUnbond?: BN) => {
@@ -142,5 +201,6 @@ export default withMulti(
   withApi,
   withCalls<Props>(
     ['query.staking.ledger', { paramName: 'controllerId' }]
-  )
+  ),
+  withRouter
 );

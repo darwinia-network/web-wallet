@@ -8,7 +8,7 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton, Button } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 // import {DerivedRingBalances} from '../../app-darwina/types'
@@ -19,7 +19,7 @@ import Ring from './styles/icon/ring.svg'
 import Kton from './styles/icon/kton.svg'
 import { withRouter } from "react-router";
 
-import { StructAny, Vector, getTypeDef } from '@polkadot/types';
+import { StructAny, Vector, getTypeDef, Struct, Compact } from '@polkadot/types';
 import { noop } from 'rxjs';
 
 export interface DerivedRingBalances extends StructAny {
@@ -48,18 +48,35 @@ export type CryptoActiveType = {
 
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
-  ringBalances_freeBalance?: BN,
+  balances_freeBalance?: BN,
   kton_freeBalance?: BN,
-  ringBalances_locks?: Vector<any>,
-
+  balances_locks?: Vector<any>,
+  kton_locks?: Vector<any>,
   children?: React.ReactNode,
   staking_info?: DerivedStaking,
   value: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
+  staking_ledger: stakingLedgerType,
   transferCb?: (type: string) => void,
-  history: any
+  history: any,
+  controllerId?: string,
+  stashId?: string,
 };
+
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    active_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
 
 // <AddressInfo
 //   withBalance // default
@@ -72,7 +89,7 @@ type Props = BareProps & I18nProps & {
 // <AddressInfo withBalance={{ available: true }} />
 class AddressInfoDarwinia extends React.PureComponent<Props> {
   render() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
+    const { balances_all, kton_freeBalance, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
 
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
@@ -80,11 +97,12 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
         ? withBalance
         : undefined;
 
-        if (!balanceDisplay || !balances_all) {
-          return null;
-        }
+    if (!balanceDisplay || !balances_all) {
+      return null;
+    }
 
-    const ringBalance = this.renderRingBalances()
+    const ringBalance = this.renderQueryRingBalances()
+    const ktonBalance = this.renderQueryKtonBalances()
     return (
       <div className={className}>
         <div>
@@ -96,14 +114,13 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               <h1>RING</h1>
               {/* <p className='ui--value'>{formatBalance(ringBalances_freeBalance)}</p> */}
               <p className='ui--value'>{formatBalance(balances_all.freeBalance)}</p>
-              
             </div>
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p>availible:</p>
+              <p className="p-title">availible:</p>
               <p className="p-amount">{ringBalance[0]}</p>
-              <p><Button
+              <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
                 label={t('Transfer')}
@@ -111,16 +128,23 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p>bonded:</p>
+              <p className="p-title">bonded:</p>
               <p className="p-amount">{ringBalance[1]}</p>
-              <p><Button
+              <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
-                label={t('Deposit')}
+                label={t('Staking')}
                 onClick={() => {
                   history.push('ringstaking');
                 }}
               /></p>
+            </div>
+            <div className="ui--value-box">
+              <p className="p-title">unbonding:</p>
+              <p className="p-amount">{ringBalance[2]}</p>
+              <p className="p-btn">
+                {this.renderRedeemButton()}
+              </p>
             </div>
           </div>
         </div>
@@ -132,14 +156,14 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
             </div>
             <div>
               <h1>KTON</h1>
-              <p className='ui--value'>{formatBalance(kton_freeBalance)}</p>
+              <p className='ui--value'>{formatKtonBalance(kton_freeBalance)}</p>
             </div>
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p>availible:</p>
-              <p className="p-amount">{formatBalance(kton_freeBalance)}</p>
-              <p><Button
+              <p className="p-title">availible:</p>
+              <p className="p-amount">{ktonBalance[0]}</p>
+              <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
                 label={t('Transfer')}
@@ -147,9 +171,9 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p>bonded:</p>
-              <p className="p-amount">{balanceDisplay.bonded ? this.renderBonded(balanceDisplay.bonded) : '0'}</p>
-              <p><Button
+              <p className="p-title">bonded:</p>
+              <p className="p-amount">{ktonBalance[1]}</p>
+              <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
                 label={t('Staking')}
@@ -158,6 +182,13 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
                 }}
               /></p>
             </div>
+            <div className="ui--value-box">
+              <p className="p-title">unbonding:</p>
+              <p className="p-amount">{ktonBalance[2]}</p>
+              <p className="p-btn">
+                {this.renderRedeemButton()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -165,11 +196,10 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     )
   }
 
-
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, staking_info, t, withBalance = true } = this.props;
+    const { balances_all, staking_info, t, withBalance = true } = this.props;
     // console.log('balance', balances_all)
-    console.log('2222222', ringBalances_freeBalance && ringBalances_freeBalance.toString())
+    // console.log('2222222', ringBalances_freeBalance && ringBalances_freeBalance.toString())
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -227,28 +257,57 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     if (!balanceDisplay || !balances_all) {
       return null;
     }
-    
     return [formatBalance(balances_all.availableBalance), formatBalance(balances_all.lockedBalance)]
   }
 
-  private renderRingBalances1() {
-    const { ringBalances_locks, ringBalances_freeBalance = new BN(0) } = this.props;
+  private renderQueryRingBalances() {
+    const { balances_locks, balances_freeBalance = new BN(0), staking_ledger } = this.props;
 
-    // const type = getTypeDef(ringBalances_locks.Type);
-    
-    if(!ringBalances_locks) return [formatBalance(ringBalances_freeBalance), formatBalance(0)]
-    const values = ringBalances_locks.toArray().map((value) => ({
+
+
+    if (!balances_locks) return [formatBalance(balances_freeBalance), formatBalance(0)]
+    const values = balances_locks.toArray().map((value) => ({
       value
     }));
 
     let ringBonded = new BN(0);
-    values.forEach((value: { value: {amount:BN} }, _: number) => {
-      ringBonded = ringBonded.add(value.value.amount)
-    })
+    let ringUnbonding = new BN(0);
+    // values.forEach((value: { value: {amount:BN} }, _: number) => {
+    //   ringBonded = ringBonded.add(value.value.amount)
+    // })
 
-    if(ringBalances_freeBalance.lt(ringBonded)) return [formatBalance(0),formatBalance(ringBonded)]
-    return [formatBalance(ringBalances_freeBalance.sub(ringBonded)), formatBalance(ringBonded)]
+    if (staking_ledger && !staking_ledger.isNone) {
+      ringBonded = staking_ledger.raw.active_ring.toBn()
+      ringUnbonding = staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn())
+    }
+
+    // if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded), formatBalance(ringUnbonding)]
+    return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded), formatBalance(ringUnbonding)]
   }
+
+  private renderQueryKtonBalances() {
+    const { kton_locks, kton_freeBalance = new BN(0), staking_ledger } = this.props;
+
+    if (!kton_locks) return [formatKtonBalance(kton_freeBalance), formatKtonBalance(0)]
+    const values = kton_locks.toArray().map((value) => ({
+      value
+    }));
+
+    let ktonBonded = new BN(0);
+    let ktonUnbonding = new BN(0);
+    // values.forEach((value: { value: {amount:BN} }, _: number) => {
+    //   ktonBonded = ktonBonded.add(value.value.amount)
+    // })
+
+    if (staking_ledger && !staking_ledger.isNone) {
+      ktonBonded = staking_ledger.raw.active_kton.toBn()
+      ktonUnbonding = staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn())
+    }
+
+    // if (kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
+    return [formatKtonBalance(kton_freeBalance.sub(ktonBonded)), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
+  }
+
 
   // either true (filtered above already) or [own, ...all extras]
   private renderBonded(bonded: true | Array<BN>) {
@@ -259,12 +318,12 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0])} ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active);
     }
 
     return value
@@ -306,18 +365,16 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
   }
 
   private renderRedeemButton() {
-    const { staking_info, t } = this.props;
+    const { t, controllerId } = this.props;
 
-    return (staking_info && staking_info.controllerId && (
+    return (controllerId && (
       <TxButton
-        accountId={staking_info.controllerId.toString()}
-        className='iconButton'
-        icon='lock'
-        size='small'
-        isPrimary
+        accountId={controllerId.toString()}
+        isBasic={true}
+        isSecondary={true}
+        label={t('Withdraw')}
         key='unlock'
         params={[]}
-        tooltip={t('Redeem these funds')}
         tx='staking.withdrawUnbonded'
       />
     ));
@@ -380,11 +437,17 @@ export default withMulti(
         margin-bottom: 0;
         color: #98959F;
       }
+      .p-title{
+        flex-basis: 103px;
+      }
       .p-amount{
-        // flex: 1;
-        // text-align: left;
+        flex: 1;
+        text-align: left;
         color: #302B3C;
         font-size: 16px;
+      }
+      .p-btn{
+
       }
       button{
         width: 110px;
@@ -454,11 +517,11 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['derive.balances.all', { paramName: 'value' }],
-    // ['query.ringBalances.freeBalance', { paramName: 'value' }],
-
-    // ['query.ringBalances.locks', { paramName: 'value' }],
-
+    ['query.balances.freeBalance', { paramName: 'value' }],
+    ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
+    ['query.kton.locks', { paramName: 'value' }],
+    ['query.staking.ledger', { paramName: 'controllerId' }],
     ['derive.staking.info', { paramName: 'value' }]
   )
 );

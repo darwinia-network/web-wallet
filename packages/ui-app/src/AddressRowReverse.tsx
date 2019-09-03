@@ -140,7 +140,12 @@ class AddressRow extends React.PureComponent<Props, State> {
 
     return (
       <div className='ui--AddressRow-accountId'>
-        <span>{toShortAddress(address)}</span>
+        <CopyButton
+          isAddress
+          value={address}
+        >
+          <span>{toShortAddress(address)}</span>
+        </CopyButton>
       </div>
     );
   }

@@ -10,7 +10,8 @@ export default ([
   {
     Component: RingStaking,
     display: {
-      needsApi: []
+      needsAccounts: true,
+      needsApi: [] 
     },
     i18n: {
       defaultValue: 'Deposit Ring'

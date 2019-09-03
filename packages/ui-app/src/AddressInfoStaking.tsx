@@ -8,14 +8,18 @@ import { BareProps, I18nProps } from './types';
 import BN from 'bn.js';
 import React from 'react';
 import styled from 'styled-components';
-import { formatBalance, formatNumber } from '@polkadot/util';
+import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 
 import translate from './translate';
 import CryptoType from './CryptoType';
 import Label from './Label';
-import { StructAny } from '@polkadot/types';
+import { StructAny, Option, Struct, Compact } from '@polkadot/types';
+import powerbg from './styles/icon/power-bg.svg'
+import ringIcon from './styles/icon/ring.svg'
+import ktonIcon from './styles/icon/kton.svg'
+import Power from './Power'
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
@@ -29,7 +33,10 @@ export interface DerivedKtonBalances extends StructAny {
 
 export interface DerivedLockBalances extends StructAny {
   amount: BN;
+}
 
+export interface DerivedStakingLedger extends Compact {
+  amount: BN;
 }
 
 // true to display, or (for bonded) provided values [own, ...all extras]
@@ -46,16 +53,36 @@ export type CryptoActiveType = {
   nonce?: boolean
 };
 
+export type stakingLedgerType = {
+  raw: {
+    stash?: string,
+    total_power?: number,
+    active_power?: number,
+    total_ring?: Compact,
+    regular_ring?: Compact,
+    active_ring?: Compact,
+    total_kton?: Compact,
+    active_kton?: Compact
+  },
+  isNone: boolean
+}
+
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
   children?: React.ReactNode,
+  buttons?: React.ReactNode,
   staking_info?: DerivedStaking,
   value: string,
+  stashId?: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
   ringBalances_freeBalance?: BN,
   kton_freeBalance?: BN,
-  kton_locks: Array<any>
+  kton_locks: Array<any>,
+  balances_locks: Array<any>,
+  isReadyStaking: boolean,
+  staking_ledger: stakingLedgerType,
+  balances_freeBalance?: BN
 };
 
 // <AddressInfo
@@ -73,6 +100,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     return (
       <div className={className}>
+        {this.renderPower()}
         {this.renderBalances()}
         {this.renderExtended()}
         {children && (
@@ -84,8 +112,26 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
     );
   }
 
+  private renderPower() {
+    const { staking_ledger, value } = this.props
+
+    if (!staking_ledger) {
+      return null;
+    }
+
+    const power = formatBalance(staking_ledger.raw.active_power, false)
+    return (
+      <div className="power-box">
+        <h3>Power</h3>
+        {/* <p>{power}</p> */}
+        <p><Power ringAmount={staking_ledger.raw.active_ring} ktonAmount={staking_ledger.raw.active_kton} /></p>
+      </div>
+    );
+  }
+
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks } = this.props;
+    const { balances_all, ringBalances_freeBalance, balances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value } = this.props;
+
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -96,44 +142,76 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       return null;
     }
 
+    let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
-    console.log('kton_locks', kton_locks, kton_freeBalance)
-
-    if(kton_locks) {
-        kton_locks.forEach((item) => {
-          _ktonBalances_locks.add(item.amount)
-        })
+    
+    if (balances_locks) {
+      balances_locks.forEach((item) => {
+        _balances_locks = _balances_locks.add(item.amount)
+      })
     }
-    console.log(111,_ktonBalances_locks)
+    if (kton_locks) {
+      kton_locks.forEach((item) => {
+        _ktonBalances_locks = _ktonBalances_locks.add(item.amount)
+      })
+    }
+
+    if (!isReadyStaking) {
+      return (
+        <div className='column'>
+          <div className="ui--address-value">
+          <div className="balance-box">
+              <p>RING</p>
+              <h1>{formatBalance(balances_all.freeBalance)}</h1>
+            </div>
+            <div className="balance-box">
+              <p>KTON</p>
+              <h1>{formatKtonBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')}</h1>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (!staking_ledger || staking_ledger.isNone) {
+      return null;
+    }
+
     return (
       <div className='column'>
         <div className="ui--address-value">
-          <div>
-            <p>total</p>
-            <h1>{formatBalance(kton_freeBalance ? kton_freeBalance.toString() : '0')} KTON</h1>
-          </div>
-          <div>
-            <p>available</p>
-            <h1>{formatBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0')} KTON</h1>
-          </div>
-          <div>
-            <p>bonded</p>
-            <h1>{balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)} KTON</h1>
-          </div>
-          <div>
-            <p>unbonding</p>
-            <h1>{this.renderUnlocking()}</h1>
-          </div>
-          {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
-            <div>
-              <p>{t('redeemable')}</p>
-              <h1>{formatBalance(staking_info.redeemable)}
-                {this.renderRedeemButton()}</h1>
+          <div className="flex-box">
+            <div className="nominate-balance-box">
+              <div className="box-left">
+                <img src={ringIcon} />
+                <p>{t('ring')}</p>
+              </div>
+              <div className="box-right">
+                <p><label>Available</label><span>{formatBalance((balances_freeBalance && balances_locks) ? balances_freeBalance.sub(_balances_locks).toString() : '0', false)}</span></p>
+                <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="flex-box">
+            <div className="nominate-balance-box">
+              <div className="box-left">
+                <img src={ktonIcon} />
+                <p>{t('kton')}</p>
+              </div>
+              <div className="box-right">
+                <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
+                <p><label>Bonded</label><span>{formatKtonBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
+              </div>
+            </div>
+          </div>
+    
+          {buttons}
         </div>
       </div>
-    );
+    )
   }
 
   // either true (filtered above already) or [own, ...all extras]
@@ -145,12 +223,12 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       // Get the sum of all extra values (if available)
       const extras = bonded.filter((value, index) => index !== 0);
       const extra = extras.reduce((total, value) => total.add(value), new BN(0)).gtn(0)
-        ? `(+${extras.map((bonded) => formatBalance(bonded)).join(', ')})`
+        ? `(+${extras.map((bonded) => formatKtonBalance(bonded)).join(', ')})`
         : '';
 
-      value = `${formatBalance(bonded[0])} ${extra}`;
+      value = `${formatKtonBalance(bonded[0])} ${extra}`;
     } else if (staking_info && staking_info.stakingLedger && staking_info.accountId.eq(staking_info.stashId)) {
-      value = formatBalance(staking_info.stakingLedger.active);
+      value = formatKtonBalance(staking_info.stakingLedger.active);
     }
 
     return value || '0';
@@ -219,7 +297,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       staking_info.unlocking &&
       staking_info.unlocking.map(({ remainingBlocks, value }, index) => (
         <div key={index}>
-          {formatBalance(value)} KTON
+          {formatKtonBalance(value)}
           <Icon
             name='info circle'
             data-tip
@@ -241,12 +319,105 @@ export default withMulti(
     display: flex;
     flex: 1;
     justify-content: center;
+    background: #fff;
+    border: 1px solid #EDEDED;
+    align-items: center;
+    .power-box{
+      display: flex;
+      background: url(${powerbg}) no-repeat;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 175px;
+      height: 102px;
+      justify-content: center;
+      margin: 15px;
+      padding-left: 15px;
+      color: #fff;
+      h3,p{
+        color:#fff;
+        font-weight: bold;
+      }
+      h3{
+        font-size: 14px;
+      }
+      p{
+        font-size: 24px;
+      }
+    }
 
     .column {
       flex: 1;
       display: grid;
       opacity: 1;
-
+      .flex-box{
+        
+      }
+      .balance-box{
+        flex-basis: 205px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        h1{
+          font-size: 18px;
+          font-weight: bold;
+          margin-top: 0;
+          color: #302B3C;
+        }
+        p{
+          font-size: 14px;
+          font-weight: bold;
+          color: #302B3C;
+        }
+      }
+      .nominate-balance-box {
+        margin: 0 5px;
+        flex-basis: 332px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 30px;
+        background: #FBFBFB;
+        .box-left{
+          text-align: center;
+          margin-top: 5px;
+          
+          img{
+            width: 40px;
+          }
+          p{
+            text-transform: uppercase;
+            font-weight: bold;
+          }
+        }
+        .box-right{
+          flex: 1;
+          margin-left: 30px;
+          p {
+            display: flex;
+            flex-direction: row;
+            margin-bottom: 0.9rem;
+            label{
+              color: #98959F;
+              font-size: 12px;
+              flex-basis: 88px;
+              text-align: left;
+            }
+            span{
+              color: #5930DD;
+              font-size: 16px;
+              font-weight: bold;
+            }
+          }
+          p:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+      h1{
+        text-transform: none;
+      }
       label {
         grid-column:  1;
         padding-right: 0.5rem;
@@ -272,9 +443,12 @@ export default withMulti(
   `,
   translate,
   withCalls<Props>(
+    ['query.staking.ledger', { paramName: 'value' }],
     ['derive.balances.all', { paramName: 'value' }],
     ['derive.staking.info', { paramName: 'value' }],
-    ['query.kton.locks', { paramName: 'value' }],
-    ['query.kton.freeBalance', { paramName: 'value' }]
+    ['query.kton.locks', { paramName: 'stashId' }],
+    ['query.balances.locks', { paramName: 'stashId' }],
+    ['query.kton.freeBalance', { paramName: 'stashId' }],
+    ['query.balances.freeBalance', { paramName: 'stashId' }],
   )
 );
