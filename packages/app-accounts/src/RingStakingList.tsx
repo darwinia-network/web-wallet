@@ -77,13 +77,13 @@ class Overview extends React.PureComponent<Props, State> {
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
             <tbody>
-              <tr className='stakingTh'><td>Expire Date</td><td>Deposit</td>
+              <tr className='stakingTh'><td>Expire Date</td><td>Lock</td>
                 <td>Reward</td>
                 <td>Setting</td></tr>
               <tr>
                 <td colSpan={4} className="emptyTd">
                   <p className="no-items">No items</p>
-                  <ColorButton onClick={onStakingNow}>{t('Deposit Now')}</ColorButton>
+                  {/* <ColorButton onClick={onStakingNow}>{t('Deposit Now')}</ColorButton> */}
                 </td>
               </tr>
             </tbody>

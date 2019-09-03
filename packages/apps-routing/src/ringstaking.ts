@@ -14,7 +14,7 @@ export default ([
       needsApi: [] 
     },
     i18n: {
-      defaultValue: 'Deposit Ring'
+      defaultValue: 'Lock History'
     },
     icon: 'users',
     name: 'ringstaking'
