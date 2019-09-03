@@ -122,17 +122,17 @@ class Overview extends React.PureComponent<Props, State> {
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
         <div className='bannerBox'>
           <img className='ringStakingBanner' src={ringStakingBanner} alt="stake ring for precious kton" />
-          <div className='stakingBtn' onClick={() => {
+          {/* <div className='stakingBtn' onClick={() => {
             if(controllerId) {
               this.toggleBondExtra()
             } else {
               this.toggleBond()
             }
-            }}><p>Deposit now</p></div>
+            }}><p>Deposit now</p></div> */}
         </div>
 
         <div className={'titleRow'}>
-          Deposit Ring
+          Lock History
         </div>
 
         <RingStakingList account={controllerId} onStakingNow={() => {
