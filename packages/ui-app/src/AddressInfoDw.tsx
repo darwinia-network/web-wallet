@@ -64,7 +64,7 @@ class AddressInfoDw extends React.PureComponent<Props> {
       <div>
         
         <div className="ui--value-box">
-          <p>availible:</p>
+          <p>available:</p>
           {/* <p>{ringBalances_freeBalance && ringBalances_freeBalance.toString()}</p> */}
           
         </div>
