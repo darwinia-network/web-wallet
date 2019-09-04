@@ -560,12 +560,12 @@ class Account extends React.PureComponent<Props, State> {
         {!stashId && !isNominating && !isValidating && !sessionId && <div>
           <div className={'titleRow'}>Start a KTON staking</div>
           <div className="ui--string-now">
-            <h1>Start a KTON staking</h1>
+            <h1>Get Power for Validate</h1>
             <p>note: </p>
             <p>
-              1. Please make sure you have 2 available accounts. <a className="ui-addaccount" onClick={this.toggleCreate}>ADD ACCOUNT</a><br />
+              1. Please make sure you have 3 available accounts. <a className="ui-addaccount" onClick={this.toggleCreate}>ADD ACCOUNT</a><br />
               2. Please make sure that there are a few ring in the account as gas fee.<br />
-              3. After the kton is bonded,  you can apply to become a verifier or vote for the verifier and get earnings from it<br />
+              3. You need to stake some KTON or RING to get power for validate.<br />
             </p>
             <button
               onClick={this.toggleBondWithStep}
