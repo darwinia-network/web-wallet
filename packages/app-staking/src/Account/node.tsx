@@ -509,7 +509,7 @@ class Account extends React.PureComponent<Props, State> {
           </div>
           <div className="ui--string-now">
             <h1>Sorry！</h1>
-            <p>You are in the status of a node and cannot be a nominators for now.</p>
+            <p>You are in the status of a nominator and cannot be a node for now.</p>
             <p>Please replace the account and retry.</p>
           </div>
         </StyledWrapper>
