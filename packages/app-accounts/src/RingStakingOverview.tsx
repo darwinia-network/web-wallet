@@ -24,7 +24,7 @@ import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 import RingStaking from './modals/RingStaking'
 import ringStakingBtn from './img/stakingBtn.svg';
 import RingStakingList from './RingStakingList';
-const ringStakingBanner = require('./img/ringStakingBanner.jpg');
+const ringStakingBanner = require('./img/ringStakingBanner.png');
 
 import Bond from '@polkadot/app-staking/Account/Bond';
 import BondExtra from '@polkadot/app-staking/Account/BondExtra';
