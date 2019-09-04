@@ -89,7 +89,7 @@ export type stakingLedgerType = {
 // <AddressInfo withBalance={{ available: true }} />
 class AddressInfoDarwinia extends React.PureComponent<Props> {
   render() {
-    const { balances_all, kton_freeBalance, staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
+    const { balances_all, kton_freeBalance = new BN(0), staking_info, t, withBalance = true, children, className, transferCb, history } = this.props;
 
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
@@ -118,8 +118,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p className="p-title">availible:</p>
-              <p className="p-amount">{ringBalance[0]}</p>
+              <p className="p-title">available:</p>
+              <p className="p-amount">{formatBalance(balances_all.availableBalance)}</p>
               <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
@@ -161,8 +161,8 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p className="p-title">availible:</p>
-              <p className="p-amount">{ktonBalance[0]}</p>
+              <p className="p-title">available:</p>
+              <p className="p-amount">{this.renderQueryKtonAvailableBalance()}</p>
               <p className="p-btn"><Button
                 isBasic={true}
                 isSecondary={true}
@@ -283,6 +283,22 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
     // if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded), formatBalance(ringUnbonding)]
     return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded), formatBalance(ringUnbonding)]
+  }
+
+  private renderQueryKtonAvailableBalance(){
+    const { kton_locks, kton_freeBalance = new BN(0), staking_ledger } = this.props;
+
+    if (!kton_locks) return formatKtonBalance(kton_freeBalance)
+    const values = kton_locks.toArray().map((value) => ({
+      value
+    }));
+
+    let bondedBalance = new BN(0);
+    values.forEach((value: { value: {amount:BN} }, _: number) => {
+      bondedBalance = bondedBalance.add(value.value.amount)
+    })
+
+    return formatKtonBalance(kton_freeBalance.sub(bondedBalance))
   }
 
   private renderQueryKtonBalances() {
