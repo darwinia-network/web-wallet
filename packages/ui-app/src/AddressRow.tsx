@@ -168,7 +168,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     // const totalShare = new Bignumber(total ? total.toString() : 0);
     const div = myshare.div(new Bignumber(staking_ringPool.toString()).times(2)).times(100000)
     return (
-      <div className="myshare">My share: {div.toFixed(0).toString()}</div>
+      <div className="myshare">My share: {div.toFixed(0).toString()} Power</div>
     );
   }
 

@@ -218,6 +218,7 @@ class Validate extends TxComponent<Props, State> {
             label={t('reward commission')}
             onChange={this.onChangePayment}
             onEnter={this.sendTx}
+            rightLabel={'%'}
             isSi={false}
             value={
               validatorPayment
