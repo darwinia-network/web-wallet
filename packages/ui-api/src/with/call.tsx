@@ -26,7 +26,7 @@ const NOOP = () => {
   // ignore
 };
 
-export default function withCall<P extends ApiProps> (endpoint: string, { at, atProp, callOnResult, isMulti = false, params = [], paramName, paramPick, paramValid = false, propName, transform = echoTransform }: Options = {}): (Inner: React.ComponentType<ApiProps>) => React.ComponentType<any> {
+export default function withCall<P extends ApiProps>(endpoint: string, { at, atProp, callOnResult, isMulti = false, params = [], paramName, paramPick, paramValid = false, propName, transform = echoTransform }: Options = {}): (Inner: React.ComponentType<ApiProps>) => React.ComponentType<any> {
   return (Inner: React.ComponentType<ApiProps>): React.ComponentType<SubtractProps<P, ApiProps>> => {
     class WithPromise extends React.Component<P, State> {
       state: State = {
@@ -38,28 +38,40 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
       private isActive: boolean = false;
       private propName: string;
       private timerId: number = -1;
+      private checkTimer: NodeJS.Timeout | null = null;
+      private subscribeAmount: number = 0;
 
-      constructor (props: P) {
+      constructor(props: P) {
         super(props);
 
         const [, section, method] = endpoint.split('.');
-
-        this.propName = `${section}_${method}`;
+        this.propName = propName || `${section}_${method}`;
       }
 
-      componentDidUpdate (prevProps: any) {
+      componentDidUpdate(prevProps: any) {
         const oldParams = this.getParams(prevProps);
         const newParams = this.getParams(this.props);
 
         if (this.isActive && !isEqual(newParams, oldParams)) {
-          this
-            .subscribe(newParams)
-            .then(NOOP)
-            .catch(NOOP);
+          const checkSubscribeAmount = () => {
+            if (this.subscribeAmount > 0) {
+              this.checkTimer = setTimeout(() => {
+                checkSubscribeAmount()
+              }, 1000)
+            } else {
+              this
+                .subscribe(newParams)
+                .then(NOOP)
+                .catch(NOOP);
+            }
+          }
+
+          this.clearCheckTimer()
+          checkSubscribeAmount()
         }
       }
 
-      componentDidMount () {
+      componentDidMount() {
         this.isActive = true;
         this.timerId = window.setInterval(() => {
           const elapsed = Date.now() - (this.state.callUpdatedAt || 0);
@@ -76,7 +88,7 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
           .catch(NOOP);
       }
 
-      componentWillUnmount () {
+      componentWillUnmount() {
         this.isActive = false;
 
         this.unsubscribe()
@@ -88,13 +100,13 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         }
       }
 
-      private nextState (state: Partial<State>) {
+      private nextState(state: Partial<State>) {
         if (this.isActive) {
           this.setState(state as State);
         }
       }
 
-      private getParams (props: any): [boolean, Array<any>] {
+      private getParams(props: any): [boolean, Array<any>] {
         const paramValue = paramPick
           ? paramPick(props)
           : paramName
@@ -122,7 +134,7 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         return [true, values];
       }
 
-      private getApiMethod (newParams: Array<any>): ApiMethodInfo {
+      private getApiMethod(newParams: Array<any>): ApiMethodInfo {
         const { api } = this.props;
 
         if (endpoint === 'subscribe') {
@@ -160,7 +172,7 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         ];
       }
 
-      private async subscribe ([isValid, newParams]: [boolean, Array<any>]) {
+      private async subscribe([isValid, newParams]: [boolean, Array<any>]) {
         if (!isValid) {
           return;
         }
@@ -183,6 +195,7 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         }
 
         const [apiMethod, params, isSubscription] = info;
+
         const updateCb = (value?: any) =>
           this.triggerUpdate(this.props, value);
 
@@ -190,9 +203,11 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
 
         try {
           if (isSubscription) {
+            this.subscribeAmount++;
             this.destroy = isMulti
               ? await apiMethod.multi(params, updateCb)
               : await apiMethod(...params, updateCb);
+            this.subscribeAmount--;
           } else {
             updateCb(
               at
@@ -201,18 +216,28 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
             );
           }
         } catch (error) {
+          if (this.subscribeAmount > 0) {
+            this.subscribeAmount--;
+          }
           // console.error(endpoint, '::', error);
         }
       }
 
-      private async unsubscribe () {
+      private async clearCheckTimer() {
+        if (this.checkTimer) {
+          clearTimeout(this.checkTimer);
+          this.checkTimer = null;
+        }
+      }
+
+      private async unsubscribe() {
         if (this.destroy) {
-          this.destroy();
+          await this.destroy();
           this.destroy = undefined;
         }
       }
 
-      private triggerUpdate (props: any, value?: any): void {
+      private triggerUpdate(props: any, value?: any): void {
         try {
           const callResult = (props.transform || transform)(value);
 
@@ -232,8 +257,9 @@ export default function withCall<P extends ApiProps> (endpoint: string, { at, at
         }
       }
 
-      render () {
+      render() {
         const { callUpdated, callUpdatedAt, callResult } = this.state;
+
         const _props = {
           ...this.props,
           callUpdated,
