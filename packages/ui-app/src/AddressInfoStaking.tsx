@@ -82,7 +82,7 @@ type Props = BareProps & I18nProps & {
   balances_locks: Array<any>,
   isReadyStaking: boolean,
   staking_ledger: stakingLedgerType,
-  balances_freeBalance?: BN
+  balances_freeBalance_stash?: BN
 };
 
 // <AddressInfo
@@ -102,7 +102,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       <div className={className}>
         {this.renderPower()}
         {this.renderBalances()}
-        {this.renderExtended()}
+        {/* {this.renderExtended()} */}
         {children && (
           <div className='column'>
             {children}
@@ -130,7 +130,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderBalances() {
-    const { balances_all, ringBalances_freeBalance, balances_freeBalance, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value } = this.props;
+    const { ringBalances_freeBalance, balances_freeBalance_stash, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value ,stashId} = this.props;
 
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
@@ -138,16 +138,17 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
         ? withBalance
         : undefined;
 
-    if (!balanceDisplay || !balances_all) {
+    if (!balanceDisplay || !balances_freeBalance_stash) {
       return null;
     }
 
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
-    
+    console.log('staking_balance', stashId, balances_freeBalance_stash.toString(), balances_locks)
     if (balances_locks) {
       balances_locks.forEach((item) => {
         _balances_locks = _balances_locks.add(item.amount)
+        console.log('staking_balance - 1', balances_freeBalance_stash.toString(), item.amount.toString())
       })
     }
     if (kton_locks) {
@@ -162,7 +163,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
           <div className="ui--address-value">
           <div className="balance-box">
               <p>RING</p>
-              <h1>{formatBalance(balances_all.freeBalance)}</h1>
+              <h1>{formatBalance(balances_freeBalance_stash)}</h1>
             </div>
             <div className="balance-box">
               <p>KTON</p>
@@ -187,7 +188,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
                 <p>{t('ring')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatBalance((balances_freeBalance && balances_locks) ? balances_freeBalance.sub(_balances_locks).toString() : '0', false)}</span></p>
+                <p><label>Available</label><span>{formatBalance((balances_freeBalance_stash && balances_locks) ? balances_freeBalance_stash.sub(_balances_locks).toString() : '0', false)}</span></p>
                 <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
                 <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
               </div>
@@ -443,12 +444,13 @@ export default withMulti(
   `,
   translate,
   withCalls<Props>(
-    ['query.staking.ledger', { paramName: 'value' }],
-    ['derive.balances.all', { paramName: 'value' }],
-    ['derive.staking.info', { paramName: 'value' }],
+    
     ['query.kton.locks', { paramName: 'stashId' }],
     ['query.balances.locks', { paramName: 'stashId' }],
     ['query.kton.freeBalance', { paramName: 'stashId' }],
-    ['query.balances.freeBalance', { paramName: 'stashId' }],
+    ['query.balances.freeBalance', { paramName: 'stashId' ,propName: 'balances_freeBalance_stash'}],
+    ['query.staking.ledger', { paramName: 'value' }],
+    // ['derive.balances.all', { paramName: 'stashId' }],
+    // ['derive.staking.info', { paramName: 'value' }],
   )
 );
