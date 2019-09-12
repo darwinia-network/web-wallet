@@ -9,7 +9,7 @@ import { CalculateBalanceProps } from '../types';
 import BN from 'bn.js';
 import React from 'react';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Dropdown } from '@polkadot/ui-app';
-import { Option, StakingLedger, Balance, Compact } from '@polkadot/types';
+import { Option, StakingLedgers, Balance, Compact } from '@polkadot/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import { calcSignatureLength } from '@polkadot/ui-signer/Checks';
@@ -23,26 +23,13 @@ import { PowerTelemetry } from '@polkadot/ui-app'
 import translate from '../translate';
 import Bignumber from 'bignumber.js'
 
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
-
 type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   accountId: string,
   controllerId: string,
   isOpen: boolean,
   onClose: () => void,
   onSuccess?: (status: SubmittableResult) => void,
-  staking_ledger?: stakingLedgerType,
+  staking_ledger?: StakingLedgers,
   kton_freeBalance: BN,
   kton_locks: Array<any>,
   stashId?: string,
@@ -163,12 +150,10 @@ class BondExtra extends TxComponent<Props, State> {
 
     let ktonBonded = new BN(0);
     let ringBonded = new BN(0);
-
-    if (staking_ledger && !staking_ledger.isNone) {
-      ktonBonded = staking_ledger.raw.active_kton.toBn()
-      ringBonded = staking_ledger.raw.active_ring.toBn()
+    if (staking_ledger && !staking_ledger.isEmpty) {
+      ktonBonded = staking_ledger.active_kton.toBn()
+      ringBonded = staking_ledger.active_ring.toBn()
     }
-
 
     return <PowerTelemetry
       ringAmount={ringBonded as Balance}
@@ -401,7 +386,8 @@ export default withMulti(
     ['query.balances.locks', { paramName: 'accountId' }],
     ['query.balances.freeBalance', { paramName: 'accountId' }],
     ['query.system.accountNonce', { paramName: 'accountId' }],
-    ['query.staking.ledger', { paramName: 'controllerId' }],
+    ['query.staking.ledger', { paramName: 'controllerId' , transform: (value: Option<StakingLedgers>) =>
+    value.unwrapOr(null)}],
     ['query.kton.locks', { paramName: 'accountId' }],
     ['query.kton.freeBalance', { paramName: 'accountId' }],
     'query.staking.ringPool',

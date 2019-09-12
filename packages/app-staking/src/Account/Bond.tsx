@@ -54,7 +54,6 @@ type Props = I18nProps & ApiProps & CalculateBalanceProps & {
   balances_freeBalance?: BN,
   staking_ringPool?: Balance,
   staking_ktonPool?: Balance,
-  staking_ledger?: stakingLedgerType
 };
 
 type State = {
@@ -191,16 +190,11 @@ class Bond extends TxComponent<Props, State> {
   }
 
   getPowerAmount = () => {
-    const { staking_ringPool, staking_ledger, staking_ktonPool } = this.props
+    const { staking_ringPool, staking_ktonPool } = this.props
     const { type, bondValue = ZERO } = this.state
 
     let ktonBonded = new BN(0);
     let ringBonded = new BN(0);
-
-    if (staking_ledger && !staking_ledger.isNone) {
-      ktonBonded = staking_ledger.raw.active_kton.toBn()
-      ringBonded = staking_ledger.raw.active_ring.toBn()
-    }
 
     return <PowerTelemetry
       ringAmount={ringBonded as Balance}
@@ -218,7 +212,6 @@ class Bond extends TxComponent<Props, State> {
     const hasValue = !!bondValue && bondValue.gtn(0);
 
     const canSubmit = hasValue && !controllerError && !!controllerId && (lockLimit && type === 'ring' ? accept : true);
-    // console.log('canSubmit', hasValue, controllerError, controllerId, lockLimit, type, accept)
     if (!isOpen) {
       return null;
     }

@@ -18,9 +18,7 @@ import Label from './Label';
 import Ring from './styles/icon/ring.svg'
 import Kton from './styles/icon/kton.svg'
 import { withRouter } from "react-router";
-
-import { StructAny, Vector, getTypeDef, Struct, Compact } from '@polkadot/types';
-import { noop } from 'rxjs';
+import { StructAny, Vector, Compact, StakingLedgers, Option } from '@polkadot/types';
 
 export interface DerivedRingBalances extends StructAny {
   freeBalance: BN;
@@ -57,7 +55,7 @@ type Props = BareProps & I18nProps & {
   value: string,
   withBalance?: boolean | BalanceActiveType,
   withExtended?: boolean | CryptoActiveType,
-  staking_ledger: stakingLedgerType,
+  staking_ledger: StakingLedgers,
   transferCb?: (type: string) => void,
   history: any,
   controllerId?: string,
@@ -276,17 +274,17 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     //   ringBonded = ringBonded.add(value.value.amount)
     // })
 
-    if (staking_ledger && !staking_ledger.isNone) {
-      ringBonded = staking_ledger.raw.active_ring.toBn()
-      ringUnbonding = staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn())
+    if (staking_ledger && !staking_ledger.isEmpty) {
+      ringBonded = staking_ledger.active_ring.toBn()
+      ringUnbonding = staking_ledger.total_ring.toBn().sub(staking_ledger.active_ring.toBn())
     }
 
     // if (balances_freeBalance.lt(ringBonded)) return [formatBalance(0), formatBalance(ringBonded), formatBalance(ringUnbonding)]
     return [formatBalance(balances_freeBalance.sub(ringBonded)), formatBalance(ringBonded), formatBalance(ringUnbonding)]
   }
 
-  private renderQueryKtonAvailableBalance(){
-    const { kton_locks, kton_freeBalance = new BN(0), staking_ledger } = this.props;
+  private renderQueryKtonAvailableBalance() {
+    const { kton_locks, kton_freeBalance = new BN(0) } = this.props;
 
     if (!kton_locks) return formatKtonBalance(kton_freeBalance)
     const values = kton_locks.toArray().map((value) => ({
@@ -294,7 +292,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     }));
 
     let bondedBalance = new BN(0);
-    values.forEach((value: { value: {amount:BN} }, _: number) => {
+    values.forEach((value: { value: { amount: BN } }, _: number) => {
       bondedBalance = bondedBalance.add(value.value.amount)
     })
 
@@ -315,15 +313,14 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
     //   ktonBonded = ktonBonded.add(value.value.amount)
     // })
 
-    if (staking_ledger && !staking_ledger.isNone) {
-      ktonBonded = staking_ledger.raw.active_kton.toBn()
-      ktonUnbonding = staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn())
+    if (staking_ledger && !staking_ledger.isEmpty) {
+      ktonBonded = staking_ledger.active_kton.toBn()
+      ktonUnbonding = staking_ledger.total_kton.toBn().sub(staking_ledger.active_kton.toBn())
     }
 
     // if (kton_freeBalance.lt(ktonBonded)) return [formatKtonBalance(0), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
     return [formatKtonBalance(kton_freeBalance.sub(ktonBonded)), formatKtonBalance(ktonBonded), formatKtonBalance(ktonUnbonding)]
   }
-
 
   // either true (filtered above already) or [own, ...all extras]
   private renderBonded(bonded: true | Array<BN>) {
@@ -537,7 +534,10 @@ export default withMulti(
     ['query.balances.locks', { paramName: 'value' }],
     ['query.kton.freeBalance', { paramName: 'value' }],
     ['query.kton.locks', { paramName: 'value' }],
-    ['query.staking.ledger', { paramName: 'controllerId' }],
+    ['query.staking.ledger', {
+      paramName: 'controllerId', transform: (value: Option<StakingLedgers>) =>
+        value.unwrapOr(null)
+    }],
     ['derive.staking.info', { paramName: 'value' }]
   )
 );

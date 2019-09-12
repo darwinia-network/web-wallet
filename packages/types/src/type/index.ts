@@ -70,6 +70,7 @@ export { default as Signature, Ed25519Signature, Sr25519Signature } from './Sign
 export { default as SignaturePayload, SignaturePayloadRaw } from './SignaturePayload';
 export { default as SlotRange } from './SlotRange';
 export { default as StakingLedger } from './StakingLedger';
+export { default as StakingLedgers } from './Ledger';
 export { default as StoredPendingChange } from './StoredPendingChange';
 export { default as SubId } from './SubId';
 export { default as TreasuryProposal } from './TreasuryProposal';

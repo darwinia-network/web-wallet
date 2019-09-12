@@ -35,7 +35,7 @@ const wsEndpoint = process.env.WS_URL || settings.apiUrl || undefined;
 
 const DARWINIA_TYPES = {
   "EpochDuration": "u64",
-  "EraIndex": "u32",
+  // "EraIndex": "u32",
   "RingBalanceOf": "u128",
   "KtonBalanceOf": "u128",
   "ExtendedBalance": "u128",
@@ -49,28 +49,28 @@ const DARWINIA_TYPES = {
       "Kton": "KtonBalanceOf"
     }
   },
-  "TimeDepositItem": {
-    "value": "Compact<RingBalanceOf>",
-    "start_time": "Compact<Moment>",
-    "expire_time": "Compact<Moment>"
-  },
-  "UnlockChunk": {
-    "value": "StakingBalance",
-    "era": "Compact<EraIndex>",
-    "is_time_deposit": "bool"
-  },
-  "StakingLedgers": {
-    "stash": "AccountId",
-    "total_ring": "Compact<RingBalanceOf>",
-    "total_deposit_ring": "Compact<RingBalanceOf>",
+  // "TimeDepositItem": {
+  //   "value": "Compact<RingBalanceOf>",
+  //   "start_time": "Compact<Moment>",
+  //   "expire_time": "Compact<Moment>"
+  // },
+  // "UnlockChunk": {
+  //   "value": "StakingBalance",
+  //   "era": "Compact<EraIndex>",
+  //   "is_time_deposit": "bool"
+  // },
+  // "StakingLedgers": {
+  //   "stash": "AccountId",
+  //   "total_ring": "Compact<RingBalanceOf>",
+  //   "total_deposit_ring": "Compact<RingBalanceOf>",
     
-    "active_ring": "Compact<RingBalanceOf>",
-    "active_deposit_ring": "Compact<RingBalanceOf>",
-    "total_kton": "Compact<KtonBalanceOf>",
-    "active_kton": "Compact<KtonBalanceOf>",
-    "deposit_items": "Vec<TimeDepositItem>",
-    "unlocking": "Vec<UnlockChunk>"
-  },
+  //   "active_ring": "Compact<RingBalanceOf>",
+  //   "active_deposit_ring": "Compact<RingBalanceOf>",
+  //   "total_kton": "Compact<KtonBalanceOf>",
+  //   "active_kton": "Compact<KtonBalanceOf>",
+  //   "deposit_items": "Vec<TimeDepositItem>",
+  //   "unlocking": "Vec<UnlockChunk>"
+  // },
   "IndividualExpo": {
     "who": "AccountId",
     "value": "ExtendedBalance"
@@ -95,9 +95,7 @@ try {
   const names = Object.keys(types);
 
   if (names.length) {
-    console.log(getTypeRegistry(),1)
     getTypeRegistry().register(types);
-    console.log(getTypeRegistry(),1)
     console.log('Type registration:', names.join(', '));
   }
 } catch (error) {
