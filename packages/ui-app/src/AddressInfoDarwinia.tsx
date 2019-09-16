@@ -62,20 +62,6 @@ type Props = BareProps & I18nProps & {
   stashId?: string,
 };
 
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    active_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
-
 // <AddressInfo
 //   withBalance // default
 //   withExtended={true} // optional
@@ -425,15 +411,15 @@ export default withMulti(
     display: flex;
     flex: 1;
     justify-content: center;
+    flex-wrap: wrap;
+    margin: -10px;
     &>div{
       flex: 1;
       border: 1px solid #EDEDED;
       background: #fff;
+      margin:10px;
+      min-width: 430px;
     }
-    &>div+div{
-      margin-left: 20px;
-    }
-
     .ui--value{
       font-weight: bold;
     }
@@ -523,6 +509,26 @@ export default withMulti(
 
         i.info.circle.icon {
           margin-left: .3em;
+        }
+      }
+    }
+
+    @media (max-width: 767px) {
+      .allvalueBox {
+        padding: 10px;
+      }
+      
+      .info-bottom {
+        padding: 23px 10px;
+      }
+
+      &>div{
+        min-width: 320px;
+      }
+
+      .ui--value-box {
+        button{
+          width: 90px;
         }
       }
     }

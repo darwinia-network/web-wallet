@@ -46,6 +46,7 @@ const Toggle = styled.img`
   top: 0px;
   transition: opacity 0.2s ease-in, top 0.2s ease-in;
   width: 2.8rem;
+  height: 2.8rem;
 
   &.delayed {
     transition-delay: 0.4s;
@@ -88,12 +89,12 @@ class SideBar extends React.PureComponent<Props, State> {
         onUpdate={handleResize}
         className={classes('apps-SideBar-Wrapper', false ? 'collapsed' : 'expanded')}
       >
-        <Toggle
-          alt='logo'
-          className={menuOpen ? 'closed' : 'open delayed'}
-          onClick={toggleMenu}
-          src={logo}
-        />
+          <Toggle
+            alt='logo'
+            className={menuOpen ? 'closed' : 'open delayed'}
+            onClick={toggleMenu}
+            src={logo}
+          />
         {this.renderModals()}
         <div className='apps--SideBar'>
           <Menu
@@ -107,7 +108,7 @@ class SideBar extends React.PureComponent<Props, State> {
               {/* {this.renderGithub()}
               {this.renderWiki()} */}
               {/* <Menu.Divider hidden /> */}
-             
+
               {/* {
                 isCollapsed
                   ? undefined
@@ -133,7 +134,7 @@ class SideBar extends React.PureComponent<Props, State> {
     return (
       <Responsive
         minWidth={SIDEBAR_MENU_THRESHOLD}
-        className={`apps--SideBar-collapse ${false ? 'collapsed' : 'expanded'}`}
+        className={`apps--SideBar-collapse ${isCollapsed ? 'collapsed' : 'expanded'}`}
       >
         <Button
           icon={`angle double ${isCollapsed ? 'right' : 'left'}`}
@@ -180,7 +181,7 @@ class SideBar extends React.PureComponent<Props, State> {
     const { handleResize, isCollapsed } = this.props;
 
     return routing.routes.map((route, index) => {
-      
+
       return route
         ? (
           <Item
@@ -201,7 +202,7 @@ class SideBar extends React.PureComponent<Props, State> {
           // />
           <div className="apps-SideBar-Split"></div>
         )
-        });
+    });
   }
 
   private renderGithub() {

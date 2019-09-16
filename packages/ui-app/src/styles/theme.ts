@@ -11,10 +11,10 @@ export const primaryColor = theme('theme', {
 
 export const logoBackground = theme('theme', {
   substrate: '#333',
-  polkadot: 'none'
+  polkadot: '#333'
 });
 
 export const logoPadding = theme('theme', {
   substrate: '4px',
-  polkadot: '0px'
+  polkadot: '8px'
 });

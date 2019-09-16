@@ -31,3 +31,10 @@ br+.ui--Button-Group {
   background:linear-gradient(315deg,rgba(254,56,118,1) 0%,rgba(124,48,221,1) 71%,rgba(58,48,221,1) 100%)!important;
   border-radius:2px;
 }
+
+@media (max-width: 767px) {
+  .ui.colorButton.button{
+    font-size: 13px;
+    padding: .58571429em 1em .58571429em;
+  }
+}

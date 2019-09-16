@@ -62,7 +62,7 @@ class Overview extends React.PureComponent<Props, State> {
 
   render() {
     const { account, staking_ledger, t } = this.props;
-    let ledger = staking_ledger 
+    let ledger = staking_ledger
 
     if (!ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
       return (
@@ -214,6 +214,20 @@ const Wrapper = styled.div`
       .emptyTd{
         padding: 100px 0!important;
         background: #fff!important;
+      }
+    }
+    @media (max-width: 767px) {
+      .stakingTable{
+        tr{
+          td{
+            text-align: center;
+            padding: 15px 2px;
+          }
+        }
+
+        .stakingRange{
+          font-size: 12px;
+        }
       }
     }
 `

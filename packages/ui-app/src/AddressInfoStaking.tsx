@@ -97,7 +97,6 @@ type Props = BareProps & I18nProps & {
 class AddressInfoAccountList extends React.PureComponent<Props> {
   render() {
     const { children, className, staking_ledger } = this.props;
-    console.log('staking_ledger', staking_ledger)
     return (
       <div className={className}>
         {this.renderPower()}
@@ -142,11 +141,9 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
-    console.log('staking_balance', stashId, balances_freeBalance_stash.toString(), balances_locks)
     if (balances_locks) {
       balances_locks.forEach((item) => {
         _balances_locks = _balances_locks.add(item.amount)
-        console.log('staking_balance - 1', balances_freeBalance_stash.toString(), item.amount.toString())
       })
     }
     if (kton_locks) {
@@ -436,6 +433,20 @@ export default withMulti(
 
         i.info.circle.icon {
           margin-left: .3em;
+        }
+      }
+    }
+
+    @media (max-width: 767px) {
+      flex-wrap: wrap;
+      .ui--address-value{
+        flex-wrap: wrap;
+      }
+
+      .column {
+        .nominate-balance-box {
+          padding: 10px;
+          margin: 5px 0;
         }
       }
     }

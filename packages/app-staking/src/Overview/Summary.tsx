@@ -60,6 +60,10 @@ const StyledWrapper = styled.div`
   padding: 55px;
   border-radius:2px;
   border:1px solid rgba(237,237,237,1);
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 `
 
 
