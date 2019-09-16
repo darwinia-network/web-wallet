@@ -7,28 +7,13 @@ import { ApiProps } from '@polkadot/ui-api/types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { AccountId, Option, StakingLedger, Compact, StakingLedgers } from '@polkadot/types';
+import { AccountId, Option, StakingLedgers } from '@polkadot/types';
 import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent } from '@polkadot/ui-app';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import styled from 'styled-components'
 import { withRouter } from 'react-router-dom';
 import { formatBalance, formatKtonBalance } from '@polkadot/util';
-
 import translate from '../translate';
-
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    active_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
 
 type Props = I18nProps & ApiProps & {
   controllerId?: AccountId | null,
@@ -131,7 +116,7 @@ class Unbond extends TxComponent<Props, State> {
     if (!staking_ledger || staking_ledger.isEmpty) {
       return;
     }
-    
+
     return (
       <>
         <Modal.Header>
