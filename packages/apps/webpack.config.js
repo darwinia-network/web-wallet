@@ -172,13 +172,15 @@ function createWebpack ({ alias = {}, context, name = 'index' }) {
         'process.env': {
           NODE_ENV: JSON.stringify(ENV),
           VERSION: JSON.stringify(pkgJson.version),
+          
           WS_URL: JSON.stringify(process.env.WS_URL)
         }
       }),
       new HtmlWebpackPlugin({
         inject: true,
         template: path.join(context, `${hasPublic ? 'public/' : ''}${name}.html`),
-        PAGE_TITLE: 'Darwinia Wallet'
+        PAGE_TITLE: 'Darwinia Wallet',
+        GIT_VERSION: (new Date()).toUTCString(),
       }),
       new webpack.optimize.SplitChunksPlugin(),
       new MiniCssExtractPlugin({
