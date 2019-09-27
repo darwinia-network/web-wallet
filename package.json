@@ -17,8 +17,6 @@
     "@polkadot/rpc-core":"0.82.0-beta.34",
     "@polkadot/api-derive":"0.82.0-beta.34",
     "@polkadot/rpc-provider":"0.82.0-beta.34",
-
-
     "@polkadot/util-crypto": "0.94.0-beta.4",
     "@types/styled-components": "4.1.8",
     "babel-core": "^7.0.0-bridge.0",
@@ -33,7 +31,8 @@
     "postinstall": "polkadot-dev-yarn-only",
     "test": "echo \"skipping tests\"",
     "vanitygen": "node packages/app-accounts/scripts/vanitygen.js",
-    "start": "cd packages/apps && webpack --config webpack.config.js"
+    "start": "cd packages/apps && webpack --config webpack.config.js",
+    "i18n-extract": "i18next --config i18next-parser.config.js"
   },
   "dependencies": {
     "dayjs": "^1.8.15"
@@ -44,6 +43,8 @@
     "@polkadot/dev-react": "^0.30.0-beta.16",
     "@polkadot/ts": "^0.1.60",
     "autoprefixer": "^9.5.1",
+    "i18next-parser": "1.0.0-beta34",
+    "acorn-jsx": "^4.1.1",
     "empty": "^0.10.1",
     "gh-pages": "^2.0.1",
     "html-loader": "^0.5.5",
