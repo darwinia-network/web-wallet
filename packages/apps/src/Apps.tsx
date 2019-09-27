@@ -55,10 +55,11 @@ export default class Apps extends React.Component<Props, State> {
     const state = store.get('sidebar') || {};
 
     this.state = {
-      isCollapsed: false,
+      
       menuOpen: false,
       transition: SideBarTransition.COLLAPSED,
-      ...state
+      ...state,
+      isCollapsed: false,
     };
   }
 
