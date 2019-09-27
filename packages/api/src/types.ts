@@ -298,7 +298,7 @@ export interface Signer {
   /**
    * @description signs an extrinsic payload from a serialized form
    */
-  signPayload (payload: SignerPayload): Promise<SignerResult>;
+  signPayload? (payload: SignerPayload): Promise<SignerResult>;
 
   /**
    * @description Receives an update for the extrinsic signed by a `signer.sign`
