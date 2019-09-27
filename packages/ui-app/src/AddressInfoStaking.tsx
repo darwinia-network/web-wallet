@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
-
+import { ZERO_STAKING_LEDGER } from '@polkadot/app-staking/constants'
 import translate from './translate';
 import CryptoType from './CryptoType';
 import Label from './Label';
@@ -62,7 +62,7 @@ type Props = BareProps & I18nProps & {
 // Additionally to tweak the display, i.e. only available
 //
 // <AddressInfo withBalance={{ available: true }} />
-class AddressInfoAccountList extends React.PureComponent<Props> {
+class AddressInfoStaking extends React.PureComponent<Props> {
   render() {
     const { children, className, staking_ledger } = this.props;
     return (
@@ -80,10 +80,13 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderPower() {
-    const { staking_ledger } = this.props
-
-    if (!staking_ledger || staking_ledger.isEmpty) {
-      return null;
+    let { staking_ledger = ZERO_STAKING_LEDGER } = this.props
+    
+    if(!staking_ledger || staking_ledger.isEmpty){
+        return (<div className="power-box">
+        <h3>Power</h3>
+        <p><Power ringAmount={new BN(0)} ktonAmount={new BN(0)} /></p>
+      </div>);
     }
 
     return (
@@ -278,7 +281,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 }
 
 export default withMulti(
-  styled(AddressInfoAccountList)`
+  styled(AddressInfoStaking)`
     align-items: flex-start;
     display: flex;
     flex: 1;
