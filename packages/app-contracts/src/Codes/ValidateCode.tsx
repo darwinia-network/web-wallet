@@ -6,7 +6,9 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 
 import React from 'react';
-import { Option, PrefabWasmModule } from '@polkadot/types';
+import { Option } from '@polkadot/types';
+import { PrefabWasmModule } from '@polkadot/types/srml/contracts/types';
+
 import { withCalls } from '@polkadot/ui-api';
 import { InfoForInput } from '@polkadot/ui-app';
 import { isHex } from '@polkadot/util';

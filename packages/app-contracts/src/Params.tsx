@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { ContractABIFn$Arg } from '@polkadot/api-contract/types';
+import { ContractABIFnArg } from '@polkadot/api-contract/types';
 import { RawParams } from '@polkadot/ui-params/types';
 
 import React from 'react';
@@ -11,7 +11,7 @@ import { getTypeDef, TypeDef } from '@polkadot/types';
 
 type Props = {
   isDisabled?: boolean,
-  params?: Array<ContractABIFn$Arg>,
+  params?: Array<ContractABIFnArg>,
   onChange: (values: Array<any>) => void,
   onEnter?: () => void
 };
