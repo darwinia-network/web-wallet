@@ -179,7 +179,7 @@ class Overview extends React.PureComponent<Props, State> {
         {AccountMain && <AccountStatus onStatusChange={this._wrapperStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
 
         {AccountMain && <div className={'titleRow'}>
-          Darwinia asset
+          {t('Darwinia asset')}
         </div>}
 
         {AccountMain && <AccountDarwinia

@@ -72,6 +72,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
           <AddressRowReverse
             isEditable={true}
             value={address}
+            
           // withExplorer
           // withIndex
           // withTags

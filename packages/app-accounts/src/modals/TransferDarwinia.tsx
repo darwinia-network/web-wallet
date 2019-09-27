@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { ApiProps } from '@polkadot/ui-api/types';
-import { DerivedFees } from '@polkadot/api-derive/types';
+import { DerivedFees, DerivedKtonBalances } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 
@@ -12,7 +12,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { Index } from '@polkadot/types';
 import { Button, InputAddress, InputBalance, Modal, TxButton, media } from '@polkadot/ui-app';
-import { Available } from '@polkadot/ui-reactive';
+import { Available, AvailableKton } from '@polkadot/ui-reactive';
 import Checks, { calcSignatureLength } from '@polkadot/ui-signer/Checks';
 import { withApi, withCalls, withMulti } from '@polkadot/ui-api';
 import { ZERO_FEES } from '@polkadot/ui-signer/Checks/constants';
@@ -26,7 +26,11 @@ type Props = ApiProps & I18nProps & {
   senderId?: string,
   system_accountNonce?: BN,
   type: 'balances' | 'kton',
-  kton_locks: Array<BN>, balances_locks: Array<BN>,  kton_freeBalance: BN, balances_freeBalance: BN,
+  kton_locks: Array<BN>, 
+  balances_locks: Array<BN>,  
+  kton_freeBalance: BN, 
+  balances_freeBalance: BN,
+  kton_all?: DerivedKtonBalances
 };
 
 type State = {
@@ -86,7 +90,6 @@ class TransferDarwinia extends React.PureComponent<Props> {
   componentDidUpdate(prevProps: Props, prevState: State) {
     const { balances_fees } = this.props;
     const { extrinsic, recipientId, senderId } = this.state;
-    console.log('balances_fees', balances_fees)
     const hasLengthChanged = ((extrinsic && extrinsic.encodedLength) || 0) !== ((prevState.extrinsic && prevState.extrinsic.encodedLength) || 0);
 
     if ((recipientId && prevState.recipientId !== recipientId) ||
@@ -176,7 +179,10 @@ class TransferDarwinia extends React.PureComponent<Props> {
             onChange={this.onChangeFrom}
             type='account'
           />
-          <div className='balance'><Available label={available} params={senderId}/></div>
+          <div className='balance'>
+            <Available label={available} params={senderId}/>
+            <AvailableKton label={available} params={senderId}/>
+          </div>
           <InputAddress
             defaultValue={propRecipientId}
             help={t('Select a contact or paste the address you want to send funds to.')}
@@ -185,7 +191,10 @@ class TransferDarwinia extends React.PureComponent<Props> {
             onChange={this.onChangeTo}
             type='all'
           />
-          <div className='balance'><Available label={available} params={recipientId} /></div>
+          <div className='balance'>
+            <Available label={available} params={recipientId} />
+            <AvailableKton label={available} params={recipientId}/>
+          </div>
           <InputBalance
             help={t('Type the amount you want to transfer. Note that you can select the unit on the right e.g sending 1 mili is equivalent to sending 0.001.')}
             isError={!hasAvailable}
@@ -195,12 +204,12 @@ class TransferDarwinia extends React.PureComponent<Props> {
             siValue={type}
             withMax
           />
-          {/* <Checks
+          <Checks
             accountId={senderId}
             extrinsic={extrinsic}
             isSendable
             onChange={this.onChangeFees}
-          /> */}
+          />
         </Wrapper>
       </Modal.Content>
     );
@@ -223,7 +232,7 @@ class TransferDarwinia extends React.PureComponent<Props> {
   }
 
   private setMaxBalance = async () => {
-    const { api, balances_fees = ZERO_FEES, kton_locks, balances_locks,  kton_freeBalance, balances_freeBalance, type } = this.props;
+    const { api, balances_fees = ZERO_FEES, kton_locks, balances_locks,  kton_freeBalance, balances_freeBalance, type , kton_all} = this.props;
     const { senderId, recipientId } = this.state;
 
     if (!senderId || !recipientId) {
@@ -235,9 +244,9 @@ class TransferDarwinia extends React.PureComponent<Props> {
     // FIXME The any casts here are irritating, but they are basically caused by the derive
     // not really returning an actual `class implements Codec`
     // (if casting to DerivedBalance it would be `as any as DerivedBalance`)
-    const accountNonce = await api.query.system.accountNonce(senderId) as Index;
-    const senderBalance = (await api.derive.balances.all(senderId) as any).availableBalance;
-    const recipientBalance = (await api.derive.balances.all(recipientId) as any).availableBalance;
+    const accountNonce = await api.query.system.accountNonce<Index>(senderId);
+    const senderBalance = (await api.derive.balances.all(senderId)).availableBalance;
+    const recipientBalance = (await api.derive.balances.all(recipientId)).availableBalance;
 
     // const accountNonce = await api.query.system.accountNonce(senderId) as Index;
     // const senderBalance = ZERO;
@@ -259,16 +268,8 @@ class TransferDarwinia extends React.PureComponent<Props> {
 
       let _ktonBalances_locks = new BN(0)
 
-      if (kton_locks && kton_locks.length) {
-        // @ts-ignore
-        _ktonBalances_locks = kton_locks[0].amount
-      }
-      
-      let _balances_locks = new BN(0)
-
-      if (balances_locks && balances_locks.length) {
-        // @ts-ignore
-        _balances_locks = balances_locks[0].amount
+      if(kton_all) {
+        _ktonBalances_locks = kton_all.lockedBalance
       }
 
       if(type === 'kton') {
@@ -291,6 +292,7 @@ export default withMulti(
   withApi,
   withCalls<Props>(
     'derive.balances.fees',
+    ['derive.kton.all', { paramName: 'senderId' }],
     ['query.kton.locks', { paramName: 'senderId' }],
     ['query.balances.locks', { paramName: 'senderId' }],
     ['query.kton.freeBalance', { paramName: 'senderId' }],
