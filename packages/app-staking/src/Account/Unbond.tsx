@@ -13,6 +13,7 @@ import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import styled from 'styled-components'
 import { withRouter } from 'react-router-dom';
 import { formatBalance, formatKtonBalance } from '@polkadot/util';
+import Checks from '@polkadot/ui-signer/Checks';
 import translate from '../translate';
 
 type Props = I18nProps & ApiProps & {
@@ -27,6 +28,7 @@ type State = {
   maxBalance?: BN
   maxUnbond?: BN,
   type: string,
+  hasAvailable: boolean
 };
 
 const StyleWrapper = styled.div`
@@ -44,9 +46,17 @@ const StyleWrapper = styled.div`
   }
 `
 
+function toIdString(id?: AccountId | null | undefined): string | null | undefined {
+  if (typeof id === 'undefined') return undefined
+  return id
+    ? id.toString()
+    : null;
+}
+
 class Unbond extends TxComponent<Props, State> {
   state: State = {
     type: 'ring',
+    hasAvailable: true
   };
 
   componentDidUpdate(prevProps: Props) {
@@ -62,10 +72,14 @@ class Unbond extends TxComponent<Props, State> {
     history.push('ringstaking');
   }
 
+  private onChangeFees = (hasAvailable: boolean) => {
+    this.setState({ hasAvailable });
+  }
+
   render() {
     const { controllerId, isOpen, onClose, t } = this.props;
-    const { maxUnbond, type } = this.state;
-    const canSubmit = !!maxUnbond && maxUnbond.gtn(0);
+    const { maxUnbond, type, hasAvailable } = this.state;
+    const canSubmit = !!maxUnbond && maxUnbond.gtn(0) && hasAvailable;
     const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
     if (!isOpen) {
@@ -110,12 +124,15 @@ class Unbond extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { controllerId, staking_ledger, t } = this.props;
-    const { maxBalance, type } = this.state;
+    const { controllerId, staking_ledger, api, t } = this.props;
+    const { type, maxUnbond } = this.state;
+    const typeKey = type.charAt(0).toUpperCase() + type.slice(1)
 
     if (!staking_ledger || staking_ledger.isEmpty) {
       return;
     }
+
+    const extrinsic = api.tx.staking.unbond({ [typeKey]: maxUnbond && maxUnbond });
 
     return (
       <>
@@ -143,6 +160,12 @@ class Unbond extends TxComponent<Props, State> {
             // withMax
             isType
           />
+          <Checks
+            accountId={toIdString(controllerId)}
+            extrinsic={extrinsic}
+            isSendable
+            onChange={this.onChangeFees}
+          />
         </Modal.Content>
       </>
     );
@@ -154,12 +177,13 @@ class Unbond extends TxComponent<Props, State> {
 
   private nextState(newState: Partial<State>): void {
     this.setState((prevState: State): State => {
-      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance, type = prevState.type } = newState;
+      const { maxUnbond = prevState.maxUnbond, maxBalance = prevState.maxBalance, type = prevState.type, hasAvailable = prevState.hasAvailable } = newState;
 
       return {
         maxUnbond,
         maxBalance,
-        type
+        type,
+        hasAvailable
       };
     });
   }

@@ -3,46 +3,53 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { I18nProps } from '@polkadot/ui-app/types';
-
+import { ApiProps } from '@polkadot/ui-api/types';
 import React from 'react';
 import { Button, InputAddress, Modal, TxButton } from '@polkadot/ui-app';
-
+import Checks from '@polkadot/ui-signer/Checks';
 import ValidateSession from './ValidateSession';
 import translate from '../translate';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
+import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 
-const noop = function(){};
+const noop = function () { };
 
 
-type Props = I18nProps & {
+type Props = ApiProps & I18nProps & {
   accountId: string,
   isOpen: boolean,
   onClose: () => void,
-  onSuccess?:(status: SubmittableResult) => void,
+  onSuccess?: (status: SubmittableResult) => void,
   stashId: string,
   withStep?: boolean
 };
 
 type State = {
   sessionError: string | null,
-  sessionId: string
+  sessionId: string,
+  hasAvailable: boolean
 };
 
 class Key extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
 
     this.state = {
       sessionError: null,
-      sessionId: props.accountId
+      sessionId: props.accountId,
+      hasAvailable: true
     };
   }
 
-  render () {
-    const { accountId, isOpen, onClose,onSuccess, t } = this.props;
-    const { sessionError, sessionId } = this.state;
+  private onChangeFees = (hasAvailable: boolean) => {
+    this.setState({ hasAvailable });
+  }
+
+  render() {
+    const { accountId, isOpen, onClose, onSuccess, t } = this.props;
+    const { sessionError, sessionId, hasAvailable } = this.state;
 
     if (!isOpen) {
       return null;
@@ -58,33 +65,35 @@ class Key extends React.PureComponent<Props, State> {
       >
         {this.renderContent()}
         <Modal.Actions>
-        <Button.Group>
-          <TxButton
-            accountId={accountId}
-            isDisabled={!sessionId || !!sessionError}
-            isPrimary
-            label={t('Set Session Key')}
-            onClick={onSuccess ? noop : onClose}
-            onSuccess= {onSuccess}
-            params={[[sessionId, sessionId],'0x']}
-            tx='session.setKeys'
-            withSpinner
-          />
-          <Button
-            isBasic={true}
-            isSecondary={true}
-            onClick={onClose}
-            label={t('Cancel')}
-          />
-        </Button.Group>
-      </Modal.Actions>
+          <Button.Group>
+            <TxButton
+              accountId={accountId}
+              isDisabled={!sessionId || !!sessionError || !hasAvailable}
+              isPrimary
+              label={t('Set Session Key')}
+              onClick={onSuccess ? noop : onClose}
+              onSuccess={onSuccess}
+              params={[[sessionId, sessionId], '0x']}
+              tx='session.setKeys'
+              withSpinner
+            />
+            <Button
+              isBasic={true}
+              isSecondary={true}
+              onClick={onClose}
+              label={t('Cancel')}
+            />
+          </Button.Group>
+        </Modal.Actions>
       </Modal>
     );
   }
 
-  private renderContent () {
-    const { accountId, stashId, t, withStep } = this.props;
+  private renderContent() {
+    const { accountId, stashId, t, withStep, api } = this.props;
     const { sessionId } = this.state;
+
+    const extrinsic = api.tx.session.setKeys([sessionId, sessionId], '0x');
 
     return (
       <>
@@ -127,6 +136,12 @@ class Key extends React.PureComponent<Props, State> {
             sessionId={sessionId}
             stashId={stashId}
           />
+          <Checks
+            accountId={accountId}
+            extrinsic={extrinsic}
+            isSendable
+            onChange={this.onChangeFees}
+          />
         </Modal.Content>
       </>
     );
@@ -141,4 +156,4 @@ class Key extends React.PureComponent<Props, State> {
   }
 }
 
-export default translate(Key);
+export default withMulti(Key, withApi, translate);

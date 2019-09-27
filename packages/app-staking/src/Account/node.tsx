@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { AccountFilter, RecentlyOfflineMap } from '../types';
-import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact, Bytes, Enum , RewardDestination} from '@polkadot/types';
+import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact, Bytes, Enum , RewardDestination, StakingLedgers} from '@polkadot/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 import { DerivedBalances, DerivedBalancesMap, DerivedStaking } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
@@ -34,21 +34,7 @@ import CreateModal from '@polkadot/app-accounts/modals/Create';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { ignoreElements } from 'rxjs/operators';
 import { api } from '@polkadot/ui-api'
-import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
-
-
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
+import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util';
 
 /** Enum */
 // export interface RewardDestination extends Enum {
@@ -110,7 +96,7 @@ type State = {
   controllers: Array<string>,
   validators: Array<string>,
   isCreateOpen: boolean,
-  staking_ledger: stakingLedgerType,
+  staking_ledger: StakingLedgers,
   isValidator: boolean,
   staking_nodeName: Bytes
 };
@@ -361,48 +347,9 @@ class Account extends React.PureComponent<Props, State> {
     
   };
 
-  // static getDerivedStateFromProps({ accountId, staking_info, staking_controllers = [[], []], session_validators = [], staking_validators }: Props): Pick<State, never> | null {
-
-  //   if (!staking_info) {
-  //     return null;
-  //   }
-
-  //   const { controllerId, nextSessionId, nominators, rewardDestination, stakers, stakingLedger, stashId, validatorPrefs } = staking_info;
-  //   const isStashNominating = nominators && nominators.length !== 0;
-  //   const isStashValidating = !!validatorPrefs && !validatorPrefs.isEmpty && !isStashNominating;
-
-
-
-  //   // console.log('getDerivedStateFromProps', accountId,toIdString(controllerId), nominators)
-  //   return {
-  //     controllerId: toIdString(controllerId),
-  //     destination: rewardDestination && rewardDestination.toNumber(),
-  //     isActiveController: accountId === toIdString(controllerId),
-  //     // isActiveController: false,
-  //     isActiveSession: accountId === toIdString(nextSessionId),
-  //     isActiveStash: accountId === toIdString(stashId),
-  //     isStashNominating,
-  //     isStashValidating,
-  //     nominators,
-  //     sessionId: toIdString(nextSessionId),
-  //     stakers,
-  //     stakingLedger,
-  //     stashId: toIdString(stashId),
-  //     validatorPrefs,
-
-  //     controllers: staking_controllers[1].filter((optId) => optId && optId.isSome).map((accountId) =>
-  //       accountId.unwrap().toString()
-  //     ),
-  //     validators: session_validators.map((authorityId) =>
-  //       authorityId.toString()
-  //     ),
-  //   };
-  // }
-
   static getDerivedStateFromProps({ accountId, staking_info, staking_nominators, staking_controllers = [[], []], session_validators = [], staking_validators, ledger, stashId, controllerId, sessionKey, staking_payee }: Props): Pick<State, never> | null {
     // console.log('getDerivedStateFromProps', staking_info, accountId, staking_nominators);
     // console.log('staking_validators', staking_validators)
-    // const { nextSessionId, stakingLedger, validatorPrefs } = staking_info;
     if (!accountId) {
       return null;
     }
@@ -494,14 +441,6 @@ class Account extends React.PureComponent<Props, State> {
     const nodeNameString = u8aToString(nodeName.toU8a(true))
     const isNominating = !!nominators && nominators.length;
     const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
-
-
-
-    // const next = controllers.filter((address) =>
-    //   !validators.includes(address)
-    // );
-
-
 
     if ((controllerId == stashId && controllerId != null && controllerId != '') || isNominating) {
       return (
@@ -1126,7 +1065,7 @@ class Account extends React.PureComponent<Props, State> {
       // only show a "Bond Additional" button if this stash account actually doesn't bond everything already
       // staking_ledger.total gives the total amount that can be slashed (any active amount + what is being unlocked)
       // if (balances_all && stakingLedger && stakingLedger.total && (balances_all.freeBalance.gt(stakingLedger.total))) {
-      if (staking_ledger && !staking_ledger.isNone) {
+      if (staking_ledger && !staking_ledger.isEmpty) {
         buttons.push(
           <Button
             isBasic={true}
@@ -1270,9 +1209,7 @@ class Account extends React.PureComponent<Props, State> {
 
 
 export default withMulti(
-  styled(Account as React.ComponentClass<Props>)`
-   
-  `,
+  Account,
   translate,
   withCalls<Props>(
     ['derive.staking.info', { paramName: 'accountId' }],

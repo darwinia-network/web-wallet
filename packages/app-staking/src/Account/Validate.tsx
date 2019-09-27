@@ -78,17 +78,11 @@ class Validate extends TxComponent<Props, State> {
 
   static getDerivedStateFromProps(props: Props, state: State): State | null {
     console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
-    // console.log('111111',props.validatorPrefs)
+
     if (!props.validatorPrefs || state.isUpdateProps) {
       return null;
     }
     const {nodeName = new Bytes()}  = props
-    // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
-    // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
-    // return {
-    //   unstakeThreshold: unstake_threshold.toBn(),
-    //   validatorPayment: validator_payment_ratio.toBn()
-    // }
 
     if (props.validatorPrefs && !state.isUpdateProps) {
       // @ts-ignore

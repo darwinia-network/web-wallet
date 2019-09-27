@@ -3,16 +3,18 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { I18nProps } from '@polkadot/ui-app/types';
+import { ApiProps } from '@polkadot/ui-api/types';
 
 import BN from 'bn.js';
 import React from 'react';
 import { ValidatorPrefs, Bytes } from '@polkadot/types';
-import { Button, InputAddress, InputBalance, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
-
+import { Button, InputAddress, InputNumber, Modal, TxButton, TxComponent, Input } from '@polkadot/ui-app';
+import Checks from '@polkadot/ui-signer/Checks';
+import { withMulti, withApi } from '@polkadot/ui-api';
 import translate from '../translate';
 import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 
-type Props = I18nProps & {
+type Props = ApiProps & I18nProps & {
   accountId: string,
   isOpen: boolean,
   onClose: () => void,
@@ -25,12 +27,14 @@ type State = {
   unstakeThreshold?: BN,
   validatorPayment?: BN,
   nodeName?: string,
+  hasAvailable: boolean
 };
 
 class Staking extends TxComponent<Props, State> {
   state: State = {
     // unstakeThreshold: new BN(3),
-    validatorPayment: new BN(0)
+    validatorPayment: new BN(0),
+    hasAvailable: true
   };
 
   // inject the preferences are returned via RPC once into the state (from this
@@ -41,7 +45,7 @@ class Staking extends TxComponent<Props, State> {
     if (state.unstakeThreshold) {
       return null;
     }
-    const {nodeName = new Bytes()}  = props
+    const { nodeName = new Bytes() } = props
     // const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
     // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
     // return {
@@ -52,19 +56,21 @@ class Staking extends TxComponent<Props, State> {
     if (props.validatorPrefs) {
       // @ts-ignore
       const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
-      console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+      // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
 
       return {
         unstakeThreshold: unstake_threshold.toBn(),
         validatorPayment: validator_payment_ratio.toBn(),
-        nodeName: u8aToString(nodeName.toU8a(true))
+        nodeName: u8aToString(nodeName.toU8a(true)),
+        hasAvailable: state.hasAvailable
       };
     }
 
     return {
       unstakeThreshold: new BN(3),
       validatorPayment: undefined,
-      nodeName: u8aToString(nodeName.toU8a(true))
+      nodeName: u8aToString(nodeName.toU8a(true)),
+      hasAvailable: state.hasAvailable
     };
 
   }
@@ -90,15 +96,20 @@ class Staking extends TxComponent<Props, State> {
     );
   }
 
+  private onChangeFees = (hasAvailable: boolean) => {
+    this.setState({ hasAvailable });
+  }
+
   private renderButtons() {
     const { accountId, onClose, t } = this.props;
-    const { unstakeThreshold, validatorPayment, nodeName } = this.state;
+    const { unstakeThreshold, validatorPayment, nodeName, hasAvailable } = this.state;
 
     return (
       <Modal.Actions>
         <Button.Group>
           <TxButton
             accountId={accountId}
+            isDisabled={!hasAvailable}
             isPrimary
             label={t('Validate')}
             onClick={onClose}
@@ -123,8 +134,9 @@ class Staking extends TxComponent<Props, State> {
   }
 
   private renderContent() {
-    const { accountId, stashId, t } = this.props;
+    const { accountId, stashId, api, t } = this.props;
     const { unstakeThreshold, validatorPayment, nodeName } = this.state;
+    const extrinsic = api.tx.staking.validate(u8aToHex(u8aToU8a(nodeName)), validatorPayment, unstakeThreshold);
 
     return (
       <>
@@ -185,6 +197,12 @@ class Staking extends TxComponent<Props, State> {
                 : '3'
             }
           />
+          <Checks
+            accountId={accountId}
+            extrinsic={extrinsic}
+            isSendable
+            onChange={this.onChangeFees}
+          />
         </Modal.Content>
       </>
     );
@@ -207,4 +225,8 @@ class Staking extends TxComponent<Props, State> {
   }
 }
 
-export default translate(Staking);
+export default withMulti(
+  Staking,
+  translate,
+  withApi
+);

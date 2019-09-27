@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Balance } from '@polkadot/types';
+import { Balance, BlockNumber } from '@polkadot/types';
 import { BareProps } from '@polkadot/ui-app/types';
 import { ComponentProps } from '../types';
 
@@ -33,10 +33,12 @@ class Overview extends React.PureComponent<Props> {
     const validatorsSorted = this.sortByBalance(validators);
 
     let lastBlock: string = '—';
+    let lastBlockBN: BlockNumber;
     let lastAuthor: string | undefined;
 
     if (chain_subscribeNewHead) {
       lastBlock = formatNumber(chain_subscribeNewHead.blockNumber);
+      lastBlockBN = chain_subscribeNewHead.blockNumber;
       lastAuthor = (chain_subscribeNewHead.author || '').toString();
     }
 
@@ -46,6 +48,7 @@ class Overview extends React.PureComponent<Props> {
           balances={balances}
           controllers={controllers}
           lastBlock={lastBlock}
+          lastBlockBN={lastBlockBN}
           lastAuthor={lastAuthor}
           validators={validators}
         />
