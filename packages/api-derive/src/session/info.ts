@@ -19,7 +19,7 @@ type Result = [BN, [BN, BN]];
 const ZERO = new BN(0);
 
 // internal helper to just split the logic - take all inputs, do the calculations and combine
-function createDerived0to94 ([bestNumber, [currentIndex, _lastLengthChange, sessionLength, lastEraLengthChange, sessionsPerEra]]: Result0to94): DerivedSessionInfo {
+function createDerived0to94 ([bestNumber, [currentIndex, _lastLengthChange, sessionLength = new BN(50), lastEraLengthChange, sessionsPerEra]]: Result0to94): DerivedSessionInfo {
   const eraLength = sessionLength.mul(sessionsPerEra);
   const lastLengthChange = _lastLengthChange
     ? _lastLengthChange.unwrapOr(ZERO)

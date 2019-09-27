@@ -18,6 +18,13 @@ export interface DerivedBalances {
   vestedBalance: BN;
 }
 
+export interface DerivedKtonBalances {
+  accountId: AccountId;
+  freeBalance: BN;
+  lockedBalance: BN;
+  availableBalance: BN;
+}
+
 export type DerivedBalancesMap = Record<string, DerivedBalances>;
 
 export interface DerivedContractFees {

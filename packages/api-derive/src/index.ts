@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 
 import * as accounts from './accounts';
 import * as balances from './balances';
+import * as kton from './kton';
 import * as chain from './chain';
 import * as contracts from './contracts';
 import * as democracy from './democracy';
@@ -56,7 +57,7 @@ function injectFunctions<AllSections> (api: ApiInterfaceRx, allSections: AllSect
     }, {} as unknown as DeriveSections<AllSections>);
 }
 
-export const derive = { accounts, balances, chain, contracts, democracy, elections, session, staking };
+export const derive = { accounts, balances,kton, chain, contracts, democracy, elections, session, staking };
 export type Derive = typeof derive;
 
 // FIXME I have no idea how to get this done
