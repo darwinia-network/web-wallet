@@ -46,10 +46,11 @@ class Summary extends React.PureComponent<Props> {
             <CardSummary label={t('waiting')}>
               {waiting}
             </CardSummary>
-          </section>
-          <section>
             {<SummarySession lastBlockBN={lastBlockBN}/>}
           </section>
+          {/* <section>
+            {<SummarySession lastBlockBN={lastBlockBN}/>}
+          </section> */}
           <section>
             <CardSummary label={t('last block')}>
               {lastBlock}

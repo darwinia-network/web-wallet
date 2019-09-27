@@ -35,6 +35,7 @@ class Summary extends React.PureComponent<Props> {
           >
             <TotalIssuance />
           </CardSummary>
+          <SummarySession />
         </section>
         <section className='ui--media-large'>
           <SummarySession />
