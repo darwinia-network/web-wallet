@@ -4,13 +4,13 @@
 
 import { AccountId, AccountIndex, Address } from '@polkadot/types';
 import { BareProps, CallProps } from '@polkadot/ui-api/types';
-import { DerivedBalances } from '@polkadot/api-derive/types';
+import { DerivedKtonBalances } from '@polkadot/api-derive/types';
 import React from 'react';
-import { formatBalance } from '@polkadot/util';
+import { formatKtonBalance } from '@polkadot/util';
 import { withCalls } from '@polkadot/ui-api';
 
 type Props = BareProps & CallProps & {
-  balances_all?: DerivedBalances,
+  kton_all?: DerivedKtonBalances,
   children?: React.ReactNode,
   label?: React.ReactNode,
   params?: AccountId | AccountIndex | Address | string | Uint8Array | null,
@@ -18,11 +18,11 @@ type Props = BareProps & CallProps & {
 
 export class AvailableDisplay extends React.PureComponent<Props> {
   render() {
-    const { balances_all, children, className, label = '' } = this.props;
+    const { children, className, label = '', kton_all } = this.props;
     return (
       <div className={className}>
-        <p>{label}{balances_all ?
-          formatBalance(balances_all.availableBalance) :
+        <p>{label}{kton_all ?
+          formatKtonBalance(kton_all.availableBalance) :
           '0'}</p>
         {children}
       </div>
@@ -31,5 +31,5 @@ export class AvailableDisplay extends React.PureComponent<Props> {
 }
 
 export default withCalls<Props>(
-  ['derive.balances.all', { paramName: 'params' }]
+  ['derive.kton.all', { paramName: 'params' }]
 )(AvailableDisplay);
