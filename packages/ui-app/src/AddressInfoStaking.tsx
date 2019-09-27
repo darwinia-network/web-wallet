@@ -21,24 +21,6 @@ import ringIcon from './styles/icon/ring.svg'
 import ktonIcon from './styles/icon/kton.svg'
 import Power from './Power'
 
-export interface DerivedRingBalances extends StructAny {
-  freeBalance: BN;
-  transferFee: BN;
-}
-
-export interface DerivedKtonBalances extends StructAny {
-  freeBalance: BN;
-  transferFee: BN;
-}
-
-export interface DerivedLockBalances extends StructAny {
-  amount: BN;
-}
-
-export interface DerivedStakingLedger extends Compact {
-  amount: BN;
-}
-
 // true to display, or (for bonded) provided values [own, ...all extras]
 export type BalanceActiveType = {
   available?: boolean,
@@ -52,20 +34,6 @@ export type CryptoActiveType = {
   crypto?: boolean,
   nonce?: boolean
 };
-
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    active_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
 
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,

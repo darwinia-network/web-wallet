@@ -39,7 +39,7 @@ class Selection extends TxComponent<Props, State> {
     const { apiDefaultTxSudo, t } = this.props;
     const { isValid, isValidUnsigned, accountId } = this.state;
     const extrinsic = this.getExtrinsic() || apiDefaultTxSudo;
-    console.log(111,extrinsic)
+
     return (
       <div className='extrinsics--Selection'>
         <InputAddress
@@ -135,7 +135,7 @@ class Selection extends TxComponent<Props, State> {
     if (!method) {
       return null;
     }
-    console.log(111,method)
+
     const fn = Method.findFunction(method.callIndex);
 
     return api.tx[fn.section][fn.method](...method.args);

@@ -57,8 +57,6 @@ const Wrapper = styled.div`
     flex: 1 1;
     min-width: 0;
     color: #302B3C;
-    /* margin-top: 28px; */
-    /* font-size: 40px; */
     text-align: center;
   }
 
