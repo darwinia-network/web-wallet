@@ -212,11 +212,11 @@ class App extends React.PureComponent<Props, State> {
     let staking_ledger_t, staking_bonded_t = null;
     let isStashId = false
     staking_ledger_t = await api.query.staking.ledger((AccountMain), async (ledger: Option<Codec>) => {
-      console.log('api.query.staking.ledger', ledger)
+      // console.log('api.query.staking.ledger', ledger)
       let stashId = null;
 
       const ledgerWrap = ledger && ledger.isSome && ledger.unwrapOr(null);
-      console.log('api.query.staking.ledger wrap', ledgerWrap)
+      // console.log('api.query.staking.ledger wrap', ledgerWrap)
       stashId = ledgerWrap && ledgerWrap.stash || null;
 
       if (ledger) {
@@ -239,7 +239,7 @@ class App extends React.PureComponent<Props, State> {
     })
 
     staking_bonded_t = await api.query.staking.bonded(AccountMain, (bonded: Option<Codec>) => {
-      console.log('api.query.staking.bonded', bonded)
+      // console.log('api.query.staking.bonded', bonded)
       if (isStashId) {
         return;
       }

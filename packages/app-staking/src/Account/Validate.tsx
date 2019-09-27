@@ -77,7 +77,7 @@ class Validate extends TxComponent<Props, State> {
 
 
   static getDerivedStateFromProps(props: Props, state: State): State | null {
-    console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
+    // console.log('props.validatorPrefs unstakeThreshold', state.unstakeThreshold)
 
     if (!props.validatorPrefs || state.isUpdateProps) {
       return null;
@@ -87,7 +87,7 @@ class Validate extends TxComponent<Props, State> {
     if (props.validatorPrefs && !state.isUpdateProps) {
       // @ts-ignore
       const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
-      console.log('props.validatorPrefs1', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+      // console.log('props.validatorPrefs1', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
 
       return {
         unstakeThreshold: unstake_threshold.toBn(),
