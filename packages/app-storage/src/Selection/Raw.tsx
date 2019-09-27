@@ -7,25 +7,25 @@ import { ComponentProps } from '../types';
 
 import React from 'react';
 import { Button, Input, TxComponent } from '@polkadot/ui-app';
-
+import { withMulti } from '@polkadot/ui-api';
 import translate from '../translate';
 import { u8aToU8a } from '@polkadot/util';
 import { Compact } from '@polkadot/types';
 
 type Props = ComponentProps & I18nProps;
 
-type State = {
-  isValid: boolean,
-  key: Uint8Array
-};
+interface State {
+  isValid: boolean;
+  key: Uint8Array;
+}
 
 class Raw extends TxComponent<Props, State> {
-  state: State = {
+  public state: State = {
     isValid: false,
     key: new Uint8Array([])
   };
 
-  render () {
+  public render(): React.ReactNode {
     const { t } = this.props;
     const { isValid } = this.state;
 
@@ -56,7 +56,7 @@ class Raw extends TxComponent<Props, State> {
     const { onAdd } = this.props;
     const { key } = this.state;
 
-    onAdd({ key });
+    onAdd({ isConst: false, key });
   }
 
   private onChangeKey = (key: string): void => {
@@ -70,4 +70,7 @@ class Raw extends TxComponent<Props, State> {
   }
 }
 
-export default translate(Raw);
+export default withMulti(
+  Raw,
+  translate
+);

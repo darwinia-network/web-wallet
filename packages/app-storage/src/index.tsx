@@ -4,6 +4,7 @@
 
 import { AppProps, I18nProps } from '@polkadot/ui-app/types';
 import { QueryTypes } from './types';
+import { withMulti } from '@polkadot/ui-api';
 
 import './index.css';
 
@@ -15,16 +16,16 @@ import translate from './translate';
 
 type Props = AppProps & I18nProps;
 
-type State = {
-  queue: Array<QueryTypes>
-};
+interface State {
+  queue: QueryTypes[];
+}
 
 class StorageApp extends React.PureComponent<Props, State> {
-  state: State = {
+  public state: State = {
     queue: []
   };
 
-  render () {
+  public render(): React.ReactNode {
     const { basePath } = this.props;
     const { queue } = this.state;
 
@@ -53,10 +54,13 @@ class StorageApp extends React.PureComponent<Props, State> {
   private onRemove = (id: number): void => {
     this.setState(
       (prevState: State): State => ({
-        queue: prevState.queue.filter((item) => item.id !== id)
+        queue: prevState.queue.filter((item): boolean => item.id !== id)
       })
     );
   }
 }
 
-export default translate(StorageApp);
+export default withMulti(
+  StorageApp,
+  translate
+);
