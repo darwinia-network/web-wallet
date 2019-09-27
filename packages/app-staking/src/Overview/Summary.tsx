@@ -4,6 +4,7 @@
 
 import { DerivedBalancesMap } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
+import { BlockNumber } from '@polkadot/types';
 import styled from 'styled-components';
 
 import BN from 'bn.js';
@@ -14,18 +15,20 @@ import { withCalls, withMulti } from '@polkadot/ui-api';
 
 import translate from '../translate';
 
+
 type Props = I18nProps & {
   balances: DerivedBalancesMap,
   controllers: Array<string>,
   lastAuthor?: string,
   lastBlock: string,
+  lastBlockBN: BlockNumber,
   staking_validatorCount?: BN,
   validators: Array<string>
 };
 
 class Summary extends React.PureComponent<Props> {
   render() {
-    const { className, controllers, lastAuthor, lastBlock, style, t, staking_validatorCount, validators } = this.props;
+    const { className, controllers, lastAuthor, lastBlock, style, t, staking_validatorCount, validators, lastBlockBN } = this.props;
     const waiting = controllers.length > validators.length
       ? (controllers.length - validators.length)
       : 0;
@@ -45,6 +48,9 @@ class Summary extends React.PureComponent<Props> {
             </CardSummary>
           </section>
           <section>
+            {<SummarySession lastBlockBN={lastBlockBN}/>}
+          </section>
+          <section>
             <CardSummary label={t('last block')}>
               {lastBlock}
             </CardSummary>
@@ -61,8 +67,17 @@ const StyledWrapper = styled.div`
   border-radius:2px;
   border:1px solid rgba(237,237,237,1);
 
+  .ui--Labelled-content{
+    margin-top: 28px;
+    font-size: 40px;
+  }
+
   @media (max-width: 767px) {
     padding: 0;
+    .ui--Labelled-content{
+      margin-top: 10px;
+      font-size: 16px;
+    }
   }
 `
 
