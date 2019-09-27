@@ -40,10 +40,15 @@ export interface ModulesWithMethods {
   [key: string]: Methods; // Will hold modules returned by state_getMetadata
 }
 
-const FN_UNKNOWN: Partial<MethodFunction> = {
+// const FN_UNKNOWN: Partial<MethodFunction> = {
+//   method: 'unknown',
+//   section: 'unknown'
+// };
+
+const FN_UNKNOWN = {
   method: 'unknown',
   section: 'unknown'
-};
+} as MethodFunction;
 
 const injected: Record<string, MethodFunction> = {};
 

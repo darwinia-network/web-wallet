@@ -65,6 +65,7 @@ export default class StorageKey extends Bytes {
     } else if (!value || isString(value) || isU8a(value)) {
       // let Bytes handle these inputs
       return {
+        // @ts-ignore
         key: value
       };
     } else if (isFunction(value)) {

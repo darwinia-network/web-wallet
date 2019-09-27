@@ -9,7 +9,7 @@ import BlockNumber from './BlockNumber';
 import U32 from '../primitive/U32'
 import UnlockingValue from './UnlockingValue'
 import Bool from '../primitive/Bool';
-
+import UInt from '../codec/UInt';
 /**
  * @name Unlocking
  * @description
@@ -28,7 +28,7 @@ export default class Unlocking extends Struct {
    * @description Era number at which point it'll be unlocked
    */
   get era (): U32 {
-    return (this.get('era') as Compact).toBn() as U32;
+    return (this.get('era') as Compact<UInt>).toBn() as U32;
   }
 
   /**

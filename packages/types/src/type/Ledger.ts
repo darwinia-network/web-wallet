@@ -5,6 +5,7 @@
 import Compact from '../codec/Compact';
 import Struct from '../codec/Struct';
 import Vector from '../codec/Vector';
+import UInt from '../codec/UInt';
 import AccountId from '../primitive/AccountId';
 import Balance from './Balance';
 import Unlocking from './Unlocking';
@@ -36,27 +37,27 @@ export default class Ledger extends Struct {
   }
 
   get total_ring (): Balance {
-    return (this.get('total_ring') as Compact).toBn() as Balance;
+    return (this.get('total_ring') as Compact<Balance>).toBn() as Balance;
   }
 
   get total_deposit_ring (): Balance {
-    return (this.get('total_deposit_ring') as Compact).toBn() as Balance;
+    return (this.get('total_deposit_ring') as Compact<Balance>).toBn() as Balance;
   }
 
   get active_ring (): Balance {
-    return (this.get('active_ring') as Compact).toBn() as Balance;
+    return (this.get('active_ring') as Compact<Balance>).toBn() as Balance;
   }
 
   get active_deposit_ring (): Balance {
-    return (this.get('active_deposit_ring') as Compact).toBn() as Balance;
+    return (this.get('active_deposit_ring') as Compact<Balance>).toBn() as Balance;
   }
 
   get total_kton (): Balance {
-    return (this.get('total_kton') as Compact).toBn() as Balance;
+    return (this.get('total_kton') as Compact<Balance>).toBn() as Balance;
   }
 
   get active_kton (): Balance {
-    return (this.get('active_kton') as Compact).toBn() as Balance;
+    return (this.get('active_kton') as Compact<Balance>).toBn() as Balance;
   }
 
   get deposit_items (): Vector<DepositItem> {

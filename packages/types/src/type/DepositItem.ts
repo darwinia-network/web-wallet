@@ -5,7 +5,6 @@
 import Compact from '../codec/Compact';
 import Struct from '../codec/Struct';
 import Balance from './Balance';
-import BlockNumber from './BlockNumber';
 import Moment from '../primitive/Moment';
 
 /**
@@ -26,15 +25,15 @@ export default class DepositItem extends Struct {
    * @description Amount of funds to be unlocked
    */
   get value (): Balance {
-    return (this.get('value') as Compact).toBn() as Balance;
+    return (this.get('value') as Compact<Balance>).toBn() as Balance;
   }
 
   get start_time (): Moment {
-    return (this.get('start_time') as Compact).unwrap() as Moment;
+    return (this.get('start_time') as Compact<Moment>).unwrap() as Moment;
   }
 
   get expire_time (): Moment {
-    return (this.get('expire_time') as Compact).unwrap() as Moment;
+    return (this.get('expire_time') as Compact<Moment>).unwrap() as Moment;
   }
 
 }
