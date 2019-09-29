@@ -55,18 +55,19 @@ export default class Apps extends React.Component<Props, State> {
     const state = store.get('sidebar') || {};
 
     this.state = {
-      isCollapsed: false,
+      
       menuOpen: false,
       transition: SideBarTransition.COLLAPSED,
-      ...state
+      ...state,
+      isCollapsed: false,
     };
   }
 
   componentDidMount () {
     this.setState({
       menuOpen: false,
-      // isMenu: window.innerWidth >= SIDEBAR_MENU_THRESHOLD ? false : true
-      isMenu: false
+      isMenu: window.innerWidth >= SIDEBAR_MENU_THRESHOLD ? false : true
+      // isMenu: false
     });
   }
 
@@ -79,13 +80,13 @@ export default class Apps extends React.Component<Props, State> {
 
     return (
       <ThemeProvider theme={{ theme: settings.uiTheme }}>
-        <Wrapper className={`apps-Wrapper ${false ? 'collapsed' : 'expanded'} ${false ? 'fixed' : ''} ${true ? 'menu-open' : ''} theme--${settings.uiTheme}`}>
+        <Wrapper className={`apps-Wrapper ${isCollapsed ? 'collapsed' : 'expanded'} ${isMenu ? 'fixed' : ''} ${menuOpen ? 'menu-open' : ''} theme--${settings.uiTheme}`}>
           {this.renderMenuBg()}
           <SideBar
             collapse={this.collapse}
             handleResize={this.handleResize}
-            menuOpen={true}
-            isCollapsed={false}
+            menuOpen={menuOpen}
+            isCollapsed={isCollapsed}
             toggleMenu={this.toggleMenu}
           />
           <Signer>

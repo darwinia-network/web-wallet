@@ -4,6 +4,7 @@
 
 export { default as AccountIndex } from './AccountIndex';
 export { default as Available } from './Available';
+export { default as AvailableKton } from './AvailableKton';
 export { default as Balance } from './Balance';
 export { default as Bonded } from './Bonded';
 export { default as BestFinalized } from './BestFinalized';

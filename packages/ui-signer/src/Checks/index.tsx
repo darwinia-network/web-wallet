@@ -9,7 +9,7 @@ import { ExtraFees } from './types';
 
 import BN from 'bn.js';
 import React from 'react';
-import { Compact, Method } from '@polkadot/types';
+import { Compact, Method, UInt } from '@polkadot/types';
 import { withCalls } from '@polkadot/ui-api';
 import { Icon } from '@polkadot/ui-app';
 import { compactToU8a, formatBalance } from '@polkadot/util';
@@ -19,6 +19,7 @@ import ContractCall from './ContractCall';
 import ContractDeploy from './ContractDeploy';
 import Proposal from './Proposal';
 import Transfer from './Transfer';
+import Staking from './Staking';
 import { MAX_SIZE_BYTES, MAX_SIZE_MB, ZERO_BALANCE, ZERO_FEES_BALANCES, ZERO_FEES_CONTRACT } from './constants';
 
 type State = ExtraFees & {
@@ -73,13 +74,14 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
     if (!accountId || !extrinsic) {
       return null;
     }
-
+  
     const fn = Method.findFunction(extrinsic.callIndex);
     const extMethod = fn.method;
     const extSection = fn.section;
     const txLength = calcSignatureLength(extrinsic, system_accountNonce);
 
     const isSameExtrinsic = prevState.extMethod === extMethod && prevState.extSection === extSection;
+
     const extraAmount = isSameExtrinsic
       ? prevState.extraAmount
       : new BN(0);
@@ -175,6 +177,7 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
             : undefined
         }
         {this.renderTransfer()}
+        {this.renderBond()}
         {this.renderProposal()}
         {this.renderCall()}
         {this.renderDeploy()}
@@ -189,7 +192,7 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
             fees: formatBalance(allFees)
           }
         })}</div>
-        <div><Icon name='arrow right' />{t('{{total}} total transaction amount (fees + value)', {
+        <div><Icon name='arrow right' />{t('{{total}} total transaction amount (fees + value) from sending account', {
           replace: {
             total: formatBalance(allTotal)
           }
@@ -237,6 +240,36 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
     );
   }
 
+  private renderBond () {
+    const { extrinsic, balances_fees } = this.props;
+    const { extMethod, extSection } = this.state;
+    
+    if (!balances_fees || !extrinsic || extSection !== 'staking' || !(extMethod === 'bond' || extMethod === 'bondExtra')) {
+      return null;
+    }
+    
+    let isRing, value;
+    if(extMethod === 'bond') {
+      // @ts-ignore
+      [,{isRing, value},,] = extrinsic.args;
+    } else {
+      // @ts-ignore
+      [{isRing, value}, ] = extrinsic.args;
+    }
+
+    if(!isRing) {
+      return null
+    }
+
+    return (
+      <Staking
+        value={value}
+        fees={balances_fees}
+        onChange={this.onExtraUpdate}
+      />
+    );
+  }
+
   private renderCall () {
     const { extrinsic, contract_fees = ZERO_FEES_CONTRACT } = this.props;
     const { extMethod, extSection } = this.state;
@@ -249,7 +282,7 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
 
     return (
       <ContractCall
-        endowment={endowment as any as Compact}
+        endowment={endowment as any as Compact<UInt>}
         fees={contract_fees}
         onChange={this.onExtraUpdate}
       />
@@ -265,10 +298,10 @@ export class FeeDisplay extends React.PureComponent<Props, State> {
     }
 
     const [endowment] = extrinsic.args;
-
+   
     return (
       <ContractDeploy
-        endowment={endowment as any as Compact}
+        endowment={endowment as any as Compact<UInt>}
         fees={contract_fees}
         onChange={this.onExtraUpdate}
       />

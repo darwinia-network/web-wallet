@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { DerivedFees, DerivedBalances, DerivedContractFees } from '@polkadot/api-derive/types';
+import { DerivedFees, DerivedBalances, DerivedKtonBalances, DerivedContractFees } from '@polkadot/api-derive/types';
 
 import BN from 'bn.js';
 
@@ -14,6 +14,12 @@ export const ZERO_BALANCE = {
   vestedBalance: new BN(0),
   votingBalance: new BN(0)
 } as DerivedBalances;
+
+export const ZERO_KTON_BALANCE = {
+  availableBalance: new BN(0),
+  lockedBalance: new BN(0),
+  freeBalance: new BN(0),
+} as DerivedKtonBalances
 
 export const ZERO_FEES_BALANCES = {
   transactionBaseFee: new BN(0),

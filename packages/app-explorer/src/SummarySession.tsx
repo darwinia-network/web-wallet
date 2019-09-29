@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 // Copyright 2017-2019 @polkadot/app-explorer authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
@@ -10,15 +11,18 @@ import { CardSummary } from '@polkadot/ui-app';
 import { withCalls } from '@polkadot/ui-api';
 
 import translate from './translate';
+import { formatNumber } from '@polkadot/util';
+import { BlockNumber } from '@polkadot/types';
 
-type Props = I18nProps & {
-  session_info?: DerivedSessionInfo,
-  withEra?: boolean,
-  withSession?: boolean
-};
+interface Props extends I18nProps {
+  session_info?: DerivedSessionInfo;
+  withEra?: boolean;
+  withSession?: boolean;
+  lastBlockBN?: BlockNumber;
+}
 
 class SummarySession extends React.PureComponent<Props> {
-  render () {
+  public render (): React.ReactNode {
     return (
       <>
         {this.renderSession()}
@@ -27,40 +31,53 @@ class SummarySession extends React.PureComponent<Props> {
     );
   }
 
-  private renderEra () {
+  private renderEra (): React.ReactNode {
     const { session_info, t, withEra = true } = this.props;
 
-    if (!withEra) {
+    if (!withEra || !session_info) {
       return null;
     }
 
-    return (
-      <CardSummary
-        label={t('era')}
-        progress={{
-          total: session_info && session_info.eraLength,
-          value: session_info && session_info.eraProgress
-        }}
-      />
-    );
+    return session_info.sessionLength.gtn(0)
+      ? (
+        <CardSummary
+          label={t('era')}
+          progress={{
+            total: session_info && session_info.eraLength,
+            value: session_info && session_info.eraProgress
+          }}
+        />
+      )
+      : (
+        <CardSummary label={t('era')}>
+          {formatNumber(session_info.currentEra)}
+        </CardSummary>
+      );
   }
 
-  private renderSession () {
-    const { session_info, t, withSession = true } = this.props;
+  private renderSession (): React.ReactNode {
+    const { session_info, t, withSession = true, lastBlockBN } = this.props;
 
-    if (!withSession) {
+    if (!withSession || !session_info || !lastBlockBN) {
       return null;
     }
 
-    return (
-      <CardSummary
-        label={t('session')}
-        progress={{
-          total: session_info && session_info.sessionLength,
-          value: session_info && session_info.sessionProgress
-        }}
-      />
-    );
+    return session_info.sessionLength.gtn(0)
+      ? (
+        <CardSummary
+          label={t('session')}
+          progress={{
+            total: session_info.sessionLength,
+            value: session_info.sessionProgress
+          }}
+        />
+      )
+      : (
+        <CardSummary label={t('session')}>
+          {/* {formatNumber(session_info.currentIndex)} */}
+          {formatNumber(lastBlockBN.modn(10))}/10
+        </CardSummary>
+      );
   }
 }
 

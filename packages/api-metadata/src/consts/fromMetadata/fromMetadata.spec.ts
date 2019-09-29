@@ -4,15 +4,18 @@
 
 import { Metadata, BlockNumber } from '@polkadot/types';
 import json from '@polkadot/types/Metadata/v6/static';
+import { injectDefinitions } from '@polkadot/types/srml';
 
 import fromMetadata from '../fromMetadata';
+
+injectDefinitions();
 
 // Use the pre-generated metadata
 const metadata = new Metadata(json);
 const consts = fromMetadata(metadata);
 
-describe('fromMetadata', () => {
-  it('should return constants with the correct type and value', () => {
+describe('fromMetadata', (): void => {
+  it('should return constants with the correct type and value', (): void => {
     expect(consts.democracy.cooloffPeriod).toBeInstanceOf(BlockNumber);
     expect(consts.democracy.cooloffPeriod.eq(432000)).toBeTruthy();
   });

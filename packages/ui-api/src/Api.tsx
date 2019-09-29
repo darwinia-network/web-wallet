@@ -29,7 +29,8 @@ type Props = {
 };
 
 type State = ApiProps & {
-  chain?: string | null
+  chain?: string | null,
+
 };
 
 export { api };
@@ -61,6 +62,7 @@ export default class Api extends React.PureComponent<Props, State> {
     this.state = {
       isApiConnected: false,
       isApiReady: false,
+      isSubstrateV2: true,
       isWaitingInjected: isWeb3Injected,
       api,
       setApiUrl
@@ -145,18 +147,20 @@ export default class Api extends React.PureComponent<Props, State> {
       (api.tx.system && api.tx.system.setCode) || // 2.x
       (api.tx.consensus && api.tx.consensus.setCode) || // 1.x
       apiDefaultTx; // other
+    const isSubstrateV2 = !!Object.keys(api.consts).length;
 
     this.setState({
       isApiReady: true,
       apiDefaultTx,
       apiDefaultTxSudo,
       chain,
-      isDevelopment
+      isDevelopment,
+      isSubstrateV2
     });
   }
 
   render () {
-    const { api, apiDefaultTx, apiDefaultTxSudo, chain, isApiConnected, isApiReady, isDevelopment, isWaitingInjected, setApiUrl } = this.state;
+    const { api, apiDefaultTx, apiDefaultTxSudo, chain, isApiConnected, isApiReady, isDevelopment, isWaitingInjected, setApiUrl, isSubstrateV2 } = this.state;
 
     return (
       <ApiContext.Provider
@@ -169,6 +173,7 @@ export default class Api extends React.PureComponent<Props, State> {
           isApiReady: isApiReady && !!chain,
           isDevelopment,
           isWaitingInjected,
+          isSubstrateV2,
           setApiUrl
         }}
       >

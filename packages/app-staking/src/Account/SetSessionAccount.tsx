@@ -8,6 +8,7 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import React from 'react';
 import { Button, InputAddress, Modal, TxButton } from '@polkadot/ui-app';
 import { withApi, withMulti } from '@polkadot/ui-api';
+import Checks from '@polkadot/ui-signer/Checks';
 
 import ValidateSession from './InputValidationSession';
 import translate from '../translate';
@@ -22,7 +23,8 @@ type Props = I18nProps & ApiProps & {
 
 type State = {
   sessionError: string | null,
-  sessionId: string
+  sessionId: string,
+  hasAvailable: boolean
 };
 
 class SetSessionKey extends React.PureComponent<Props, State> {
@@ -33,16 +35,19 @@ class SetSessionKey extends React.PureComponent<Props, State> {
 
     this.state = {
       sessionError: null,
-      sessionId: props.sessionId || props.controllerId
+      sessionId: props.sessionId || props.controllerId,
+      hasAvailable: true
     };
+  }
+
+  private onChangeFees = (hasAvailable: boolean) => {
+    this.setState({ hasAvailable });
   }
 
   render () {
     const { api, controllerId, isOpen, onClose, t } = this.props;
-    const { sessionError, sessionId } = this.state;
+    const { sessionError, sessionId, hasAvailable } = this.state;
     const isV2 = !!api.tx.session.setKeys;
-
-    console.log('sessionId', sessionId);
 
     if (!isOpen) {
       return null;
@@ -61,7 +66,7 @@ class SetSessionKey extends React.PureComponent<Props, State> {
           <Button.Group>
             <TxButton
               accountId={controllerId}
-              isDisabled={!sessionId || !!sessionError}
+              isDisabled={!sessionId || !!sessionError || !hasAvailable}
               isPrimary
               label={t('Set Session Key')}
               onClick={ onClose }
@@ -81,8 +86,9 @@ class SetSessionKey extends React.PureComponent<Props, State> {
   }
 
   private renderContent () {
-    const { controllerId, stashId, t } = this.props;
+    const { controllerId, stashId, api, t } = this.props;
     const { sessionId } = this.state;
+    const extrinsic = api.tx.session.setKeys([sessionId, sessionId], '0x');
 
     return (
       <>
@@ -109,6 +115,12 @@ class SetSessionKey extends React.PureComponent<Props, State> {
             onError={this.onSessionError}
             sessionId={sessionId}
             stashId={stashId}
+          />
+          <Checks
+            accountId={controllerId}
+            extrinsic={extrinsic}
+            isSendable
+            onChange={this.onChangeFees}
           />
         </Modal.Content>
       </>

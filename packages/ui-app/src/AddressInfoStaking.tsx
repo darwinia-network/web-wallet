@@ -11,33 +11,15 @@ import styled from 'styled-components';
 import { formatBalance, formatNumber, formatKtonBalance } from '@polkadot/util';
 import { Icon, Tooltip, TxButton } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
-
+import { ZERO_STAKING_LEDGER } from '@polkadot/app-staking/constants'
 import translate from './translate';
 import CryptoType from './CryptoType';
 import Label from './Label';
-import { StructAny, Option, Struct, Compact } from '@polkadot/types';
+import { StructAny, Option, Struct, Compact, StakingLedgers } from '@polkadot/types';
 import powerbg from './styles/icon/power-bg.svg'
 import ringIcon from './styles/icon/ring.svg'
 import ktonIcon from './styles/icon/kton.svg'
 import Power from './Power'
-
-export interface DerivedRingBalances extends StructAny {
-  freeBalance: BN;
-  transferFee: BN;
-}
-
-export interface DerivedKtonBalances extends StructAny {
-  freeBalance: BN;
-  transferFee: BN;
-}
-
-export interface DerivedLockBalances extends StructAny {
-  amount: BN;
-}
-
-export interface DerivedStakingLedger extends Compact {
-  amount: BN;
-}
 
 // true to display, or (for bonded) provided values [own, ...all extras]
 export type BalanceActiveType = {
@@ -53,20 +35,6 @@ export type CryptoActiveType = {
   nonce?: boolean
 };
 
-export type stakingLedgerType = {
-  raw: {
-    stash?: string,
-    total_power?: number,
-    active_power?: number,
-    total_ring?: Compact,
-    regular_ring?: Compact,
-    active_ring?: Compact,
-    total_kton?: Compact,
-    active_kton?: Compact
-  },
-  isNone: boolean
-}
-
 type Props = BareProps & I18nProps & {
   balances_all?: DerivedBalances,
   children?: React.ReactNode,
@@ -81,7 +49,7 @@ type Props = BareProps & I18nProps & {
   kton_locks: Array<any>,
   balances_locks: Array<any>,
   isReadyStaking: boolean,
-  staking_ledger: stakingLedgerType,
+  staking_ledger: StakingLedgers,
   balances_freeBalance_stash?: BN
 };
 
@@ -94,10 +62,9 @@ type Props = BareProps & I18nProps & {
 // Additionally to tweak the display, i.e. only available
 //
 // <AddressInfo withBalance={{ available: true }} />
-class AddressInfoAccountList extends React.PureComponent<Props> {
+class AddressInfoStaking extends React.PureComponent<Props> {
   render() {
-    const { children, className } = this.props;
-
+    const { children, className, staking_ledger } = this.props;
     return (
       <div className={className}>
         {this.renderPower()}
@@ -113,24 +80,25 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
   }
 
   private renderPower() {
-    const { staking_ledger, value } = this.props
-
-    if (!staking_ledger) {
-      return null;
+    let { staking_ledger = ZERO_STAKING_LEDGER } = this.props
+    
+    if(!staking_ledger || staking_ledger.isEmpty){
+        return (<div className="power-box">
+        <h3>Power</h3>
+        <p><Power ringAmount={new BN(0)} ktonAmount={new BN(0)} /></p>
+      </div>);
     }
 
-    const power = formatBalance(staking_ledger.raw.active_power, false)
     return (
       <div className="power-box">
         <h3>Power</h3>
-        {/* <p>{power}</p> */}
-        <p><Power ringAmount={staking_ledger.raw.active_ring} ktonAmount={staking_ledger.raw.active_kton} /></p>
+        <p><Power ringAmount={staking_ledger.active_ring} ktonAmount={staking_ledger.active_kton} /></p>
       </div>
     );
   }
 
   private renderBalances() {
-    const { ringBalances_freeBalance, balances_freeBalance_stash, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value ,stashId} = this.props;
+    const { balances_freeBalance_stash, kton_freeBalance, staking_info, t, withBalance = true, kton_locks, balances_locks, buttons, isReadyStaking = false, staking_ledger, value, stashId } = this.props;
 
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
@@ -144,11 +112,9 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 
     let _balances_locks = new BN(0)
     let _ktonBalances_locks = new BN(0)
-    console.log('staking_balance', stashId, balances_freeBalance_stash.toString(), balances_locks)
     if (balances_locks) {
       balances_locks.forEach((item) => {
         _balances_locks = _balances_locks.add(item.amount)
-        console.log('staking_balance - 1', balances_freeBalance_stash.toString(), item.amount.toString())
       })
     }
     if (kton_locks) {
@@ -161,7 +127,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
       return (
         <div className='column'>
           <div className="ui--address-value">
-          <div className="balance-box">
+            <div className="balance-box">
               <p>RING</p>
               <h1>{formatBalance(balances_freeBalance_stash)}</h1>
             </div>
@@ -173,8 +139,8 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
         </div>
       );
     }
-
-    if (!staking_ledger || staking_ledger.isNone) {
+    
+    if (!staking_ledger || staking_ledger.isEmpty) {
       return null;
     }
 
@@ -189,8 +155,8 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               </div>
               <div className="box-right">
                 <p><label>Available</label><span>{formatBalance((balances_freeBalance_stash && balances_locks) ? balances_freeBalance_stash.sub(_balances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatBalance(staking_ledger.raw.active_ring.toBn(), false)}</span></p>
-                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.raw.total_ring.toBn().sub(staking_ledger.raw.active_ring.toBn()), false)}</span></p>
+                <p><label>Bonded</label><span>{formatBalance(staking_ledger.active_ring.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.total_ring.toBn().sub(staking_ledger.active_ring.toBn()), false)}</span></p>
               </div>
             </div>
           </div>
@@ -203,12 +169,12 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               </div>
               <div className="box-right">
                 <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatKtonBalance(staking_ledger.raw.active_kton.toBn(), false)}</span></p>
-                <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.raw.total_kton.toBn().sub(staking_ledger.raw.active_kton.toBn()), false)}</span></p>
+                <p><label>Bonded</label><span>{formatKtonBalance(staking_ledger.active_kton.toBn(), false)}</span></p>
+                <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.total_kton.toBn().sub(staking_ledger.active_kton.toBn()), false)}</span></p>
               </div>
             </div>
           </div>
-    
+
           {buttons}
         </div>
       </div>
@@ -315,7 +281,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
 }
 
 export default withMulti(
-  styled(AddressInfoAccountList)`
+  styled(AddressInfoStaking)`
     align-items: flex-start;
     display: flex;
     flex: 1;
@@ -441,15 +407,31 @@ export default withMulti(
         }
       }
     }
+
+    @media (max-width: 767px) {
+      flex-wrap: wrap;
+      .ui--address-value{
+        flex-wrap: wrap;
+      }
+
+      .column {
+        .nominate-balance-box {
+          padding: 10px;
+          margin: 5px 0;
+        }
+      }
+    }
   `,
   translate,
   withCalls<Props>(
-    
+
     ['query.kton.locks', { paramName: 'stashId' }],
     ['query.balances.locks', { paramName: 'stashId' }],
     ['query.kton.freeBalance', { paramName: 'stashId' }],
-    ['query.balances.freeBalance', { paramName: 'stashId' ,propName: 'balances_freeBalance_stash'}],
-    ['query.staking.ledger', { paramName: 'value' }],
+    ['query.balances.freeBalance', { paramName: 'stashId', propName: 'balances_freeBalance_stash' }],
+    ['query.staking.ledger', { paramName: 'value' , transform: (value: Option<StakingLedgers>) =>
+      value.unwrapOr(null)
+    }],
     // ['derive.balances.all', { paramName: 'stashId' }],
     // ['derive.staking.info', { paramName: 'value' }],
   )

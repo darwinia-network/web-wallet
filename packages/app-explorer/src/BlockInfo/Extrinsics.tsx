@@ -77,17 +77,17 @@ class Extrinsics extends React.PureComponent<Props> {
   private renderSigner (extrinsic: Extrinsic) {
     const { t } = this.props;
 
-    if (!extrinsic.signature.isSigned) {
+    if (!extrinsic.isSigned) {
       return null;
     }
 
     return (
       <div className='explorer--BlockByHash-header-right'>
         <div>
-          <AddressMini value={extrinsic.signature.signer} />
+          <AddressMini value={extrinsic.signer} />
         </div>
         <div className='explorer--BlockByHash-accountIndex'>
-          {t('index')} {formatNumber(extrinsic.signature.nonce)}
+          {t('index')} {formatNumber(extrinsic.nonce)}
         </div>
       </div>
     );

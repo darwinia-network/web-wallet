@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { createType, Bytes, Compact, StorageKey, Text, U8a } from '@polkadot/types';
+import { createType, Bytes, Compact, StorageKey, U8a } from '@polkadot/types';
 import { PlainType, StorageEntryMetadata, StorageEntryModifier, StorageEntryType } from '@polkadot/types/Metadata/v6/Storage';
 import { StorageEntry } from '@polkadot/types/primitive/StorageKey';
 import { assert, isNull, isUndefined, stringLowerFirst, stringToU8a, u8aConcat } from '@polkadot/util';
@@ -12,6 +12,13 @@ import getHasher, { HasherFunction } from './getHasher';
 export interface CreateItemOptions {
   key?: string;
   skipHashing?: boolean; // We don't hash the keys defined in ./substrate.ts
+}
+
+export interface CreateItemFn {
+  meta: StorageEntryMetadata;
+  method: string;
+  prefix: string;
+  section: string;
 }
 
 /**
@@ -24,10 +31,10 @@ export interface CreateItemOptions {
  * are not known at runtime (from state_getMetadata), they need to be supplied
  * by us manually at compile time.
  */
-export default function createFunction (section: Text | string, method: Text | string, meta: StorageEntryMetadata, options: CreateItemOptions = {}): StorageEntry {
+export default function createFunction ({ meta, method, prefix, section }: CreateItemFn, options: CreateItemOptions = {}): StorageEntry {
   const stringKey = options.key
     ? options.key
-    : `${section.toString()} ${method.toString()}`;
+    : `${prefix} ${method}`;
   const rawKey = stringToU8a(stringKey);
 
   // Get the hashing function
@@ -46,14 +53,14 @@ export default function createFunction (section: Text | string, method: Text | s
   // Can only have zero or one argument:
   // - storage.balances.freeBalance(address)
   // - storage.timestamp.blockPeriod()
-  const storageFn = (arg?: any): Uint8Array => {
+  const _storageFn = (arg?: any): Uint8Array => {
     let key = rawKey;
 
     if (meta.type.isDoubleMap) {
       assert(!isUndefined(arg) && !isNull(arg) && !isUndefined(arg[0]) && !isNull(arg[0]) && !isUndefined(arg[1]) && !isNull(arg[1]), `${meta.name} expects two arguments`);
+
       const type1 = meta.type.asDoubleMap.key1.toString();
       const type2 = meta.type.asDoubleMap.key2.toString();
-
       const param1Encoded = u8aConcat(key, createType(type1, arg[0]).toU8a(true));
       const param1Hashed = hasher(param1Encoded);
       const param2Hashed = key2Hasher(createType(type2, arg[1]).toU8a(true));
@@ -78,23 +85,40 @@ export default function createFunction (section: Text | string, method: Text | s
     );
   };
 
+  const storageFn = _storageFn as StorageEntry;
+
+  storageFn.meta = meta;
+  storageFn.method = stringLowerFirst(method);
+  storageFn.prefix = prefix;
+  storageFn.section = section;
+  storageFn.toJSON = (): any => meta.toJSON();
+
   if (meta.type.isMap && meta.type.asMap.isLinked) {
     const keyHash = new U8a(hasher(`head of ${stringKey}`));
-    const keyFn: any = () => keyHash;
+    const keyFn: any = (): U8a => keyHash;
+
+    // metadata with a flabbcak value using the type of the key, the normal
+    // meta fallback only applies to actual entry values, create one for head
     keyFn.meta = new StorageEntryMetadata({
       name: meta.name,
       modifier: new StorageEntryModifier('Required'),
       type: new StorageEntryType(new PlainType(meta.type.asMap.key), 0),
-      fallback: new Bytes(),
+      fallback: new Bytes(createType(meta.type.asMap.key).toHex()),
       documentation: meta.documentation
     });
-    storageFn.headKey = new StorageKey(keyFn);
+
+    // here we pass the section/methos through as well - these are not on
+    // the function itself, so specify these explicitly to the constructor
+    storageFn.headKey = new StorageKey(keyFn, {
+      method: storageFn.method,
+      section: `head of ${storageFn.section}`
+    });
+
+    // adjust the fallback value - the metadata only specifies the value
+    // part, add a Linkage<Type> to the fallback aswell. The additional
+    // bytes here is a represnettaion of teh Options for next/prev
+    meta.set('fallback', new Bytes(meta.fallback.toHex().concat('0000')));
   }
 
-  storageFn.meta = meta;
-  storageFn.method = stringLowerFirst(method.toString());
-  storageFn.section = stringLowerFirst(section.toString());
-  storageFn.toJSON = (): any => meta.toJSON();
-
-  return storageFn as StorageEntry;
+  return storageFn;
 }

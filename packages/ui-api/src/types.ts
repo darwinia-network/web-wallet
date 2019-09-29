@@ -22,6 +22,7 @@ export type ApiProps = {
   currentChain: string,
   isApiConnected: boolean,
   isApiReady: boolean,
+  isSubstrateV2: boolean,
   isDevelopment: boolean,
   isWaitingInjected: boolean,
   setApiUrl: (url?: string) => void

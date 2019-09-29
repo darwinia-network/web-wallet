@@ -8,23 +8,20 @@ import { ComponentProps } from './types';
 import styled from 'styled-components';
 
 import React from 'react';
-import store from 'store'
-import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid, ColorButton, TxButton } from '@polkadot/ui-app';
+import { TxButton } from '@polkadot/ui-app';
+import { StructAny, Option, Struct, Compact, StakingLedgers } from '@polkadot/types';
 import BN from 'bn.js';
 import translate from './translate';
 import { formatBalance, formatKtonBalance, formatNumber, ringToKton } from '@polkadot/util';
-import ringStakingBtn from './img/stakingBtn.svg';
 import dayjs from 'dayjs'
 
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   balances_locks: Array<{ amount: BN }>,
   account: string,
-  gringotts_depositLedger: { raw: { deposit_list: Array<any> } },
   onStakingNow: () => void,
-  staking_ledger: any
+  staking_ledger: StakingLedgers
 };
 
 type State = {
@@ -64,14 +61,9 @@ class Overview extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts, onStatusChange, t, balances_locks = [], account, gringotts_depositLedger = { raw: { deposit_list: [] } }, onStakingNow, staking_ledger } = this.props;
-    // if(!staking_ledger){
-    //   return null;
-    // }
-    let ledger = staking_ledger && staking_ledger.unwrapOr(null)
+    const { account, staking_ledger, t } = this.props;
+    let ledger = staking_ledger
 
-
-    console.log('staking_ledger', staking_ledger, ledger)
     if (!ledger || !ledger.deposit_items || (ledger.deposit_items.length === 0)) {
       return (
         <Wrapper>
@@ -101,18 +93,17 @@ class Overview extends React.PureComponent<Props, State> {
               <td>Reward</td>
               <td>Setting</td></tr>
             {regularList.map((item, index) => {
-              console.log('item', item, item.expire_time)
               return <tr key={index}>
                 <td>
-                  <p className="stakingRange">{`${this.formatDate(item.start_time.raw)} - ${this.formatDate(item.expire_time.raw)}`}</p>
+                  <p className="stakingRange">{`${this.formatDate(item.start_time)} - ${this.formatDate(item.expire_time)}`}</p>
                   <div className="stakingProcess">
-                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_time.raw, item.expire_time.raw)}%` }}></div>
+                    <div className="stakingProcessPassed" style={{ width: `${this.process(item.start_time, item.expire_time)}%` }}></div>
                   </div>
                 </td>
                 <td>{formatBalance(item.value)}</td>
-                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time.raw).unix() - dayjs(item.start_time.raw).unix()) / (30 * 24 * 3600))))}</td>
+                <td className="textGradient">{formatKtonBalance(ringToKton(item.value, ((dayjs(item.expire_time).unix() - dayjs(item.start_time).unix()) / (30 * 24 * 3600))))}</td>
                 <td>
-                  {dayjs(item.expire_time.raw).unix() < dayjs().unix() ? <TxButton
+                  {dayjs(item.expire_time).unix() < dayjs().unix() ? <TxButton
                     accountId={account}
                     className={'colorButton'}
                     isPrimary
@@ -125,7 +116,7 @@ class Overview extends React.PureComponent<Props, State> {
                       // isNegative
                       params={[
                         item.value.toString(),
-                        item.expire_time.raw
+                        item.expire_time
                       ]}
                       label={
                         t('Redeem')
@@ -225,12 +216,20 @@ const Wrapper = styled.div`
         background: #fff!important;
       }
     }
+    @media (max-width: 767px) {
+      .stakingTable{
+        tr{
+          td{
+            text-align: center;
+            padding: 15px 2px;
+          }
+        }
 
-    /* .textGradient{
-      background: linear-gradient(to right, red, blue);
-        -webkit-background-clip: text;
-        color: transparent;
-    } */
+        .stakingRange{
+          font-size: 12px;
+        }
+      }
+    }
 `
 
 export default withMulti(
@@ -238,7 +237,10 @@ export default withMulti(
   translate,
   withCalls<Props>(
     ['query.balances.locks', { paramName: 'account' }],
-    ['query.staking.ledger', { paramName: 'account' }],
+    ['query.staking.ledger', {
+      paramName: 'account', transform: (value: Option<StakingLedgers>) =>
+        value.unwrapOr(null)
+    }],
   ),
   // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

@@ -2,6 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import memoizee from 'memoizee';
 import { assert } from '@polkadot/util';
 
 import { Codec, Constructor } from '../types';
@@ -35,21 +36,21 @@ export enum TypeDefInfo {
   Null
 }
 
-export type TypeDefExtVecFixed = {
-  length: number,
-  type: string
-};
+export interface TypeDefExtVecFixed {
+  length: number;
+  type: string;
+}
 
-export type TypeDef = {
-  info: TypeDefInfo,
-  ext?: TypeDefExtVecFixed, // add additional here as required
-  name?: string,
-  type: string,
-  sub?: TypeDef | Array<TypeDef>
-};
+export interface TypeDef {
+  info: TypeDefInfo;
+  ext?: TypeDefExtVecFixed; // add additional here as required
+  name?: string;
+  type: string;
+  sub?: TypeDef | TypeDef[];
+}
 
 // safely split a string on ', ' while taking care of any nested occurences
-export function typeSplit (type: string): Array<string> {
+export function typeSplit (type: string): string[] {
   let cDepth = 0; // compact/doublemap/linkedmap/option/vector depth
   let fDepth = 0; // vector (fixed) depth
   let sDepth = 0; // struct depth
@@ -119,17 +120,17 @@ export function getTypeDef (_type: Text | string, name?: string): TypeDef {
 
   if (startingWith(type, '(', ')')) {
     value.info = TypeDefInfo.Tuple;
-    value.sub = typeSplit(subType).map((inner) => getTypeDef(inner));
+    value.sub = typeSplit(subType).map((inner): TypeDef => getTypeDef(inner));
   } else if (startingWith(type, '[', ']')) {
     // this handles e.g. [u8;32]
     const [vecType, _vecLen] = type.substr(1, type.length - 2).split(';');
     const vecLen = parseInt(_vecLen.trim(), 10);
 
     // as a first round, only u8 via u8aFixed, we can add more support
-    assert(vecLen <= 256, `Only support for [Type; <length>], where length <= 256`);
+    assert(vecLen <= 256, `${type}: Only support for [Type; <length>], where length <= 256`);
 
     value.info = TypeDefInfo.VectorFixed;
-    value.ext = { length: vecLen, type: vecType } as TypeDefExtVecFixed;
+    value.ext = { length: vecLen, type: vecType } as unknown as TypeDefExtVecFixed;
   } else if (startingWith(type, '{', '}')) {
     const parsed = JSON.parse(type);
     const keys = Object.keys(parsed);
@@ -139,12 +140,12 @@ export function getTypeDef (_type: Text | string, name?: string): TypeDef {
 
       // not as pretty, but remain compatible with oo7 for both struct and Array types
       value.sub = Array.isArray(details)
-        ? details.map((name) => ({
+        ? details.map((name): TypeDef => ({
           info: TypeDefInfo.Plain,
           name,
           type: 'Null'
         }))
-        : Object.keys(details).map((name) => ({
+        : Object.keys(details).map((name): TypeDef => ({
           info: TypeDefInfo.Plain,
           name,
           type: details[name] || 'Null'
@@ -152,7 +153,7 @@ export function getTypeDef (_type: Text | string, name?: string): TypeDef {
       value.info = TypeDefInfo.Enum;
     } else {
       value.info = TypeDefInfo.Struct;
-      value.sub = keys.map((name) => getTypeDef(parsed[name], name));
+      value.sub = keys.map((name): TypeDef => getTypeDef(parsed[name], name));
     }
   } else if (startingWith(type, 'Compact<', '>')) {
     value.info = TypeDefInfo.Compact;
@@ -174,9 +175,37 @@ export function getTypeDef (_type: Text | string, name?: string): TypeDef {
   return value;
 }
 
+// Memoized helper of the `createClass` function below
+const memoizedCreateClass = memoizee(<T extends Codec = Codec>(type: Text | string): Constructor<T> => {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
+  return getTypeClass<T>(
+    getTypeDef(type)
+  );
+}, {
+  length: 1,
+  // Normalize args so that different args that should be cached
+  // together are cached together.
+  // E.g.: `createClass('abc') === createClass(new Text('abc'));`
+  normalizer: JSON.stringify
+});
+
+export function createClass<T extends Codec = Codec> (type: Text | string): Constructor<T> {
+  return memoizedCreateClass(type);
+}
+
+// create an array of constructors from the input
+export function getTypeClassMap (defs: TypeDef[]): { [index: string]: Constructor } {
+  return defs.reduce((result, sub): Record<string, Constructor> => {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    result[sub.name as string] = getTypeClass(sub);
+
+    return result;
+  }, {} as unknown as Record<string, Constructor>);
+}
+
 // Returns the type Class for construction
-export function getTypeClass (value: TypeDef, Fallback?: Constructor): Constructor {
-  const Type = getRegistry().get(value.type);
+export function getTypeClass<T extends Codec = Codec> (value: TypeDef, Fallback?: Constructor<T>): Constructor<T> {
+  const Type = getRegistry().get<T>(value.type);
 
   if (Type) {
     return Type;
@@ -187,66 +216,60 @@ export function getTypeClass (value: TypeDef, Fallback?: Constructor): Construct
       assert(value.sub && !Array.isArray(value.sub), 'Expected subtype for Compact');
 
       return Compact.with(
-        getTypeClass(value.sub as TypeDef) as Constructor<UInt>
-      );
+        getTypeClass<UInt>(value.sub as TypeDef)
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Enum:
       assert(value.sub && Array.isArray(value.sub), 'Expected subtype for Enum');
 
       return Enum.with(
-        (value.sub as Array<TypeDef>).reduce((result, sub, index) => {
-          result[sub.name as string] = getTypeClass(sub);
-
-          return result;
-        }, {} as { [index: string]: Constructor })
-      );
+        getTypeClassMap(value.sub as TypeDef[])
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Option:
       assert(value.sub && !Array.isArray(value.sub), 'Expected subtype for Option');
 
       return Option.with(
         getTypeClass(value.sub as TypeDef)
-      );
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Struct:
       assert(Array.isArray(value.sub), 'Expected nested subtypes for Struct');
 
       return Struct.with(
-        (value.sub as Array<TypeDef>).reduce((result, sub) => {
-          result[sub.name as string] = getTypeClass(sub);
-
-          return result;
-        }, {} as { [index: string]: Constructor })
-      );
+        getTypeClassMap(value.sub as TypeDef[])
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Tuple:
       assert(Array.isArray(value.sub), 'Expected nested subtypes for Tuple');
 
       return Tuple.with(
-        (value.sub as Array<TypeDef>).map((Type) => getTypeClass(Type))
-      );
+        (value.sub as TypeDef[]).map((Type): Constructor<Codec> => getTypeClass(Type))
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Vector:
       assert(value.sub && !Array.isArray(value.sub), 'Expected subtype for Vector');
 
       return Vector.with(
-        getTypeClass(value.sub as TypeDef)
-      );
+        getTypeClass<Codec>(value.sub as TypeDef)
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.VectorFixed:
       assert(value.ext, 'Expected length & type information for fixed vector');
 
       const ext = value.ext as TypeDefExtVecFixed;
 
-      return ext.type === 'u8'
-        ? U8aFixed.with((ext.length * 8) as U8aFixedBitLength)
-        : VectorFixed.with(createClass(ext.type), ext.length);
+      return (
+        ext.type === 'u8'
+          ? U8aFixed.with((ext.length * 8) as U8aFixedBitLength)
+          : VectorFixed.with(createClass<Codec>(ext.type), ext.length)
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.Linkage:
       assert(value.sub && !Array.isArray(value.sub), 'Expected subtype for Linkage');
 
       return Linkage.withKey(
-        getTypeClass(value.sub as TypeDef)
-      );
+        getTypeClass<Codec>(value.sub as TypeDef)
+      ) as unknown as Constructor<T>;
     case TypeDefInfo.DoubleMap:
       assert(value.sub && !Array.isArray(value.sub), 'Expected subtype for DoubleMap');
 
       return getTypeClass(value.sub as TypeDef);
     case TypeDefInfo.Null:
-      return Null;
+      return Null as unknown as Constructor<T>;
   }
 
   if (Fallback) {
@@ -256,13 +279,12 @@ export function getTypeClass (value: TypeDef, Fallback?: Constructor): Construct
   throw new Error(`Unable to determine type from '${value.type}'`);
 }
 
-export function createClass (type: Text | string): Constructor {
-  return getTypeClass(
-    getTypeDef(type)
-  );
+// alias for createClass
+export function ClassOf<T extends Codec = Codec> (name: string): Constructor<T> {
+  return createClass<T>(name);
 }
 
-function initType (Type: Constructor, value?: any, isPedantic?: boolean): Codec {
+function initType<T extends Codec = Codec> (Type: Constructor<T>, value?: any, isPedantic?: boolean): T {
   try {
     const created = new Type(value);
 
@@ -293,11 +315,11 @@ function initType (Type: Constructor, value?: any, isPedantic?: boolean): Codec 
   }
 }
 
-export default function createType (type: Text | string, value?: any, isPedantic?: boolean): Codec {
+export default function createType<T extends Codec = Codec> (type: Text | string, value?: any, isPedantic?: boolean): T {
   // l.debug(() => ['createType', { type, value }]);
 
   try {
-    return initType(createClass(type), value, isPedantic);
+    return initType(createClass<T>(type), value, isPedantic);
   } catch (error) {
     throw new Error(`createType(${type}):: ${error.message}`);
   }

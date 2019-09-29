@@ -42,6 +42,9 @@ These primitive types are available:
 | [[Data]] | A raw data structure. It is an encoding of a U8a without any length encoding |
 | [[Event]] | Wrapper for the actual data that forms part of an [[Event]] |
 | [[EventRecord]] | A record for an [[Event]] (as specified by [[Metadata]]) with the specific [[Phase]] of application |
+| [[Extrinsic]] | Representation of an Extrinsic in the system |
+| [[ExtrinsicEra]] | The era for an extrinsic, indicating either a mortal or immortal extrinsic |
+| [[ExtrinsicSignature]] | A container for the [[Signature]] associated with a specific [[Extrinsic]] |
 | [[H160]] | Hash containing 160 bits (20 bytes), typically used in blocks, extrinsics and as a sane default |
 | [[H256]] | Hash containing 256 bits (32 bytes), typically used in blocks, extrinsics and as a sane default |
 | [[H512]] | Hash containing 512 bits (64 bytes), typically used for signatures |
@@ -56,6 +59,8 @@ These primitive types are available:
 | [[Moment]] | A wrapper around seconds/timestamps. Internally the representation only has second precicion (aligning with Rust) |
 | [[Null]] | Implements a type that does not contain anything (apart from `null`) |
 | [[Origin]] | Where Origin occurs, it should be ignored as an internal-only value |
+| [[Signature]] | The default signature that is used accross the system |
+| [[SignaturePayload]] | A signing payload for an [[Extrinsic]]. For the final encoding, it is variable length based on the contents included |
 | [[StorageData]] | Data retrieved via Storage queries and data for key-value pairs |
 | [[StorageKey]] |  A representation of a storage key (typically hashed) in the system |
 | [[Text]] | This is a string wrapper, along with the length. |
@@ -67,6 +72,8 @@ These primitive types are available:
 | [[U128]] | A 128-bit unsigned integer |
 | [[U256]] | A 256-bit unsigned integer |
 | [[USize]] | A System default unsigned number, typically used in RPC to report non-consensus data |
+| [[Weight]] | Numeric range of a transaction weight. |
+| [[WeightMultiplier]] | Representation of a weight multiplier. This represents how a fee value can be computed from a weighted transaction. |
 
 
 ## Substrate types
@@ -78,7 +85,6 @@ These custom types implement specific types that are found as part of the Substr
 | [[Amount]] | The Substrate Amount representation as a [[Balance]] |
 | [[ApprovalFlag]] | Approval flag, implemented as a [[U32]] |
 | [[AssetOf]] | The Substrate AssetOf representation as a [[Balance]] |
-| [[AttestedCandidate]] | An attested candidate |
 | [[AuthorityId]] | Wrapper for a AuthorityId. Same as an normal AccountId |
 | [[AuthoritiesChange]] | Log for Authories changed |
 | [[AuthorityWeight]] | The weight of an authority |
@@ -97,11 +103,9 @@ These custom types implement specific types that are found as part of the Substr
 | [[ContractStorageKey]] | A representation of a storage key for contracts |
 | [[EraIndex]] | A representation for the era count |
 | [[Exposure]] | A snapshot of the stake backing a single validator in the system |
-| [[Extrinsic]] | Representation of an Extrinsic in the system |
-| [[ExtrinsicEra]] | The era for an extrinsic, indicating either a mortal or immortal extrinsic |
 | [[Extrinsics]] | A [[Vector]] of [[Extrinsic]] |
-| [[ExtrinsicSignature]] | A container for the [[Signature]] associated with a specific [[Extrinsic]] |
 | [[Gas]] | A gas number type for Substrate, extending [[U64]] |
+| [[Heartbeat]] | Heartbeat which is send/received. |
 | [[IndividualExposure]] | The Substrate IndividualExposure for staking |
 | [[InherentOfflineReport]] | Describes the offline-reporting extrinsic |
 | [[Justification]] | A generic justification as a stream of [[Bytes]], this is specific per consensus implementation |
@@ -135,14 +139,13 @@ These custom types implement specific types that are found as part of the Substr
 | [[SessionKey]] | Wrapper for a SessionKey. Same as an normal [[AuthorityId]], i.e. a wrapper around publicKey |
 | [[SessionKeys]] | Wrapper for the session and authority ids |
 | [[SetIndex]] | Set index, implemented as a [[U32]] |
-| [[Signature]] | The default signature that is used accross the system |
-| [[SignaturePayload]] | A signing payload for an [[Extrinsic]]. For the final encoding, it is variable length based on the contents included |
-| [[SignaturePayloadRaw]] | A version of the [[SignaturePayload]] where it doesn't rely on [[Method]] with metadata, rather it treats the values as a raw byte stream |
 | [[StakingLedger]] | The ledger of a (bonded) stash |
 | [[StoredPendingChange]] | Stored pending change for a Grandpa events |
+| [[StoredState]] | Current state of the GRANDPA authority set. State transitions must happen in the same order of states defined below, e.g. `Paused` implies a prior `PendingPause` |
 | [[TreasuryProposal]] | A Proposal made for Treasury |
 | [[UncleEntryItem]] | Information about an uncle to include |
 | [[UnlockChunk]] | Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked |
+| [[ValidatorId]] | Validator in the system, maps to an AccountId |
 | [[ValidatorPrefs]] | Validator preferences |
 | [[VestingSchedule]] | Struct to encode the vesting schedule of an individual account |
 | [[Vote]] | A number of lock periods, plus a vote, one way or the other |
@@ -160,6 +163,7 @@ These types are only available in Polkadot chains -
 | **Types** | |
 | --- | --- |
 | [[AuctionIndex]] | A parachain auction index as a [[U32]] |
+| [[AttestedCandidate]] | An attested candidate |
 | [[Bidder]] | The desired target of a bidder in an auction. |
 | [[LeasePeriod]] | The length of the lease for a parachain |
 | [[LeasePeriodOf]] | The length of the lease for a parachain |
@@ -172,7 +176,7 @@ These types are only available in Polkadot chains -
 | [[SubId]] | A sub-bidder identifier. Used to distinguish between different logical bidders coming from the same account ID. |
 | [[UpwardMessage]] | A message from a parachain to its Relay Chain |
 | [[WinningData]] | Winning data type. This encodes the top bidders of each range together with their bid. |
-| [[WinningDataentry]] | And entry in the [[WinningData]] fixed vector |
+| [[WinningDataEntry]] | And entry in the [[WinningData]] fixed vector |
 
 
 ## RPC types

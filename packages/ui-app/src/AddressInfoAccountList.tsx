@@ -98,7 +98,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
             <div className='result'>{formatKtonBalance((kton_freeBalance ? kton_freeBalance.toString() : '0'), false)}</div>
           </>
         )}
-        {balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}
+        {/* {balanceDisplay.bonded && this.renderBonded(balanceDisplay.bonded)}
         {balanceDisplay.redeemable && staking_info && staking_info.redeemable && staking_info.redeemable.gtn(0) && (
           <>
             <Label label={t('redeemable')} />
@@ -115,7 +115,7 @@ class AddressInfoAccountList extends React.PureComponent<Props> {
               {this.renderUnlocking()}
             </div>
           </>
-        )}
+        )} */}
       </div>
     );
   }

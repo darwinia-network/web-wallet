@@ -50,10 +50,7 @@ class Accounts extends React.PureComponent<Props, State> {
     const { balances, recentlyOffline, t, validators, accountMain , stashId, controllerId} = this.props;
 
     const { filter, filterOptions } = this.state;
-    const accounts = keyring.getAccounts();
     const stashOptions = this.getStashOptions();
-
-    console.log('Accounts Page', stashId, controllerId)
     
     return (
       <StyledWrapper>
