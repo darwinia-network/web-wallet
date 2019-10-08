@@ -784,7 +784,6 @@ class Account extends React.PureComponent<Props, State> {
     const { staking_ledger, t } = this.props;
     const { isActiveStash, isActiveController, nominators, sessionId, stakingLedger, validatorPrefs, isSettingPopupOpen } = this.state;
     const buttons = [];
-
     if (isActiveStash) {
       // only show a "Bond Additional" button if this stash account actually doesn't bond everything already
       // staking_ledger.total gives the total amount that can be slashed (any active amount + what is being unlocked)
@@ -930,7 +929,7 @@ export default withMulti(
   withCalls<Props>(
     ['query.staking.nominators', { paramName: 'accountId' }],
     ['query.staking.ledger', {
-      paramName: 'account', transform: (value: Option<StakingLedgers>) =>
+      paramName: 'accountId', transform: (value: Option<StakingLedgers>) =>
         value.unwrapOr(null)
     }],
     ['query.staking.bonded', { paramName: 'accountId' }],
