@@ -85,14 +85,14 @@ class Validate extends TxComponent<Props, State> {
     const {nodeName = new Bytes()}  = props
 
     if (props.validatorPrefs && !state.isUpdateProps) {
-      // @ts-ignore
-      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
-      // console.log('props.validatorPrefs1', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
+
+      const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
+      // console.log('props.validatorPrefs1', props.validatorPrefs)
 
       return {
-        unstakeThreshold: unstake_threshold.toBn(),
+        unstakeThreshold: unstakeThreshold.toBn(),
         unstakeThresholdError: null,
-        validatorPayment: validator_payment_ratio.toBn().div(new BN(10000000)),
+        validatorPayment: validatorPayment.toBn().div(new BN(10000000)),
         nodeName: u8aToString(nodeName.toU8a(true)),
         isUpdateProps: true
       };

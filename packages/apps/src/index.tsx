@@ -40,10 +40,10 @@ const DARWINIA_TYPES = {
   "RingBalanceOf": "u128",
   "KtonBalanceOf": "u128",
   "ExtendedBalance": "u128",
-  "ValidatorPrefs": {
-    "unstake_threshold": "Compact<u32>",
-    "validator_payment_ratio": "u32"
-  },
+  // "ValidatorPrefs": {
+  //   "unstake_threshold": "Compact<u32>",
+  //   "validator_payment_ratio": "u32"
+  // },
   "StakingBalance": {
     "_enum": {
       "Ring": "RingBalanceOf",

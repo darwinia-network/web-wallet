@@ -17,21 +17,21 @@ import CurrentList from './CurrentList';
 import Summary from './Summary';
 
 type Props = BareProps & ComponentProps & {
-  chain_subscribeNewHead?: HeaderExtended
+  chain_subscribeNewHead?: HeaderExtended,
+  staking_validators: any,
 };
 
 const ZERO = new Balance(0);
 
 class Overview extends React.PureComponent<Props> {
   render () {
-    const { balances, chain_subscribeNewHead, controllers, recentlyOffline, validators } = this.props;
+    const { balances, chain_subscribeNewHead, controllers, recentlyOffline, validators, staking_validators } = this.props;
     const nextSorted = this.sortByBalance(
       controllers.filter((address) =>
         !validators.includes(address)
       )
     );
     const validatorsSorted = this.sortByBalance(validators);
-
     let lastBlock: string = '—';
     let lastBlockBN: BlockNumber;
     let lastAuthor: string | undefined;
@@ -59,6 +59,7 @@ class Overview extends React.PureComponent<Props> {
           lastAuthor={lastAuthor}
           next={nextSorted}
           recentlyOffline={recentlyOffline}
+          stakingValidators={staking_validators}
         />
       </div>
     );
@@ -79,6 +80,8 @@ class Overview extends React.PureComponent<Props> {
 export default withMulti(
   Overview,
   withCalls<Props>(
-    'derive.chain.subscribeNewHead'
+    'query.staking.validators',
+    'derive.chain.subscribeNewHead',
+    
   )
 );
