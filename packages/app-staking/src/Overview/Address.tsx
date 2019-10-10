@@ -16,6 +16,29 @@ import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util'
 import { api } from '@polkadot/ui-api'
 import translate from '../translate';
 
+function toIdString(id?: AccountId | null): string | null {
+  return id
+    ? id.toString()
+    : null;
+}
+
+function filterValidatorPrefs(validators, stashId) {
+  if (!validators || validators && validators.isEmpty) {
+    return null
+  }
+  let validatorIndex = -1;
+  validators[0].forEach((id, index) => {
+    if (toIdString(id) == toIdString(stashId)) {
+      validatorIndex = index
+    }
+  })
+
+  if (validatorIndex != -1) {
+    return validators[1][validatorIndex]
+  }
+  return null
+}
+
 type Props = I18nProps & {
   address: string,
   balances: DerivedBalancesMap,
@@ -25,7 +48,8 @@ type Props = I18nProps & {
   recentlyOffline: RecentlyOfflineMap,
   filter: ValidatorFilter,
   staking_info?: DerivedStaking,
-  staking_ringPool?: Balance
+  staking_ringPool?: Balance,
+  stakingValidators?: any
 };
 
 type State = {
@@ -36,7 +60,8 @@ type State = {
   stakers?: Exposure,
   stashId: string | null,
   badgeExpanded: boolean,
-  nodeName?: string
+  nodeName?: string,
+  validatorPrefs?: any
 };
 
 class Address extends React.PureComponent<Props, State> {
@@ -52,17 +77,24 @@ class Address extends React.PureComponent<Props, State> {
       stashId: null,
       stashTotal: null,
       badgeExpanded: false,
-      nodeName: ''
+      nodeName: '',
+      validatorPrefs: null
     };
   }
 
-  static getDerivedStateFromProps ({ staking_info }: Props, prevState: State): State | null {
+  static getDerivedStateFromProps ({ staking_info, stakingValidators }: Props, prevState: State): State | null {
     if (!staking_info) {
       return null;
     }
 
+    let validatorPrefs = null
+    
+
     const { controllerId, nextSessionId, stakers, stashId, stakingLedger } = staking_info;
 
+    if(stakingValidators){
+      validatorPrefs = filterValidatorPrefs(stakingValidators, stashId)
+    }
     return {
       controllerId: controllerId && controllerId.toString(),
       sessionId: nextSessionId && nextSessionId.toString(),
@@ -73,12 +105,12 @@ class Address extends React.PureComponent<Props, State> {
       stashId: stashId && stashId.toString(),
       stashTotal: stakingLedger
         ? formatBalance(stakingLedger.total)
-        : prevState.stashTotal
+        : prevState.stashTotal,
+      validatorPrefs: validatorPrefs
     } as State;
   }
 
   componentDidUpdate(prevProps, prevState) {
-
     if (prevState.stashId !== this.state.stashId && this.state.stashId) {
 
       api.query.staking.nodeName(this.state.controllerId).then((nodeName) => {
@@ -91,7 +123,7 @@ class Address extends React.PureComponent<Props, State> {
 
   render () {
     const { address, defaultName, lastAuthor, lastBlock, filter } = this.props;
-    const { controllerId, stakers, stashId, nodeName } = this.state;
+    const { controllerId, stakers, stashId, nodeName, validatorPrefs } = this.state;
     const isAuthor = [address, controllerId, stashId].includes(lastAuthor);
     const bonded = stakers && !stakers.own.isZero()
       ? [stakers.own, stakers.total.sub(stakers.own)]
@@ -114,6 +146,7 @@ class Address extends React.PureComponent<Props, State> {
           nodeName={nodeName}
           value={stashId}
           withBalance={{ bonded }}
+          validatorPrefs={validatorPrefs}
         >
           {this.renderNominators()}
         </AddressRow>

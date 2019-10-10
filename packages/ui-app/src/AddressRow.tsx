@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { AccountId, AccountIndex, Address, Exposure, Balance } from '@polkadot/types';
+import { AccountId, AccountIndex, Address, Exposure, Balance, ValidatorPrefs } from '@polkadot/types';
 import { I18nProps } from './types';
 
 import BN from 'bn.js';
@@ -45,7 +45,8 @@ export type Props = I18nProps & {
   nominator?: string,
   staking_stakers: Exposure,
   staking_ringPool?: Balance,
-  isShare?: boolean
+  isShare?: boolean,
+  validatorPrefs?: ValidatorPrefs
 };
 
 type State = {
@@ -99,8 +100,23 @@ class AddressRow extends React.PureComponent<Props, State> {
       : null;
   }
 
+  renderPayment = ({ unstakeThreshold, validatorPayment }) => {
+    let paymentText = '0'
+    if (validatorPayment) {
+          paymentText = validatorPayment.toBn().div(new BN(10000000)).toString()
+    }
+    return (
+      <div className='ui--AddressRow-payment'>
+        <div className="column">
+          <label>node preferences</label>
+          <div className="result">{paymentText}%</div>
+        </div>
+      </div>
+    )
+  }
+
   render() {
-    const { accounts_idAndIndex = [], className, isInline, style, staking_stakers, nominator, isShare, value } = this.props;
+    const { accounts_idAndIndex = [], className, isInline, style, staking_stakers, nominator, isShare, validatorPrefs } = this.props;
     const [accountId, accountIndex] = accounts_idAndIndex;
     const isValid = accountId || accountIndex;
 
@@ -130,6 +146,7 @@ class AddressRow extends React.PureComponent<Props, State> {
               {/* {this.renderBonded()} */}
             </div>
             {this.renderBalances()}
+            {validatorPrefs ?  this.renderPayment(validatorPrefs):null}
             {this.renderTags()}
           </div>
         </div>
@@ -160,7 +177,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   protected renderShares(other, total) {
-    const { isShare,staking_ringPool } = this.props;
+    const { isShare, staking_ringPool } = this.props;
     if (!isShare || other.length === 0 || !staking_ringPool) {
       return null;
     }
@@ -530,6 +547,28 @@ export default withMulti(
         .result {
           display: inline-block;
         }
+        
+      }
+
+      > span {
+        text-align: left;
+      }
+    }
+
+    .ui--AddressRow-payment{
+      .column {
+        display: block;
+
+        label {
+          grid-column: 1;
+          padding-right: 0.5rem;
+          text-align: right;
+        }
+        label,
+        .result {
+          display: inline-block;
+        }
+        
       }
 
       > span {
