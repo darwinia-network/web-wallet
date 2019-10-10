@@ -54,13 +54,12 @@ class Staking extends TxComponent<Props, State> {
     // }
 
     if (props.validatorPrefs) {
-      // @ts-ignore
-      const { unstake_threshold, validator_payment_ratio } = props.validatorPrefs;
+      const { unstakeThreshold, validatorPayment } = props.validatorPrefs;
       // console.log('props.validatorPrefs', props.validatorPrefs, unstake_threshold.toBn(), validator_payment_ratio.toBn())
 
       return {
-        unstakeThreshold: unstake_threshold.toBn(),
-        validatorPayment: validator_payment_ratio.toBn(),
+        unstakeThreshold: unstakeThreshold.toBn(),
+        validatorPayment: validatorPayment.toBn(),
         nodeName: u8aToString(nodeName.toU8a(true)),
         hasAvailable: state.hasAvailable
       };

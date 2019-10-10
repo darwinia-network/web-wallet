@@ -5,6 +5,7 @@
 import { DerivedBalancesMap } from '@polkadot/api-derive/types';
 import { I18nProps } from '@polkadot/ui-app/types';
 import { ValidatorFilter, RecentlyOfflineMap } from '../types';
+import { AccountId } from '@polkadot/types';
 
 import React from 'react';
 import { Columar, Column, Dropdown, FilterOverlay } from '@polkadot/ui-app';
@@ -18,7 +19,8 @@ type Props = I18nProps & {
   lastAuthor?: string,
   lastBlock: string,
   next: Array<string>,
-  recentlyOffline: RecentlyOfflineMap
+  recentlyOffline: RecentlyOfflineMap,
+  stakingValidators?: any
 };
 
 type State = {
@@ -57,7 +59,7 @@ class CurrentList extends React.PureComponent<Props, State> {
   }
 
   private renderColumn (addresses: Array<string>, defaultName: string) {
-    const { balances, lastAuthor, lastBlock, recentlyOffline, t } = this.props;
+    const { balances, lastAuthor, lastBlock, recentlyOffline, stakingValidators, t } = this.props;
     const { filter } = this.state;
 
     if (addresses.length === 0) {
@@ -66,7 +68,8 @@ class CurrentList extends React.PureComponent<Props, State> {
       );
     }
 
-    return   addresses.map((address) => (
+    return   addresses.map((address) => {
+      return (
       <Address
         address={address}
         balances={balances}
@@ -76,8 +79,9 @@ class CurrentList extends React.PureComponent<Props, State> {
         lastAuthor={lastAuthor}
         lastBlock={lastBlock}
         recentlyOffline={recentlyOffline}
+        stakingValidators={stakingValidators}
       />
-    ));
+    )});
   }
 }
 
