@@ -32,7 +32,7 @@
     "test": "echo \"skipping tests\"",
     "vanitygen": "node packages/app-accounts/scripts/vanitygen.js",
     "start": "cd packages/apps && webpack --config webpack.config.js",
-    "i18n-extract": "i18next --config i18next-parser.config.js"
+    "i18n-scanner": "i18next-scanner --config i18next-scanner.config.js"
   },
   "dependencies": {
     "dayjs": "^1.8.15"
@@ -59,6 +59,7 @@
     "postcss-simple-vars": "^5.0.0",
     "precss": "^4.0.0",
     "source-map-explorer": "^1.7.0",
+    "i18next-scanner": "^2.10.3",
     "html-webpack-plugin": "",
     "webpack-plugin-serve":"",
     "webpack": "",

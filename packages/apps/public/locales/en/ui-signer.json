@@ -1,0 +1,19 @@
+{
+  "The selected account does not exist on your keyring": "The selected account does not exist on your keyring",
+  "The selected account does not have the required balance available for this transaction": "The selected account does not have the required balance available for this transaction",
+  "Submitting this transaction will drop the account balance to below the existential amount ({{existentialDeposit}}), which can result in the account being removed from the chain state and its associated funds burned.": "Submitting this transaction will drop the account balance to below the existential amount ({{existentialDeposit}}), which can result in the account being removed from the chain state and its associated funds burned.",
+  "This account does have a reserved/locked balance, not taken into account": "This account does have a reserved/locked balance, not taken into account",
+  "Fees includes the transaction fee and the per-byte fee": "Fees includes the transaction fee and the per-byte fee",
+  "Fees totalling {{fees}} will be applied to the submission": "Fees totalling {{fees}} will be applied to the submission",
+  "{{total}} total transaction amount (fees + value) from sending account": "{{total}} total transaction amount (fees + value) from sending account",
+  "The deposit is below the {{minimum}} minimum required for the proposal to be evaluated": "The deposit is below the {{minimum}} minimum required for the proposal to be evaluated",
+  "The deposit of {{deposit}} will be reserved until the proposal is completed": "The deposit of {{deposit}} will be reserved until the proposal is completed",
+  "The Staking totalling {{staking}} will be applied to the submission": "The Staking totalling {{staking}} will be applied to the submission",
+  "The final recipient balance is less or equal to {{existentialDeposit}} (the existential amount) and will not be reflected": "The final recipient balance is less or equal to {{existentialDeposit}} (the existential amount) and will not be reflected",
+  "A fee of {{creationFee}} will be deducted from the sender since the destination account does not exist": "A fee of {{creationFee}} will be deducted from the sender since the destination account does not exist",
+  "Submit (no signature)": "Submit (no signature)",
+  "Sign and Submit": "Sign and Submit",
+  "Cancel": "Cancel",
+  "sending from my account": "sending from my account",
+  "unlock account with password": "unlock account with password"
+}

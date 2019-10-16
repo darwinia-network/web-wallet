@@ -10,7 +10,7 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 
 import React from 'react';
-import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp} from '@polkadot/ui-app';
+import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp } from '@polkadot/ui-app';
 import { withCalls, withMulti } from '@polkadot/ui-api';
 import { formatBalance, formatNumber } from '@polkadot/util';
 import BN from 'bn.js';
@@ -300,7 +300,7 @@ class Account extends React.PureComponent<Props, State> {
 
   render() {
 
-    const { accountId, filter } = this.props;
+    const { accountId, filter, t } = this.props;
     const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, sessionId } = this.state;
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
@@ -313,12 +313,12 @@ class Account extends React.PureComponent<Props, State> {
       return (
         <StyledWrapper>
           <div className={'titleRow'}>
-            Note
+            {t('Note')}
           </div>
           <div className="ui--string-now">
-            <h1>Sorry！</h1>
-            <p>You are in the status of a nominators and cannot be a node for now.</p>
-            <p>We will develop the upgrade to be a node function in future.</p>
+            <h1>{t('Sorry！')}</h1>
+            <p>{t('You are in the status of a nominators and cannot be a node for now.')}</p>
+            <p>{t('We will develop the upgrade to be a node function in future.')}</p>
           </div>
         </StyledWrapper>
       );
@@ -332,7 +332,7 @@ class Account extends React.PureComponent<Props, State> {
     return (
       <StyledWrapper>
         <div className={'titleRow'}>
-          My Nomination
+          {t('My Nomination')}
         </div>
         <div>
           {this.renderBond()}
@@ -355,8 +355,8 @@ class Account extends React.PureComponent<Props, State> {
             {this.renderNominateButtons()}
           </div>
           <div className={'titleRow'}>
-            POWER MANAGER 
-            <LabelHelp help={'You can manage POWER with bond more/unbond asset, which can be used to nominate nodes to earn RING. RING/KTON will have 21days of unbonding status after unbond. Assets in thiis state can not nominate and transfer'}/>
+            {t('POWER MANAGER')}
+            <LabelHelp help={t('You can manage POWER with bond more/unbond asset, which can be used to nominate nodes to earn RING. RING/KTON will have 21days of unbonding status after unbond. Assets in thiis state can not nominate and transfer')} />
           </div>
           <AddressInfoStaking
             value={accountId}
@@ -368,24 +368,24 @@ class Account extends React.PureComponent<Props, State> {
         </div>
 
         {!isActiveStash && !isNominating && !isValidating && <div>
-          <div className={'titleRow'}>Start</div>
+          <div className={'titleRow'}>{t('Start')}</div>
           <div className="ui--string-now">
-            <h1>Get Power for Nominate</h1>
-            <p>note: </p>
+            <h1>{t('Get Power for Nominate')}</h1>
+            <p>{t('note')}: </p>
             <p>
-              1. You need to stake some KTON or RING to get power for nominate.<br />
-              2. Please make sure that you have some excess RING in this account as gas fee.<br />
-              3. After you choose to become a nominee, this account does not support to upgrade to node for now, we will support the upgrade of the account in the future.
+              {t('1. You need to stake some KTON or RING to get power for nominate.')}<br />
+              {t('2. Please make sure that you have some excess RING in this account as gas fee.')}<br />
+              {t('3. After you choose to become a nominee, this account does not support to upgrade to node for now, we will support the upgrade of the account in the future.')}
             </p>
             <button
               onClick={this.toggleBondWithStep}
-            >Staking now</button>
+            >{t('Staking now')}</button>
           </div>
         </div>}
 
 
         {isActiveStash && <><div className={'titleRow'}>
-          My Nomination
+          {t('My Nomination')}
         </div>
           <div className="ui--accounts-box">
             {this.renderNominee()}
@@ -567,8 +567,8 @@ class Account extends React.PureComponent<Props, State> {
       return (
         <div className="staking--no-address-nominate">
           <div>
-            <p>Not nominating yet<br />
-              Participating in node nominating may gain more earnings
+            <p>{t('Not nominating yet')}<br />
+              {t('Participating in node nominating may gain more earnings')}
             </p>
           </div>
           <ColorButton

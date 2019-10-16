@@ -42,12 +42,18 @@ const Wrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 22px;
     p{
       margin-bottom: 0;
       font-size: 18px;
       color: #302B3C;
     }
+    button.unchecked.button{
+      box-shadow: 0 0 0 1px #EDEDED inset!important;
+      color: #EDEDED!important;
+    }
   }
+
   article.padded {
     box-shadow: none;
   }
@@ -89,7 +95,7 @@ class Setting extends React.PureComponent<Props, State> {
 
   render() {
     const { t, onClose } = this.props;
-    
+
     return (
       <Modal
         className='app--accounts-Modal'
@@ -126,13 +132,33 @@ class Setting extends React.PureComponent<Props, State> {
   }
 
   private renderContent() {
-    const {settings} = this.state;
+    const { settings } = this.state;
+    const { t } = this.props;
     return (
       <Modal.Content>
         <Wrapper>
           <div className="item">
-             <p>Developer mode</p>
-             {settings.uiMode === 'full' ? <img onClick={this.toggleUiMode} src={SwitchOff}/> : <img onClick={this.toggleUiMode} src={SwitchOn}/>}
+            <p>{t('Developer mode')}</p>
+            {settings.uiMode === 'full' ? <img onClick={this.toggleUiMode} src={SwitchOff} /> : <img onClick={this.toggleUiMode} src={SwitchOn} />}
+          </div>
+          <div className="item">
+            <p>{t('Language')}</p>
+            <div>
+              <Button
+                isBasic={true}
+                className={settings.i18nLang !== 'zh' ? 'unchecked' : null}
+                isSecondary={true}
+                label={t('Chinese')}
+                onClick={() => this.setLng('zh')}
+              />
+              <Button
+                isBasic={true}
+                className={settings.i18nLang !== 'en' ? 'unchecked' : null}
+                isSecondary={true}
+                label={t('English')}
+                onClick={() => this.setLng('en')}
+              />
+            </div>
           </div>
         </Wrapper>
       </Modal.Content>
@@ -140,27 +166,45 @@ class Setting extends React.PureComponent<Props, State> {
   }
 
   private onSave = () => {
-    const {settings} = this.state;
+    const { settings } = this.state;
+    const { i18n } = this.props;
     uiSettings.set({
       ...settings
     })
+    i18n.changeLanguage(settings.i18nLang)
+    localStorage.setItem('i18nextLng', settings.i18nLang)
+    console.log(111, settings.i18nLang)
     window.location.reload();
   }
 
 
   private toggleUiMode = () => {
-    const {settings} = this.state;
+    const { settings } = this.state;
     let uiMode = settings.uiMode
-    if(uiMode === 'full'){
+    if (uiMode === 'full') {
       uiMode = 'light'
     } else {
       uiMode = 'full'
     }
 
-    this.setState({ settings: {
-      ...settings,
-      uiMode: uiMode
-    } },() => {
+    this.setState({
+      settings: {
+        ...settings,
+        uiMode: uiMode
+      }
+    }, () => {
+      console.log(this.state)
+    });
+  }
+
+  private setLng = (lng) => {
+    const { settings } = this.state;
+    this.setState({
+      settings: {
+        ...settings,
+        i18nLang: lng
+      }
+    }, () => {
       console.log(this.state)
     });
   }

@@ -154,9 +154,9 @@ class AddressInfoStaking extends React.PureComponent<Props> {
                 <p>{t('ring')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatBalance((balances_freeBalance_stash && balances_locks) ? balances_freeBalance_stash.sub(_balances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatBalance(staking_ledger.active_ring.toBn(), false)}</span></p>
-                <p><label>Unbonding</label><span>{formatBalance(staking_ledger.total_ring.toBn().sub(staking_ledger.active_ring.toBn()), false)}</span></p>
+                <p><label>{t('available')}</label><span>{formatBalance((balances_freeBalance_stash && balances_locks) ? balances_freeBalance_stash.sub(_balances_locks).toString() : '0', false)}</span></p>
+                <p><label>{t('bonded')}</label><span>{formatBalance(staking_ledger.active_ring.toBn(), false)}</span></p>
+                <p><label>{t('unbonding')}</label><span>{formatBalance(staking_ledger.total_ring.toBn().sub(staking_ledger.active_ring.toBn()), false)}</span></p>
               </div>
             </div>
           </div>
@@ -168,13 +168,12 @@ class AddressInfoStaking extends React.PureComponent<Props> {
                 <p>{t('kton')}</p>
               </div>
               <div className="box-right">
-                <p><label>Available</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
-                <p><label>Bonded</label><span>{formatKtonBalance(staking_ledger.active_kton.toBn(), false)}</span></p>
-                <p><label>Unbonding</label><span>{formatKtonBalance(staking_ledger.total_kton.toBn().sub(staking_ledger.active_kton.toBn()), false)}</span></p>
+                <p><label>{t('available')}</label><span>{formatKtonBalance((kton_freeBalance && kton_locks) ? kton_freeBalance.sub(_ktonBalances_locks).toString() : '0', false)}</span></p>
+                <p><label>{t('bonded')}</label><span>{formatKtonBalance(staking_ledger.active_kton.toBn(), false)}</span></p>
+                <p><label>{t('unbonding')}</label><span>{formatKtonBalance(staking_ledger.total_kton.toBn().sub(staking_ledger.active_kton.toBn()), false)}</span></p>
               </div>
             </div>
           </div>
-
           {buttons}
         </div>
       </div>

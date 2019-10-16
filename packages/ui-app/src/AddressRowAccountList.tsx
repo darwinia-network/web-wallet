@@ -186,19 +186,19 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
     if(settingOpenAddress !== address) {
       return null;
     }
-
+    console.log(111, t)
     return (<div className="ui--AddressRow-Link">
         <div className="ui-AddressRow-Link-button" onClick={() => toggleBackup(address)}>
           <Icon name="cloud download" />
-          <p>Backup Json</p>
+          <p>{t('Backup Json')}</p>
         </div>
         <div className="ui-AddressRow-Link-button" onClick={() => togglePass(address)}>
           <Icon name="key" />
-          <p>Change Password</p>
+          <p>{t('Change Password')}</p>
         </div>
         <div className="ui-AddressRow-Link-button" onClick={() => toggleForget(address)}>
           <Icon name="trash" />
-          <p>Delete</p>
+          <p>{t('Delete')}</p>
         </div>
       </div>);
   }
@@ -488,16 +488,9 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
   }
 }
 
-export {
-  DEFAULT_ADDR,
-  AddressRowAccountList
-};
-
 export default withMulti(
   styled(AddressRowAccountList as any)`
     text-align: left;
-
-    
 
     &.inline {
       display: flex;

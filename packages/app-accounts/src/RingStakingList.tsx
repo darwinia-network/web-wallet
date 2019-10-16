@@ -69,13 +69,15 @@ class Overview extends React.PureComponent<Props, State> {
         <Wrapper>
           <table className={'stakingTable stakingTableEmpty'}>
             <tbody>
-              <tr className='stakingTh'><td>Expire Date</td><td>Lock</td>
-                <td>Reward</td>
-                <td>Setting</td></tr>
+              <tr className='stakingTh'>
+                <td>{t('Date')}</td>
+                <td>{t('Lock')}</td>
+                <td>{t('Reward')}</td>
+                <td>{t('Setting')}</td>
+              </tr>
               <tr>
                 <td colSpan={4} className="emptyTd">
-                  <p className="no-items">No items</p>
-                  {/* <ColorButton onClick={onStakingNow}>{t('Deposit Now')}</ColorButton> */}
+                  <p className="no-items">{t('No items')}</p>
                 </td>
               </tr>
             </tbody>
@@ -84,14 +86,17 @@ class Overview extends React.PureComponent<Props, State> {
       );
     }
 
-    let regularList = ledger.deposit_items
+    let regularList = ledger.deposit_items;
     return (
       <Wrapper>
         <table className={'stakingTable'}>
           <tbody>
-            <tr className='stakingTh'><td>Date</td><td>Deposit</td>
-              <td>Reward</td>
-              <td>Setting</td></tr>
+            <tr className='stakingTh'>
+              <td>{t('Date')}</td>
+              <td>{t('Lock')}</td>
+              <td>{t('Reward')}</td>
+              <td>{t('Setting')}</td>
+            </tr>
             {regularList.map((item, index) => {
               return <tr key={index}>
                 <td>
@@ -133,30 +138,6 @@ class Overview extends React.PureComponent<Props, State> {
       </Wrapper>
     );
   }
-
-  //   return (
-  //     <Wrapper>
-  //       <table className={'stakingTable'}>
-  //         <tbody>
-  //           <tr className='stakingTh'><td>Date</td><td>Deposit</td><td>Reward</td><td>Setting</td></tr>
-  //           {regularList.map((item, index) => {
-  //             item.start_at = '1565758536'
-  //             return <tr key={index}>
-  //               <td>
-  //                 <p className="stakingRange">{`${this.formatDate(new BN(item.start_at).toNumber() * 1000)} - ${this.formatDate(dayjs(new BN(item.start_at).toNumber() * 1000).add(new BN(item.month).toNumber() * 30, 'day').valueOf())}`}</p>
-  //                 <div className="stakingProcess">
-  //                   <div className="stakingProcessPassed" style={{ width: `${this.process(new BN(item.start_at).toNumber() * 1000, new BN(item.month).toNumber())}%` }}></div>
-  //                 </div>
-  //               </td>
-  //               <td>{formatBalance(item.value)}</td>
-  //               <td className="textGradient">{formatKtonBalance(0)}</td>
-  //               <td>----</td>
-  //             </tr>
-  //           })}
-  //         </tbody>
-  //       </table>
-  //     </Wrapper>
-  //   );
 }
 
 const Wrapper = styled.div`
@@ -242,5 +223,4 @@ export default withMulti(
         value.unwrapOr(null)
     }],
   ),
-  // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

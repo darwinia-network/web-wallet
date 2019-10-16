@@ -1,0 +1,19 @@
+{
+  "The selected account does not exist on your keyring": "您的密匙环上不存在所选帐户",
+  "The selected account does not have the required balance available for this transaction": "所选帐户没有此交易所需的余额",
+  "Submitting this transaction will drop the account balance to below the existential amount ({{existentialDeposit}}), which can result in the account being removed from the chain state and its associated funds burned.": "提交此交易会将帐户余额降至现有金额（{{existentialDeposit}}）以下，这可能导致该帐户从链状状态中删除并烧毁了其相关资金。",
+  "This account does have a reserved/locked balance, not taken into account": "此帐户确实有保留/锁定余额，未计入",
+  "Fees includes the transaction fee and the per-byte fee": "手续费包括交易费用和每字节费用",
+  "Fees totalling {{fees}} will be applied to the submission": "总计{{fees}}的手续费将应用于本次交易",
+  "{{total}} total transaction amount (fees + value) from sending account": "{{total}}来自发送帐户的总交易金额（费用+金额）",
+  "The deposit is below the {{minimum}} minimum required for the proposal to be evaluated": "保证金低于要评估的提案所需的最低{{minimum}}",
+  "The deposit of {{deposit}} will be reserved until the proposal is completed": "在提案完成之前，将保留{{deposit}}的存款",
+  "The Staking totalling {{staking}} will be applied to the submission": "此次冻结讲花费 {{staking}}",
+  "The final recipient balance is less or equal to {{existentialDeposit}} (the existential amount) and will not be reflected": "最终收件人余额小于或等于{{existentialDeposit}}（存在金额），不会反映出来",
+  "A fee of {{creationFee}} will be deducted from the sender since the destination account does not exist": "由于目标帐户不存在，因此将从发件人处扣除{{creationFee}}的费用",
+  "Submit (no signature)": "发送 (不签名)",
+  "Sign and Submit": "签名并发送",
+  "Cancel": "取消",
+  "sending from my account": "发送方",
+  "unlock account with password": "解锁账号"
+}

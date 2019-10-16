@@ -21,7 +21,6 @@ import LinkPolkascan from './LinkPolkascan';
 import translate from './translate';
 import BondedDisplay from './Bonded';
 import { classes, getAddressName, getAddressTags, toShortAddress } from './util';
-import { formatKtonBalance, formatNumber, formatBalance } from '@polkadot/util';
 import Bignumber from 'bignumber.js'
 
 export type Props = I18nProps & {
@@ -101,6 +100,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   renderPayment = ({ unstakeThreshold, validatorPayment }) => {
+    const {t} = this.props;
     let paymentText = '0'
     if (validatorPayment) {
           paymentText = validatorPayment.toBn().div(new BN(10000000)).toString()
@@ -108,7 +108,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     return (
       <div className='ui--AddressRow-payment'>
         <div className="column">
-          <label>node preferences</label>
+          <label>{t('node preferences')}</label>
           <div className="result">{paymentText}%</div>
         </div>
       </div>

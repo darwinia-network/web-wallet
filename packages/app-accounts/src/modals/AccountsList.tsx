@@ -10,16 +10,11 @@ import { ActionStatus } from '@polkadot/ui-app/Status/types';
 
 import React from 'react';
 import store from 'store'
-import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable } from '@polkadot/ui-api';
 import { Button, CardGrid, Modal, AddressRowAccountList } from '@polkadot/ui-app';
 import keyring from '@polkadot/ui-keyring';
-
 import CreateModal from '../modals/Create';
 import ImportModal from '../modals/Import';
-
-import Account from '../Account';
-import AccountDarwinia from '../AccountDarwinia';
 import translate from '../translate';
 import Forgetting from './Forgetting';
 import Backup from './Backup';
@@ -79,7 +74,7 @@ class AccountsList extends React.PureComponent<Props, State> {
             buttons={
               <div className={'overviewTab'}>
                 <div>
-                  <p>Choose account</p>
+                  <p>{t('Choose account')}</p>
                 </div>
                 <div>
                   <Button
@@ -110,7 +105,6 @@ class AccountsList extends React.PureComponent<Props, State> {
             )}
             <div className='account-box'>
               {accounts && Object.keys(accounts).map((address) => (
-                // <div key={address} className={'account-item'}>
                   <AddressRowAccountList
                     key={address} 
                     isEditable={false}
@@ -127,9 +121,7 @@ class AccountsList extends React.PureComponent<Props, State> {
                   // withExplorer
                   // withIndex
                   // withTags
-                  >
-                  </AddressRowAccountList>
-                // </div>
+                  />
               ))}
             </div>
             {this.renderModals()}
@@ -306,5 +298,4 @@ const Wrapper = styled.div`
 export default withMulti(
   AccountsList,
   translate,
-  // withObservable(accountObservable.subject, { propName: 'accounts' })
 );

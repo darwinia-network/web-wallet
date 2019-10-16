@@ -9,7 +9,7 @@ import { Button, Dropdown, InputAddress, Modal, TxButton, TxComponent } from '@p
 import { withMulti } from '@polkadot/ui-api';
 
 import translate from '../translate';
-import { rewardDestinationOptions } from '../constants';
+import { rewardDestinationOptionsI18n } from '../constants';
 
 type Props = I18nProps & {
   defaultDestination?: number,
@@ -94,7 +94,7 @@ class SetRewardDestination extends TxComponent<Props, State> {
             help={t('The destination account for any payments as either a nominator or validator')}
             label={t('payment destination')}
             onChange={this.onChangeDestination}
-            options={rewardDestinationOptions}
+            options={rewardDestinationOptionsI18n(t)}
             value={destination}
           />
         </Modal.Content>

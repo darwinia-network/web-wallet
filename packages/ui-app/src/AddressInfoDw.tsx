@@ -59,12 +59,12 @@ type Props = BareProps & I18nProps & {
 class AddressInfoDw extends React.PureComponent<Props> {
   render () {
     // const { balances_all, ringBalances_freeBalance, staking_info, t, withBalance = true, children, className } = this.props;
-
+    const {t} = this.props;
     return (
       <div>
         
         <div className="ui--value-box">
-          <p>available:</p>
+          <p>{t('available')}:</p>
           {/* <p>{ringBalances_freeBalance && ringBalances_freeBalance.toString()}</p> */}
           
         </div>
