@@ -27,7 +27,6 @@ type Props = I18nProps & ApiProps & {
 class Item extends React.PureComponent<Props> {
   render () {
     const { route: { Modal, i18n, icon, name }, t, isCollapsed, onClick } = this.props;
-
     if (!this.isVisible()) {
       return null;
     }

@@ -102,7 +102,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p className="p-title">available:</p>
+              <p className="p-title">{t('available')}:</p>
               <p className="p-amount">{formatBalance(balances_all.availableBalance)}</p>
               <p className="p-btn"><Button
                 isBasic={true}
@@ -112,7 +112,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p className="p-title">bonded:</p>
+              <p className="p-title">{t('bonded')}:</p>
               <p className="p-amount">{ringBalance[1]}</p>
               <p className="p-btn"><Button
                 isBasic={true}
@@ -124,7 +124,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p className="p-title">unbonding:</p>
+              <p className="p-title">{t('unbonding')}:</p>
               <p className="p-amount">{ringBalance[2]}</p>
               <p className="p-btn">
                 {this.renderRedeemButton()}
@@ -145,7 +145,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
           </div>
           <div className="info-bottom">
             <div className="ui--value-box">
-              <p className="p-title">available:</p>
+              <p className="p-title">{t('available')}:</p>
               <p className="p-amount">{this.renderQueryKtonAvailableBalance()}</p>
               <p className="p-btn"><Button
                 isBasic={true}
@@ -155,7 +155,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p className="p-title">bonded:</p>
+              <p className="p-title">{t('bonded')}:</p>
               <p className="p-amount">{ktonBalance[1]}</p>
               <p className="p-btn"><Button
                 isBasic={true}
@@ -167,7 +167,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
               /></p>
             </div>
             <div className="ui--value-box">
-              <p className="p-title">unbonding:</p>
+              <p className="p-title">{t('unbonding')}:</p>
               <p className="p-amount">{ktonBalance[2]}</p>
               <p className="p-btn">
                 {this.renderRedeemButton()}
@@ -182,8 +182,7 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
   private renderBalances() {
     const { balances_all, staking_info, t, withBalance = true } = this.props;
-    // console.log('balance', balances_all)
-    // console.log('2222222', ringBalances_freeBalance && ringBalances_freeBalance.toString())
+
     const balanceDisplay = withBalance === true
       ? { available: true, bonded: true, free: true, redeemable: true, unlocking: true }
       : withBalance
@@ -246,8 +245,6 @@ class AddressInfoDarwinia extends React.PureComponent<Props> {
 
   private renderQueryRingBalances() {
     const { balances_locks, balances_freeBalance = new BN(0), staking_ledger } = this.props;
-
-
 
     if (!balances_locks) return [formatBalance(balances_freeBalance), formatBalance(0)]
     const values = balances_locks.toArray().map((value) => ({

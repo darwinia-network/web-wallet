@@ -1,0 +1,22 @@
+{
+  "This is not a valid JSON object.": "This is not a valid JSON object.",
+  "Your custom types have been added": "Your custom types have been added",
+  "Save the type definitions for your custom structures as key-value pairs in a valid JSON file. The key should be the name of your custom structure and the value an object containing your type definitions.": "Save the type definitions for your custom structures as key-value pairs in a valid JSON file. The key should be the name of your custom structure and the value an object containing your type definitions.",
+  "Upload your additional type definitions as a JSON file": "Upload your additional type definitions as a JSON file",
+  "Please create a key-value pair for each of your custom structures. The key should be the name of your custom structure and the value an object containing your custom type definitions.": "Please create a key-value pair for each of your custom structures. The key should be the name of your custom structure and the value an object containing your custom type definitions.",
+  "Manually enter your custom type definitions as valid JSON": "Manually enter your custom type definitions as valid JSON",
+  "Reset": "重置",
+  "Save": "保存",
+  "preset": "预设选项",
+  "custom": "自定义",
+  "remote node/endpoint to connect to": "远程节点",
+  "Save & Reload": "保存并刷新",
+  "General": "选项",
+  "Developer": "开发者",
+  "Setting": "设置",
+  "Cancel": "取消",
+  "Chinese": "简体中文",
+  "English": "English",
+  "Developer mode": "开发者模式",
+  "Language": "语言"
+}

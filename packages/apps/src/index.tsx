@@ -3,7 +3,7 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import settings from '@polkadot/ui-settings';
-import '@polkadot/ui-app/i18n';
+// import '@polkadot/ui-app/i18n';
 import '@polkadot/ui-app/styles';
 import queryString from 'query-string';
 
@@ -16,7 +16,7 @@ import { Api } from '@polkadot/ui-api';
 
 import { QueueConsumer } from '@polkadot/ui-app/Status/Context';
 import Queue from '@polkadot/ui-app/Status/Queue';
-// import './i18n'
+import './i18n'
 import Apps from './Apps';
 
 const rootId = 'root';

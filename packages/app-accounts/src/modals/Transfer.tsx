@@ -162,7 +162,7 @@ class Transfer extends React.PureComponent<Props> {
   private renderContent() {
     const { recipientId: propRecipientId, senderId: propSenderId, type, t } = this.props;
     const { extrinsic, hasAvailable, maxBalance, recipientId, senderId } = this.state;
-    const available = <span className='label'>{t('available ')}</span>;
+    const available = <span className='label'>{t('available')} </span>;
 
     return (
       <Modal.Content>

@@ -315,7 +315,7 @@ class Playground extends React.PureComponent<Props, State> {
 
       sharedExample.code = code;
     } catch (error) {
-      const errorMessage = this.props.t('ERROR: Unable to decode code example from URL');
+      const errorMessage = 'ERROR: Unable to decode code example from URL';
 
       console.error(`${errorMessage}: \n${error}`);
       sharedExample.code = `// ${errorMessage}`;

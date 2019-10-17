@@ -7,20 +7,12 @@ import { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import { AccountId, Exposure, StakingLedger, ValidatorPrefs, VectorAny, Option, Compact } from '@polkadot/types';
 import { ComponentProps } from './types';
 import styled from 'styled-components';
-
 import React from 'react';
 import store from 'store'
-import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import { withMulti, withObservable, withCalls } from '@polkadot/ui-api';
-import { Button, CardGrid } from '@polkadot/ui-app';
 import BN from 'bn.js';
 import AccountStatus from './modals/AccountStatus';
-import Account from './Account';
-import AccountDarwinia from './AccountDarwinia';
 import translate from './translate';
-import { formatBalance, formatNumber } from '@polkadot/util';
-
-import { SIDEBAR_MENU_THRESHOLD } from "@polkadot/apps/src/constants";
 import RingStaking from './modals/RingStaking'
 import ringStakingBtn from './img/stakingBtn.svg';
 import RingStakingList from './RingStakingList';
@@ -115,8 +107,8 @@ class Overview extends React.PureComponent<Props, State> {
   render() {
     const { allAccounts, onStatusChange, t, balances_locks = [] } = this.props;
 
-    const { isRingStakingOpen, isCreateOpen, isImportOpen, isAccountsListOpen, AccountMain, stashId, controllerId } = this.state;
-    console.log('box-ring')
+    const { isRingStakingOpen, AccountMain, stashId, controllerId } = this.state;
+
     return (
       <Wrapper>
         {AccountMain && <AccountStatus onStatusChange={onStatusChange} changeAccountMain={() => { this.changeMainAddress() }} address={AccountMain} />}
@@ -132,7 +124,7 @@ class Overview extends React.PureComponent<Props, State> {
         </div>
 
         <div className={'titleRow'}>
-          Lock History
+          {t('Lock History')}
         </div>
 
         <RingStakingList account={controllerId} onStakingNow={() => {
@@ -169,7 +161,6 @@ class Overview extends React.PureComponent<Props, State> {
 
   private renderBondExtra() {
     const { controllerId, isBondExtraOpen, stashId, AccountMain } = this.state;
-    console.log('renderBondExtra', controllerId, isBondExtraOpen, stashId, AccountMain)
     return (
       <BondExtra
         // @ts-ignore
@@ -197,18 +188,6 @@ class Overview extends React.PureComponent<Props, State> {
   private toggleRingStaking = (): void => {
     this.setState(({ isRingStakingOpen }) => ({
       isRingStakingOpen: !isRingStakingOpen
-    }));
-  }
-
-  private toggleCreate = (): void => {
-    this.setState(({ isCreateOpen }) => ({
-      isCreateOpen: !isCreateOpen
-    }));
-  }
-
-  private toggleImport = (): void => {
-    this.setState(({ isImportOpen }) => ({
-      isImportOpen: !isImportOpen
     }));
   }
 

@@ -49,20 +49,19 @@ type State = {
 
 const ZERO = new BN(0);
 
-const lockLimitOptionsMaker = (): Array<object> => {
+const lockLimitOptionsMaker = (t): Array<object> => {
+
   const month = [0, 3, 6, 12, 18, 24, 30, 36]
   let options = []
   month.map((i) => {
     options.push({
-      text: i === 0 ? 'Not fixed term' : `${i} Month`,
+      text: i === 0 ? t('Not fixed term') : `${i} ${t('Month')}`,
       value: i
     })
   })
 
   return options
 }
-
-const lockLimitOptions = lockLimitOptionsMaker()
 
 const StyledWrapper = styled.div`
     display: flex;
@@ -275,20 +274,20 @@ class BondExtra extends TxComponent<Props, State> {
             help={t('lock limit')}
             label={t('lock limit')}
             onChange={this.onChangeLockLimit}
-            options={lockLimitOptions}
+            options={lockLimitOptionsMaker(t)}
           // value={lockLimit}
           /> : null}
 
           {(lockLimit && type === 'ring') ? <StyledWrapper>
             <label></label>
             <div>
-              <p>After setting a lock limit, you will receive an additional KTON bonus; if you unlock it in advance within the lock limit, you will be charged a penalty of 3 times the KTON reward.</p>
-              <Checkbox checked={accept} onChange={this.toggleAccept} label='I Accept' />
+              <p>{t('After setting a lock limit, you will receive an additional KTON bonus; if you unlock it in advance within the lock limit, you will be charged a penalty of 3 times the KTON reward.')}</p>
+              <Checkbox checked={accept} onChange={this.toggleAccept} label={t('I Accept')} />
             </div>
           </StyledWrapper> : null}
 
           <GetPowerStyledWrapper>
-            <p>You will get: <span>{this.getPowerAmount()} POWER</span></p>
+            <p>{t('You will get')}: <span>{this.getPowerAmount()} POWER</span></p>
             {(lockLimit && type === 'ring') ? <p><span>{this.getKtonAmount()} KTON</span></p> : null}
           </GetPowerStyledWrapper>
           <Checks

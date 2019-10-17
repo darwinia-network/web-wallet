@@ -167,7 +167,7 @@ class App extends React.PureComponent<Props, State> {
       })
       return;
     }
-    console.log('getStakingInfo params', controllerId, stashId)
+    // console.log('getStakingInfo params', controllerId, stashId)
 
     this.staking_multi_t && this.staking_multi_t();
     this.staking_multi_t = await api.queryMulti([
@@ -181,7 +181,7 @@ class App extends React.PureComponent<Props, State> {
       const sessionKeyWrap = (nextKeyFor && nextKeyFor.isSome) ? nextKeyFor.unwrap() : {grandpaKey: null};
 
       const nodeName = _nodeName
-      console.log('getStakingInfo', result,nextKeyFor, sessionKeyWrap, ledgerWrap, nodeName)
+      // console.log('getStakingInfo', result,nextKeyFor, sessionKeyWrap, ledgerWrap, nodeName)
 
       callback && callback({
         sessionKey: nextKeyFor ? toIdString(sessionKeyWrap.grandpaKey) : undefined,

@@ -1,0 +1,19 @@
+{
+  "Waiting for API to be connected and ready.": "等待API连接就绪。",
+  "transfer received": "转账已到账",
+  "update on #{{index}}": "更新于 #{{index}}",
+  "Create an account now.": "创建账号",
+  "Waiting for authorization from the extension. Please open the installed extension and approve or reject access.": "等待扩展的授权。 请打开已安装的扩展程序，并批准或拒绝访问。",
+  "You are not connected to a node. Ensure that your node is running and that the Websocket endpoint is reachable.": "您尚未连接到节点。 确保您的节点正在运行，并且Websocket端点可访问。",
+  "With the Firefox browser connecting to insecure WebSockets ({{wsUrl}}) will fail due to the browser not allowing localhost access from a secure site.": "使用Firefox浏览器连接到不安全的WebSockets（{{wsUrl}}）将会失败，因为浏览器不允许本地主机从安全站点访问。",
+  "You are connecting from a secure location to an insecure WebSocket ({{wsUrl}}). Due to browser mixed-content security policies this connection type is not allowed. Change the RPC service to a secure 'wss' endpoint.": "您正在从安全位置连接到不安全的WebSocket（{{wsUrl}}）。 由于浏览器混合内容安全策略，因此不允许此连接类型。 将RPC服务更改为安全的“ wss”端点。",
+  "sidebar.accounts": "资产",
+  "sidebar.stakingoverview": "浏览器",
+  "sidebar.ringstaking": "Staking中心",
+  "sidebar.staking": "投票",
+  "sidebar.node": "节点管理",
+  "sidebar.chainstate": "存储查询",
+  "sidebar.extrinsics": "交易",
+  "sidebar.settings": "连接",
+  "sidebar.dev": "设置"
+}

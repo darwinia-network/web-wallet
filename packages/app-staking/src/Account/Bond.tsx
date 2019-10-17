@@ -19,7 +19,7 @@ import { ZERO_BALANCE, ZERO_KTON_BALANCE, ZERO_FEES } from '@polkadot/ui-signer/
 import { Checkbox } from 'semantic-ui-react'
 import styled from 'styled-components'
 import { formatBalance, formatNumber, ringToKton, assetToPower, formatKtonBalance } from '@polkadot/util';
-
+import { rewardDestinationOptionsI18n } from '../constants'
 import translate from '../translate';
 import ValidateController from './ValidateController';
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
@@ -58,26 +58,18 @@ type State = {
   hasAvailable: boolean
 };
 
-const stashOptions = [
-  // { text: 'Stash account (increase the amount at stake)', value: 0 },
-  { text: 'Stash account (do not increase the amount at stake)', value: 0 },
-  { text: 'Controller account', value: 1 }
-];
-
-const lockLimitOptionsMaker = (): Array<object> => {
+const lockLimitOptionsMaker = (t): Array<object> => {
   const month = [0, 3, 6, 12, 18, 24, 30, 36]
   let options = []
   month.map((i) => {
     options.push({
-      text: i === 0 ? 'Not fixed term' : `${i} Month`,
+      text: i === 0 ? t('Not fixed term') : `${i} ${t('Month')}`,
       value: i
     })
   })
 
   return options
 }
-
-const lockLimitOptions = lockLimitOptionsMaker()
 
 const ZERO = new BN(0);
 const noop = function () { };
@@ -265,11 +257,11 @@ class Bond extends TxComponent<Props, State> {
         <Modal.Header className="ui-step-header">
           {t('Bond funds')}
           {withStep && <div>
-            <span className="">STEP1</span>
+            <span className="">{t('STEP1')}</span>
             <i className="step"></i>
-            <span className="step">STEP2</span>
+            <span className="step">{t('STEP2')}</span>
             <i className="step"></i>
-            <span className="step">STEP3</span>
+            <span className="step">{t('STEP3')}</span>
           </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
@@ -304,7 +296,7 @@ class Bond extends TxComponent<Props, State> {
             help={t('The destination account for any payments as either a nominator or validator')}
             label={t('payment destination')}
             onChange={this.onChangeDestination}
-            options={stashOptions}
+            options={rewardDestinationOptionsI18n(t)}
             value={destination}
           />}
 
@@ -330,19 +322,19 @@ class Bond extends TxComponent<Props, State> {
             help={t('lock limit')}
             label={t('lock limit')}
             onChange={this.onChangeLockLimit}
-            options={lockLimitOptions}
+            options={lockLimitOptionsMaker(t)}
           // value={lockLimit}
           /> : null}
           {lockLimit ? <StyledWrapper>
             <label></label>
             <div>
-              <p>After setting a lock limit, you will receive an additional KTON bonus; if you unlock it in advance within the lock limit, you will be charged a penalty of 3 times the KTON reward.</p>
-              <Checkbox checked={accept} onChange={this.toggleAccept} label='I Accept' />
+              <p>{t('After setting a lock limit, you will receive an additional KTON bonus; if you unlock it in advance within the lock limit, you will be charged a penalty of 3 times the KTON reward.')}</p>
+              <Checkbox checked={accept} onChange={this.toggleAccept} label={t('I Accept')} />
             </div>
           </StyledWrapper> : null}
 
           <GetPowerStyledWrapper>
-            <p>You will get: <span>{this.getPowerAmount()} POWER</span></p>
+            <p>{t('You will get')}: <span>{this.getPowerAmount()} POWER</span></p>
             {lockLimit ? <p><span>{this.getKtonAmount()} KTON</span></p> : null}
           </GetPowerStyledWrapper>
 

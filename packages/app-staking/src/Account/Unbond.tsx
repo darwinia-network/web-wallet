@@ -117,7 +117,7 @@ class Unbond extends TxComponent<Props, State> {
               />
             </Button.Group>
           </Modal.Actions>
-          <StyleWrapper>If you want to unlock the ring that set the lock limit <a href="javascript:void(0)" onClick={this.goDepositRing}>[ click here]</a></StyleWrapper>
+          <StyleWrapper>{t('If you want to unlock the ring that set the lock limit')} <a href="javascript:void(0)" onClick={this.goDepositRing}>[{t('click here')}]</a></StyleWrapper>
         </Modal>
       </>
     );
