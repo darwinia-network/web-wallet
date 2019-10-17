@@ -132,5 +132,13 @@
   "Controller account": "控制账号",
   "Not nominating yet": "您暂未投票",
   "Participating in node nominating may gain more earnings": "参与节点投票可以获取收益",
-  "(reward)": "(收益账号)"
+  "(reward)": "(收益账号)",
+  "EARNINGS": "收益",
+  "Earnings": "总收益",
+  "Today": "今日收益",
+  "Detail": "详情",
+  "Date": "日期",
+  "Era": "轮次",
+  "Type": "类型",
+  "Reward": "收益"
 }

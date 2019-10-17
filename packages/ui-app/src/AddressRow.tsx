@@ -177,7 +177,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   protected renderShares(other, total) {
-    const { isShare, staking_ringPool } = this.props;
+    const { isShare, staking_ringPool, t } = this.props;
     if (!isShare || other.length === 0 || !staking_ringPool) {
       return null;
     }
@@ -185,7 +185,7 @@ class AddressRow extends React.PureComponent<Props, State> {
     // const totalShare = new Bignumber(total ? total.toString() : 0);
     const div = myshare.div(new Bignumber(staking_ringPool.toString()).times(2)).times(100000)
     return (
-      <div className="myshare">My share: {div.toFixed(0).toString()} Power</div>
+      <div className="myshare">{t('My share')}: {div.toFixed(0).toString()} Power</div>
     );
   }
 
@@ -231,7 +231,7 @@ class AddressRow extends React.PureComponent<Props, State> {
   }
 
   private renderBonded() {
-    const { bonded, value, withBonded = false } = this.props;
+    const { bonded, value, withBonded = false, t } = this.props;
 
     if (!withBonded || !value) {
       return null;
@@ -241,7 +241,7 @@ class AddressRow extends React.PureComponent<Props, State> {
       <BondedDisplay
         className="ui-bonded"
         bonded={bonded}
-        label='My share: '
+        label={t('My share') + ': '}
         params={value}
       />
     );

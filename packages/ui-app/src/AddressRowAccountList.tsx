@@ -186,7 +186,6 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
     if(settingOpenAddress !== address) {
       return null;
     }
-    console.log(111, t)
     return (<div className="ui--AddressRow-Link">
         <div className="ui-AddressRow-Link-button" onClick={() => toggleBackup(address)}>
           <Icon name="cloud download" />

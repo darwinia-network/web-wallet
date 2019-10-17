@@ -46,5 +46,6 @@
   "node preferences": "节点优先分配",
   "Backup Json": "备份 Json 文件",
   "Change Password": "修改密码",
-  "Delete": "移除账号"
+  "Delete": "移除账号",
+  "My share": "我的份额"
 }

@@ -132,5 +132,13 @@
   "Participating in node nominating may gain more earnings": "Participating in node nominating may gain more earnings",
   "(reward)": "(reward)",
   "Stash account (do not increase the amount at stake)": "Stash account (do not increase the amount at stake)",
-  "Controller account": "Controller account"
+  "Controller account": "Controller account",
+  "EARNINGS": "EARNINGS",
+  "Earnings": "Earnings",
+  "Today": "Today",
+  "Detail": "Detail",
+  "Date": "Date",
+  "Era": "Era",
+  "Type": "Type",
+  "Reward": "Reward"
 }
