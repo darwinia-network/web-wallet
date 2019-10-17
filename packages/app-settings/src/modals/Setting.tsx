@@ -101,6 +101,7 @@ class Setting extends React.PureComponent<Props, State> {
         className='app--accounts-Modal'
         dimmer='inverted'
         open
+        size='small'
         onClose={onClose}
       >
         <Modal.Header>{t('Setting')}</Modal.Header>
@@ -173,7 +174,6 @@ class Setting extends React.PureComponent<Props, State> {
     })
     i18n.changeLanguage(settings.i18nLang)
     localStorage.setItem('i18nextLng', settings.i18nLang)
-    console.log(111, settings.i18nLang)
     window.location.reload();
   }
 

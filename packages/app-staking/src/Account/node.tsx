@@ -12,9 +12,6 @@ import { KeyringSectionOption } from '@polkadot/ui-keyring/options/types';
 import React from 'react';
 import { AddressInfo, AddressMini, AddressRow, Button, ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp } from '@polkadot/ui-app';
 import { withCalls, withMulti, withObservable } from '@polkadot/ui-api';
-import { formatBalance, formatNumber } from '@polkadot/util';
-import BN from 'bn.js';
-import { Popup } from 'semantic-ui-react';
 
 import styled from 'styled-components'
 import Bond from './Bond';
@@ -28,21 +25,10 @@ import SetSessionAccount from './SetSessionAccount';
 import Unbond from './Unbond';
 import Validating from './Validating';
 import Validate from './Validate';
-import NodeController from './nodeController';
 import NodeIcon from '../img/nodeIcon.svg';
 import CreateModal from '@polkadot/app-accounts/modals/Create';
-import accountObservable from '@polkadot/ui-keyring/observable/accounts';
-import { ignoreElements } from 'rxjs/operators';
-import { api } from '@polkadot/ui-api'
-import { u8aToU8a, u8aToString, u8aToHex } from '@polkadot/util';
-
-/** Enum */
-// export interface RewardDestination extends Enum {
-//   /** 0:: Stash */
-//   readonly isStash: boolean;
-//   /** 1:: Controller */
-//   readonly isController: boolean;
-// }
+import { u8aToString } from '@polkadot/util';
+import Earnings from './Earnings'
 
 type Props = ApiProps & I18nProps & {
   accountId: string,
@@ -429,7 +415,7 @@ class Account extends React.PureComponent<Props, State> {
   render() {
     // @ts-ignore
     const { accountId, filter, session_validators, onStatusChange, nodeName = new Bytes(), t } = this.props;
-    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId } = this.state;
+    const { controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, destination, isCreateOpen, sessionId } = this.state;
     // console.log('render1', controllerId, isActiveController, isActiveStash, stashId, nominators, validatorPrefs, validators, controllers, isCreateOpen, sessionId)
 
     if ((filter === 'controller' && isActiveController) || (filter === 'stash' && isActiveStash) || (filter === 'unbonded' && (controllerId || stashId))) {
@@ -528,6 +514,8 @@ class Account extends React.PureComponent<Props, State> {
           </div>
         </>
         } */}
+
+        {controllerId && <Earnings address={destination === 0 ? stashId : controllerId}/>}
 
         {controllerId && <>
           <div className={'titleRow'}>
@@ -975,13 +963,6 @@ class Account extends React.PureComponent<Props, State> {
       />
     );
   }
-  private renderControllerButtons1() {
-    const { controllerId, isActiveController } = this.state;
-
-    return (
-      <NodeController accountId={controllerId} />
-    );
-  }
 
   private renderControllerButtons() {
     const { t } = this.props;
@@ -989,8 +970,6 @@ class Account extends React.PureComponent<Props, State> {
     const buttons = [];
 
     if (isActiveController) {
-      // console.log('nominators', nominators)
-      // console.log('validatorPrefs', validatorPrefs)
       const isNominating = !!nominators && nominators.length;
       // const isValidating = !!validatorPrefs && !validatorPrefs.isEmpty;
       const isValidating = !!validatorPrefs;

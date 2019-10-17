@@ -20,15 +20,11 @@ import styled from 'styled-components'
 import Bond from './Bond';
 import BondExtra from './BondExtra';
 import Nominating from './Nominating';
-import SessionKey from './SessionKey';
 import translate from '../translate';
 import SetControllerAccount from './SetControllerAccount';
-import SetRewardDestination from './SetRewardDestination';
-import SetSessionAccount from './SetSessionAccount';
 import Unbond from './Unbond';
 import Validating from './Validating';
-import Validate from './Validate';
-import { api } from '@polkadot/ui-api'
+import Earnings from './Earnings'
 
 type Props = ApiProps & I18nProps & {
   accountId: string,
@@ -383,6 +379,7 @@ class Account extends React.PureComponent<Props, State> {
           </div>
         </div>}
 
+        {isActiveStash && <Earnings address='5G1Qa4FBMPAhun8WhJehoZ4Pz2ikGTYXfWjupLRAsq6PURHp'/>}
 
         {isActiveStash && <><div className={'titleRow'}>
           {t('My Nomination')}
