@@ -173,11 +173,11 @@ class Validate extends TxComponent<Props, State> {
         <Modal.Header className="ui-step-header">
           {t('Set validator preferences')}
           {withStep && <div>
-            <span className="">STEP1</span>
+            <span className="">{t('STEP1')}</span>
             <i className=""></i>
-            <span className="">STEP2</span>
+            <span className="">{t('STEP2')}</span>
             <i className=""></i>
-            <span className="">STEP3</span>
+            <span className="">{t('STEP3')}</span>
           </div>}
         </Modal.Header>
         <Modal.Content className='ui--signer-Signer-Content'>
@@ -207,7 +207,7 @@ class Validate extends TxComponent<Props, State> {
           />
           <InputNumber
             className='medium'
-            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn()}
+            defaultValue={validatorPrefs && validatorPrefs.validatorPayment && validatorPrefs.validatorPayment.toBn().div(new BN(10000000))}
             help={t('Amount taken up-front from the reward by the validator before spliting the remainder between themselves and the nominators')}
             label={t('reward commission')}
             onChange={this.onChangePayment}
