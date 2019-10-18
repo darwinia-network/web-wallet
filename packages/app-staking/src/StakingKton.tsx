@@ -16,12 +16,8 @@ import Tabs, { TabItem } from '@polkadot/ui-app/Tabs';
 import { withCalls, withMulti, withObservable } from '@polkadot/ui-api';
 import accountObservable from '@polkadot/ui-keyring/observable/accounts';
 import AccountStatus from '@polkadot/app-accounts/modals/AccountStatus';
-
 import './index.css';
-
-import basicMd from './md/basic.md';
 import Accounts from './Accounts';
-import Overview from './Overview';
 import translate from './translate';
 import { api } from '@polkadot/ui-api'
 import { Codec } from '@polkadot/types/types';

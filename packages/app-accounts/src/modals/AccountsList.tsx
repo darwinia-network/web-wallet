@@ -293,6 +293,24 @@ const Wrapper = styled.div`
   .account-item:last-child{
     border-bottom: 1px solid rgba(237,237,237,1);
   }
+
+  @media (max-width: 767px) {
+    .overviewTab{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    margin: 0;
+    .ui.primary.button {
+      margin-right: 5px;
+    }
+
+    p{
+      font-size: 16px;
+      color: #302B3C;
+    }
+  }
+  }
 `;
 
 export default withMulti(

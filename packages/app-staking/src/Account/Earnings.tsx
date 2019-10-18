@@ -6,10 +6,11 @@ import { I18nProps } from '@polkadot/ui-app/types';
 import React from 'react';
 import { withCalls, withApi, withMulti } from '@polkadot/ui-api';
 import styled from 'styled-components'
-import { ColorButton, Card, TxButton, Menu, AddressInfoStaking, LabelHelp } from '@polkadot/ui-app';
+import { ColorButton } from '@polkadot/ui-app';
 import EraningsDetail from './EraningsDetail'
 import { getStakingHistory } from './api';
 import translate from '../translate';
+import { formatNumber } from '@polkadot/util';
 
 type Props = I18nProps & {
   stashId: string,
@@ -55,6 +56,19 @@ const StyledWrapper = styled.div`
     padding: 25px 20px 27px 57px; 
   }
 
+  @media (max-width: 767px) {
+    .content {
+      background: #fff;
+      flex-wrap: wrap;
+      border: 1px solid #EDEDED;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 10px 20px;
+    }
+  }
+
   .earings-item {
     flex: 1;
     p {
@@ -73,6 +87,7 @@ const StyledWrapper = styled.div`
       /* -webkit-background-clip:text;
       -webkit-text-fill-color:transparent; */
       margin-top: 10px;
+      text-transform: uppercase;
     }
   }
   .button-box{
@@ -86,8 +101,8 @@ class Earnings extends React.PureComponent<Props, State> {
   state: State = {
     error: null,
     isEraningsDetailOpen: false,
-    sum: '----',
-    today: '----'
+    sum: '0',
+    today: '0'
   };
 
   toggleEraningsDetail = () => {
@@ -101,7 +116,6 @@ class Earnings extends React.PureComponent<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-
     if(nextProps.address !== this.props.address ) {
       this.getStakingHistory(0, nextProps.address)
       return true
@@ -109,7 +123,6 @@ class Earnings extends React.PureComponent<Props, State> {
   }
 
   private getStakingHistory = (page = 0, address = this.props.address) => {
-    
     getStakingHistory({
       page,
       address: address
@@ -123,7 +136,7 @@ class Earnings extends React.PureComponent<Props, State> {
 
   render() {
     const { t, address } = this.props
-    const { isEraningsDetailOpen, sum, today } = this.state
+    const { isEraningsDetailOpen, sum = '0', today } = this.state
     return (
       <StyledWrapper>
         <div className={'titleRow'}>
@@ -132,11 +145,11 @@ class Earnings extends React.PureComponent<Props, State> {
         <div className="content">
           <div className="earings-item">
             <p>{t('Earnings')}</p>
-            <h1>{sum}</h1>
+            <h1>{formatNumber(parseFloat(sum))} RING</h1>
           </div>
           <div className="earings-item">
             <p>{t('Today')}</p>
-            <h1>{today}</h1>
+            <h1>{formatNumber(parseFloat(today))} RING</h1>
           </div>
           <div className="button-box">
             <ColorButton

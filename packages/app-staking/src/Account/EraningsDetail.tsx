@@ -15,6 +15,8 @@ import dayjs from 'dayjs'
 import ReactPaginate from 'react-paginate';
 import translate from '../translate';
 import { getStakingHistory } from './api';
+import { formatNumber } from '@polkadot/util';
+
 
 type Props = I18nProps & ApiProps & {
   controllerId?: AccountId | null,
@@ -159,7 +161,7 @@ class EraningsDetail extends React.PureComponent<Props, State> {
                 <div>{this.parserDate(item.block_timestamp)}</div>
                 <div>{item.era}</div>
                 <div>{item.reward_type}</div>
-                <div className="earning">{item.reward} RING</div>
+                <div className="earning">{formatNumber(parseFloat(item.reward))} RING</div>
               </div>
             ))}
           </StyleWrapper>
