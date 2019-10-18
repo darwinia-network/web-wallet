@@ -301,7 +301,7 @@ const StyledWrapper = styled.div`
 
 class Account extends React.PureComponent<Props, State> {
   state: State = {
-    destination: 0,
+    destination: -1,
     isActiveController: false,
     isActiveSession: false,
     isActiveStash: true,
@@ -387,7 +387,7 @@ class Account extends React.PureComponent<Props, State> {
 
     return {
       controllerId: controllerId,
-      destination: rewardDestination && rewardDestination.toNumber(),
+      destination: (rewardDestination && rewardDestination.toNumber()) || 0,
       isActiveController: controllerId,
       // isActiveController: false,
       isActiveSession: accountId === sessionKey,
@@ -515,7 +515,7 @@ class Account extends React.PureComponent<Props, State> {
         </>
         } */}
 
-        {controllerId && <Earnings address={destination === 0 ? stashId : controllerId}/>}
+        {controllerId && destination !== -1 && <Earnings address={destination === 0 ? stashId : controllerId}/>}
 
         {controllerId && <>
           <div className={'titleRow'}>
