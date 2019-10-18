@@ -102,7 +102,7 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { accounts_idAndIndex = [], className, isInline, style } = this.props;
+    const { accounts_idAndIndex = [], className, isInline, style, t } = this.props;
     const [accountId, accountIndex] = accounts_idAndIndex;
     const isValid = accountId || accountIndex;
 
@@ -112,20 +112,22 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
         style={style}
       >
         <div className='ui--AddressRow-base'>
-          {this.renderIcon()}
-          {this.renderButtons()}
-          <div className='ui--AddressRow-details'>
-            <div className='ui--AddressRow-data'>
-              {this.renderName()}
-              {this.renderAddress()}
-              {this.renderAccountIndex()}
-              <CryptoType
-                accountId={accountId}
-                label={'crypto type: '}
-                className='result'
-              />
+          <div className="ui--AddressRow-box">
+            {this.renderIcon()}
+            {this.renderButtons()}
+            <div className='ui--AddressRow-details'>
+              <div className='ui--AddressRow-data'>
+                {this.renderName()}
+                {this.renderAddress()}
+                {this.renderAccountIndex()}
+                <CryptoType
+                  accountId={accountId}
+                  label={t('crypto type') + ': '}
+                  className='result'
+                />
+              </div>
+              {this.renderTags()}
             </div>
-            {this.renderTags()}
           </div>
           {this.renderBalances()}
           {this.renderChooseButtons()}
@@ -181,25 +183,25 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
 
   private renderLinkButtons() {
     const { t, toggleBackup, togglePass, toggleForget, settingOpenAddress } = this.props;
-    const { address} = this.state
+    const { address } = this.state
 
-    if(settingOpenAddress !== address) {
+    if (settingOpenAddress !== address) {
       return null;
     }
     return (<div className="ui--AddressRow-Link">
-        <div className="ui-AddressRow-Link-button" onClick={() => toggleBackup(address)}>
-          <Icon name="cloud download" />
-          <p>{t('Backup Json')}</p>
-        </div>
-        <div className="ui-AddressRow-Link-button" onClick={() => togglePass(address)}>
-          <Icon name="key" />
-          <p>{t('Change Password')}</p>
-        </div>
-        <div className="ui-AddressRow-Link-button" onClick={() => toggleForget(address)}>
-          <Icon name="trash" />
-          <p>{t('Delete')}</p>
-        </div>
-      </div>);
+      <div className="ui-AddressRow-Link-button" onClick={() => toggleBackup(address)}>
+        <Icon name="cloud download" />
+        <p>{t('Backup Json')}</p>
+      </div>
+      <div className="ui-AddressRow-Link-button" onClick={() => togglePass(address)}>
+        <Icon name="key" />
+        <p>{t('Change Password')}</p>
+      </div>
+      <div className="ui-AddressRow-Link-button" onClick={() => toggleForget(address)}>
+        <Icon name="trash" />
+        <p>{t('Delete')}</p>
+      </div>
+    </div>);
   }
 
   protected renderChooseButtons() {
@@ -224,7 +226,7 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
       />;
 
     return (
-      <>
+      <div className="ui--AddressRow-button">
         <Button
           isBasic={true}
           isSecondary={true}
@@ -234,7 +236,7 @@ class AddressRowAccountList extends React.PureComponent<Props, State> {
           }}
         />
         {chooseButton}
-      </>
+      </div>
     );
   }
 
@@ -527,6 +529,11 @@ export default withMulti(
       font-style: italic;
     }
 
+    .ui--AddressRow-box, .ui-AddressRow-button {
+      display: flex;
+      align-items: center;
+    }
+
     .ui--AddressRow-balances {
       display: flex;
       flex: 1;
@@ -683,6 +690,18 @@ export default withMulti(
     }
     .result{
       color: #B3B3B3;
+    }
+
+    @media (max-width: 767px) {
+      .ui--AddressRow-base{
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .ui--AddressRow-button, .ui--AddressRow-balances {
+        margin-top: 10px;
+      }
     }
   `,
   translate,

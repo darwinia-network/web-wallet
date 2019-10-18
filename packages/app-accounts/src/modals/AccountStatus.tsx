@@ -30,7 +30,7 @@ import SwitchIcon from '../img/switchAccount.svg'
 type Props = ComponentProps & I18nProps & {
   accounts?: SubjectInfo[],
   address: string,
-  changeAccountMain:() => void,
+  changeAccountMain: () => void,
   currentChain?: string
 };
 
@@ -47,7 +47,7 @@ type State = {
 class AccountStatus extends React.PureComponent<Props, State> {
   state: State;
 
-  constructor (props: Props) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       isCreateOpen: false,
@@ -72,7 +72,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
           <AddressRowReverse
             isEditable={true}
             value={address}
-            
+            className="ui--AccountStatus-Address"
           // withExplorer
           // withIndex
           // withTags
@@ -80,7 +80,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
           </AddressRowReverse>
           {/* {PopupExampleFlowing(this.renderButtons(), address)} */}
 
-          <div><img onClick={this.toggleAccount} className="switchBtn" src={SwitchIcon}/></div>
+          <div><img onClick={this.toggleAccount} className="switchBtn" src={SwitchIcon} /></div>
           {this.renderModals()}
         </div>
       </StyledWrapper>
@@ -164,7 +164,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
   }
   private onForget = (): void => {
     const { t, address } = this.props;
-    
+
     if (!address) {
       return;
     }
@@ -199,9 +199,9 @@ class AccountStatus extends React.PureComponent<Props, State> {
 
   private renderModals() {
 
-    const {address, changeAccountMain, accounts} = this.props;
+    const { address, changeAccountMain, accounts } = this.props;
     const { isForgetOpen, isBackupOpen, isPasswordOpen, isAccountOpen } = this.state;
-    const {onStatusChange} = this.props
+    const { onStatusChange } = this.props
     if (!address) {
       return null;
     }
@@ -240,7 +240,7 @@ class AccountStatus extends React.PureComponent<Props, State> {
       );
     }
 
-    if(isAccountOpen) {
+    if (isAccountOpen) {
       modals.push(
         <AccountsList
           address={address}
@@ -274,13 +274,23 @@ const ButtonStyledWrapper = styled.div`
 const StyledWrapper = styled.div`
   background: #fff;
   padding: 8px 0 8px 2rem;
-  margin:0 -2rem;
-  border-bottom:1px solid rgba(237,237,237,1);
+  margin: 0 -2rem;
+  border-bottom: 1px solid rgba(237,237,237,1);
+
+  @media (max-width: 767px) {
+    padding: 0 0.5rem;
+    margin: 0 0;
+    .ui--AccountStatus-Address{
+      display: none;
+    }
+  }
+
   .ui--AccountStatus-Box{
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+
   .ui--AccountStatus-Network{
     color: #8231D8;
     font-size: 14px;
@@ -304,7 +314,7 @@ const StyledWrapper = styled.div`
 
 // @ts-ignore
 const PopupExampleFlowing = (Box, address: string) => (
-  <Popup basic position='bottom right' trigger={<div><img className="switchBtn" src={SwitchIcon}/></div>} flowing hoverable>
+  <Popup basic position='bottom right' trigger={<div><img className="switchBtn" src={SwitchIcon} /></div>} flowing hoverable>
     {Box}
   </Popup>
 )

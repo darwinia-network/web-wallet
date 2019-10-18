@@ -315,6 +315,13 @@ const Wrapper = styled.div`
         margin-left: 30px;
       }
     }
+
+    @media (max-width: 767px) {
+      .noAccount{
+        width: auto;
+        padding: 40px 0px;
+      }
+    }
 `
 
 export default withMulti(

@@ -409,8 +409,11 @@ export default withMulti(
 
     @media (max-width: 767px) {
       flex-wrap: wrap;
-      .ui--address-value{
+      div.ui--address-value{
+        flex-direction: column;
         flex-wrap: wrap;
+        align-items: stretch;
+        padding: 10px 20px;
       }
 
       .column {
