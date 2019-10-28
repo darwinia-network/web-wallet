@@ -38,7 +38,7 @@ class SummarySession extends React.PureComponent<Props> {
       return null;
     }
 
-    return session_info.sessionLength.gtn(0)
+    return false
       ? (
         <CardSummary
           label={t('era')}
@@ -50,7 +50,7 @@ class SummarySession extends React.PureComponent<Props> {
       )
       : (
         <CardSummary label={t('era')}>
-          {formatNumber(session_info.currentEra)}
+          {formatNumber(session_info.currentEra.modn(50))}/50
         </CardSummary>
       );
   }
