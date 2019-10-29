@@ -379,7 +379,7 @@ class Account extends React.PureComponent<Props, State> {
           </div>
         </div>}
 
-        {isActiveStash && <Earnings address='5G1Qa4FBMPAhun8WhJehoZ4Pz2ikGTYXfWjupLRAsq6PURHp'/>}
+        {isActiveStash && <Earnings address={stashId}/>}
 
         {isActiveStash && <><div className={'titleRow'}>
           {t('My Nomination')}
@@ -920,7 +920,7 @@ class Account extends React.PureComponent<Props, State> {
 
 export default withMulti(
   styled(Account as React.ComponentClass<Props>)`
-   
+
   `,
   translate,
   withCalls<Props>(
