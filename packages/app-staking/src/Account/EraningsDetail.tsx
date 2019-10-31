@@ -5,7 +5,6 @@
 import { I18nProps } from '@polkadot/ui-app/types';
 import { ApiProps } from '@polkadot/ui-api/types';
 
-import BN from 'bn.js';
 import React from 'react';
 import { AccountId, Option, StakingLedgers } from '@polkadot/types';
 import { Modal, TxButton, TxComponent } from '@polkadot/ui-app';
@@ -15,7 +14,7 @@ import dayjs from 'dayjs'
 import ReactPaginate from 'react-paginate';
 import translate from '../translate';
 import { getStakingHistory } from './api';
-import { formatNumber } from '@polkadot/util';
+import { formatFloat } from '@polkadot/util';
 
 
 type Props = I18nProps & ApiProps & {
@@ -161,7 +160,7 @@ class EraningsDetail extends React.PureComponent<Props, State> {
                 <div>{this.parserDate(item.block_timestamp)}</div>
                 <div>{item.era}</div>
                 <div>{item.reward_type}</div>
-                <div className="earning">{formatNumber(parseFloat(item.reward))} RING</div>
+                <div className="earning">{formatFloat(item.reward)} RING</div>
               </div>
             ))}
           </StyleWrapper>

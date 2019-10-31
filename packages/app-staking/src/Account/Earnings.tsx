@@ -10,7 +10,7 @@ import { ColorButton } from '@polkadot/ui-app';
 import EraningsDetail from './EraningsDetail'
 import { getStakingHistory } from './api';
 import translate from '../translate';
-import { formatNumber } from '@polkadot/util';
+import { formatNumber, formatFloat } from '@polkadot/util';
 
 type Props = I18nProps & {
   stashId: string,
@@ -145,11 +145,11 @@ class Earnings extends React.PureComponent<Props, State> {
         <div className="content">
           <div className="earings-item">
             <p>{t('Earnings')}</p>
-            <h1>{formatNumber(parseFloat(sum))} RING</h1>
+            <h1>{formatFloat(sum)} RING</h1>
           </div>
           <div className="earings-item">
             <p>{t('Today')}</p>
-            <h1>{formatNumber(parseFloat(today))} RING</h1>
+            <h1>{formatFloat(today)} RING</h1>
           </div>
           <div className="button-box">
             <ColorButton
